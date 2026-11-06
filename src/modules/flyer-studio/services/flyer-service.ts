@@ -20,7 +20,7 @@ export function visibilityWhere(user: CurrentUser): Prisma.FlyerProjectWhereInpu
   return { deletedAt: null, OR: [{ ownerId: user.id }, { isTemplate: true }] };
 }
 
-export interface ListFilters { q?: string; category?: string; campaign?: string; scope?: "mine" | "all" | "templates" }
+export interface ListFilters { q?: string; category?: string; campaign?: string; scope?: "mine" | "all" | "templates"; batchId?: string }
 
 export async function listFlyers(user: CurrentUser, f: ListFilters = {}) {
   const and: Prisma.FlyerProjectWhereInput[] = [visibilityWhere(user)];
@@ -29,12 +29,13 @@ export async function listFlyers(user: CurrentUser, f: ListFilters = {}) {
   if (f.scope === "all" || !f.scope) and.push({ isTemplate: false });
   if (f.category) and.push({ category: f.category });
   if (f.campaign) and.push({ campaign: f.campaign });
+  if (f.batchId) and.push({ batchId: f.batchId });
   if (f.q?.trim()) { const q = f.q.trim(); and.push({ OR: [{ name: { contains: q, mode: "insensitive" } }, { campaign: { contains: q, mode: "insensitive" } }, { products: { contains: q, mode: "insensitive" } }] }); }
   const rows = await db.flyerProject.findMany({
     where: { AND: and },
     orderBy: { updatedAt: "desc" },
     take: 200,
-    select: { id: true, name: true, category: true, campaign: true, formatKey: true, width: true, height: true, thumbnailId: true, isTemplate: true, updatedAt: true, createdAt: true, ownerId: true, version: true, owner: { select: { name: true } }, products: true },
+    select: { id: true, name: true, category: true, campaign: true, formatKey: true, width: true, height: true, thumbnailId: true, isTemplate: true, updatedAt: true, createdAt: true, ownerId: true, version: true, mode: true, batchId: true, resultFileId: true, owner: { select: { name: true } }, products: true },
   });
   return rows.map(({ products, ...r }) => ({
     ...r,
@@ -59,6 +60,7 @@ export async function getFlyer(user: CurrentUser, id: string) {
     layoutConfig: parseJson<LayoutOptions>(row.layoutConfig, {} as LayoutOptions),
     canvasState: parseJson<FlyerDocument>(row.canvasState, {} as FlyerDocument),
     isTemplate: row.isTemplate, version: row.version, ownerId: row.ownerId, ownerName: row.owner.name,
+    mode: row.mode as "editor" | "chatgpt", prompt: row.prompt, resultFileId: row.resultFileId, batchId: row.batchId,
     createdAt: row.createdAt.toISOString(), updatedAt: row.updatedAt.toISOString(), thumbnailId: row.thumbnailId,
     canEdit: canEditFlyer(user.permissions, user.id, row.ownerId) && (!row.isTemplate || user.permissions.has("flyers.templates.manage")),
   };
@@ -147,7 +149,7 @@ export async function duplicateFlyer(user: CurrentUser, id: string, opts: { asTe
     data: {
       name: opts.asTemplate ? `${src.name} (template)` : `${src.name} (cópia)`, campaign: src.campaign, ownerId: user.id, category: src.category, formatKey: src.formatKey,
       width: src.width, height: src.height, products: toJson(src.products), layoutConfig: toJson(src.layoutConfig), canvasState: toJson(src.canvasState),
-      thumbnailId: src.thumbnailId, isTemplate: !!opts.asTemplate,
+      thumbnailId: src.mode === "chatgpt" ? null : src.thumbnailId, isTemplate: !!opts.asTemplate, mode: src.mode, prompt: src.prompt,
       versions: { create: { version: 1, products: toJson(src.products), canvasState: toJson(src.canvasState), createdById: user.id, note: `Duplicado de ${src.id}` } },
     },
   });

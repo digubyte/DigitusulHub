@@ -17,9 +17,9 @@ export function defaultLayout(category: CategoryKey = "promocional"): LayoutOpti
 
 /** Miniaturas que comunicam a proposta visual de cada categoria. */
 const CATEGORY_SWATCH: Record<CategoryKey, string> = {
-  novidade: "bg-white ring-1 ring-slate-200 [background-image:radial-gradient(circle_at_85%_10%,rgba(35,65,193,.18)_0_38%,transparent_39%)]",
+  novidade: "bg-white ring-1 ring-zinc-200 [background-image:radial-gradient(circle_at_85%_10%,rgba(35,65,193,.18)_0_38%,transparent_39%)]",
   promocional: "bg-brand-600 [background-image:linear-gradient(170deg,transparent_55%,rgba(255,255,255,.12)_55%)]",
-  reposicao: "bg-slate-100 [background-image:linear-gradient(#2341C1_0_30%,transparent_30%)]",
+  reposicao: "bg-zinc-100 [background-image:linear-gradient(#2341C1_0_30%,transparent_30%)]",
   queima: "bg-white [background-image:linear-gradient(#E61F27_0_34%,transparent_34%)]",
   blackfriday: "bg-[#0A0D14] [background-image:radial-gradient(circle_at_0_0,rgba(230,31,39,.45)_0_35%,transparent_36%)]",
   institucional: "bg-white [background-image:linear-gradient(#2341C1_0_26%,transparent_26%_86%,#2341C1_86%)]",
@@ -30,7 +30,7 @@ export function CategoryPicker({ value, onChange }: { value: CategoryKey; onChan
     <div className="grid grid-cols-2 gap-3 md:grid-cols-3" role="radiogroup" aria-label="Tipo de flyer">
       {CATEGORIES.map((c) => (
         <button key={c.key} role="radio" aria-checked={value === c.key} onClick={() => onChange(c.key)}
-          className={cn("rounded-xl border p-3 text-left transition", value === c.key ? "border-brand-600 ring-2 ring-brand-600/20" : "border-slate-200 hover:border-brand-300")}>
+          className={cn("rounded-xl border p-3 text-left transition", value === c.key ? "border-brand-600 ring-2 ring-brand-600/20" : "border-zinc-200 hover:border-brand-300")}>
           <div className={cn("mb-2 h-16 rounded-lg", CATEGORY_SWATCH[c.key])} />
           <p className="text-sm font-bold">{c.label}</p>
           <p className="text-xs text-ink-muted">{c.description}</p>
@@ -50,7 +50,7 @@ export function FormatPicker({ formatKey, width, height, onChange }: { formatKey
           const box = r >= 1 ? { w: 44, h: 44 / r } : { w: 44 * r, h: 44 };
           return (
             <button key={f.key} role="radio" aria-checked={formatKey === f.key} onClick={() => onChange({ formatKey: f.key, width: f.width, height: f.height })}
-              className={cn("flex items-center gap-3 rounded-xl border p-3 text-left", formatKey === f.key ? "border-brand-600 ring-2 ring-brand-600/20" : "border-slate-200 hover:border-brand-300")}>
+              className={cn("flex items-center gap-3 rounded-xl border p-3 text-left", formatKey === f.key ? "border-brand-600 ring-2 ring-brand-600/20" : "border-zinc-200 hover:border-brand-300")}>
               <div className="flex h-11 w-11 shrink-0 items-center justify-center"><div className="rounded-sm bg-brand-100 ring-1 ring-brand-300" style={{ width: box.w, height: Math.max(8, box.h) }} /></div>
               <div className="min-w-0"><p className="text-sm font-semibold leading-tight">{f.label}</p><p className="text-[11px] text-ink-muted">{f.hint}</p></div>
             </button>
@@ -85,8 +85,8 @@ export function AiComposer({ ctx, layout, productNames, onApply }: { ctx: Studio
   }
   return (
     <div className="rounded-xl border border-brand-200 bg-gradient-to-br from-brand-50 to-white p-4">
-      <div className="mb-2 flex items-center gap-2"><Sparkles className="h-4 w-4 text-brand-600" /><p className="font-display font-bold">Criar com IA</p>
-        <span className={cn("badge ml-auto", ctx.aiEnabled ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-500")}>{ctx.aiEnabled ? "IA ativa" : "Modo regras (IA não configurada)"}</span>
+      <div className="mb-2 flex items-center gap-2"><Sparkles className="h-4 w-4 text-brand-600" /><p className="font-semibold">Criar com IA</p>
+        <span className={cn("badge ml-auto", ctx.aiEnabled ? "bg-emerald-50 text-emerald-700" : "bg-zinc-100 text-zinc-500")}>{ctx.aiEnabled ? "IA ativa" : "Modo regras (IA não configurada)"}</span>
       </div>
       <textarea className="input min-h-[76px]" value={prompt} onChange={(e) => setPrompt(e.target.value)} placeholder="Ex.: Flyer promocional minimalista, fundo azul, preços destacados e logotipo no rodapé." />
       <div className="mt-2 flex items-start gap-2">
@@ -140,7 +140,7 @@ export function LayoutOptionsForm({ ctx, layout, onChange }: { ctx: StudioContex
             <option value="">Padrão da categoria</option>
             {ctx.brandKit.colors.map((c) => <option key={c.key} value={c.hex}>{c.name}</option>)}
           </select>
-          {layout.backgroundColor && <span className="h-9 w-9 shrink-0 rounded-lg ring-1 ring-slate-200" style={{ background: layout.backgroundColor }} />}
+          {layout.backgroundColor && <span className="h-9 w-9 shrink-0 rounded-lg ring-1 ring-zinc-200" style={{ background: layout.backgroundColor }} />}
         </div>
       </Field>
       <div className="sm:col-span-2">
@@ -151,7 +151,7 @@ export function LayoutOptionsForm({ ctx, layout, onChange }: { ctx: StudioContex
         {layout.showMascot && mascots.length > 1 && (
           <div className="mt-2 flex flex-wrap gap-2">
             {mascots.map((m) => (
-              <button key={m.fileId} onClick={() => set({ mascotFileId: m.fileId })} className={cn("h-16 w-16 rounded-lg border bg-white p-1", layout.mascotFileId === m.fileId ? "border-brand-600 ring-2 ring-brand-600/20" : "border-slate-200")} title={m.name}>
+              <button key={m.fileId} onClick={() => set({ mascotFileId: m.fileId })} className={cn("h-16 w-16 rounded-lg border bg-white p-1", layout.mascotFileId === m.fileId ? "border-brand-600 ring-2 ring-brand-600/20" : "border-zinc-200")} title={m.name}>
                 <img src={m.url} alt={m.name} className="h-full w-full object-contain" />
               </button>
             ))}

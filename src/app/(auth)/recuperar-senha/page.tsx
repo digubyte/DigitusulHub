@@ -25,11 +25,11 @@ export default function ForgotPage() {
 
   return (
     <>
-      <h2 className="font-display text-2xl font-extrabold text-ink">Recuperar senha</h2>
+      <h2 className="text-2xl font-semibold tracking-tight text-ink">Recuperar senha</h2>
       {sent ? (
         <div className="mt-4 space-y-4 text-sm text-ink-soft">
           <p>Se o e-mail estiver cadastrado, um link de redefinição foi gerado e vale por 1 hora.</p>
-          <p className="rounded-lg bg-slate-50 p-3 text-xs text-ink-muted">
+          <p className="rounded-lg bg-zinc-50 p-3 text-xs text-ink-muted">
             O envio automático de e-mails ainda não está configurado nesta instalação. Caso não receba o link, peça ao administrador para gerá-lo em Administração › Usuários.
           </p>
           <Link href="/login" className="btn-secondary w-full">Voltar ao login</Link>

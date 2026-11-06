@@ -211,18 +211,18 @@ export function Editor({ ctx, initial }: { ctx: StudioContext; initial: EditorPr
   }
 
   return (
-    <div className="flex h-[100dvh] flex-col bg-slate-100">
+    <div className="flex h-[100dvh] flex-col bg-zinc-100">
       {/* Barra superior */}
-      <header className="flex h-14 shrink-0 items-center gap-2 border-b border-slate-200 bg-white px-3">
+      <header className="flex h-14 shrink-0 items-center gap-2 border-b border-zinc-200 bg-white px-3">
         <Link href="/estudio" className="btn-icon btn-ghost" aria-label="Voltar ao Estúdio" onClick={(e) => { if (dirty && !confirm("Há alterações não salvas. Sair mesmo assim?")) e.preventDefault(); }}><ArrowLeft className="h-5 w-5" /></Link>
         <div className="min-w-0">
-          <input className="w-full max-w-[260px] truncate rounded px-1 font-display text-sm font-bold text-ink hover:bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/30" value={meta.name} readOnly={readOnly} onChange={(e) => { setMeta({ ...meta, name: e.target.value }); setDirty(true); }} aria-label="Nome do projeto" />
+          <input className="w-full max-w-[260px] truncate rounded px-1 text-sm font-semibold text-ink hover:bg-zinc-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/30" value={meta.name} readOnly={readOnly} onChange={(e) => { setMeta({ ...meta, name: e.target.value }); setDirty(true); }} aria-label="Nome do projeto" />
           <p className="truncate px-1 text-[11px] text-ink-muted">{categoryLabel(layout.category)} · {getFormat(initial.formatKey)?.label} · {initial.width}×{initial.height}px · v{version}{readOnly && ` · somente leitura (${initial.ownerName})`}</p>
         </div>
         <div className="ml-auto flex items-center gap-1">
           <button className="btn-icon btn-ghost" onClick={undo} disabled={!past.length || readOnly} title="Desfazer (Ctrl+Z)" aria-label="Desfazer"><Undo2 className="h-4 w-4" /></button>
           <button className="btn-icon btn-ghost" onClick={redo} disabled={!future.length || readOnly} title="Refazer (Ctrl+Y)" aria-label="Refazer"><Redo2 className="h-4 w-4" /></button>
-          <span className="mx-1 hidden h-6 w-px bg-slate-200 md:block" />
+          <span className="mx-1 hidden h-6 w-px bg-zinc-200 md:block" />
           <div className="hidden items-center gap-0.5 md:flex">
             <button className="btn-icon btn-ghost" onClick={() => setZoom(Math.max(0.05, scale / 1.25))} aria-label="Diminuir zoom"><Minus className="h-4 w-4" /></button>
             <button className="btn-ghost btn-sm w-14" onClick={() => setZoom(null)} title="Ajustar à tela">{Math.round(scale * 100)}%</button>
@@ -231,7 +231,7 @@ export function Editor({ ctx, initial }: { ctx: StudioContext; initial: EditorPr
             <button className={cn("btn-icon", showGrid ? "bg-brand-50 text-brand-700" : "btn-ghost")} onClick={() => setShowGrid((g) => !g)} title="Grade" aria-pressed={showGrid}><Grid3x3 className="h-4 w-4" /></button>
             <button className={cn("btn-icon", snap ? "bg-brand-50 text-brand-700" : "btn-ghost")} onClick={() => setSnap((s) => !s)} title="Encaixar na grade" aria-pressed={snap}><Magnet className="h-4 w-4" /></button>
           </div>
-          <span className="mx-1 h-6 w-px bg-slate-200" />
+          <span className="mx-1 h-6 w-px bg-zinc-200" />
           {!readOnly && <button className="btn-secondary btn-sm" onClick={() => save()} disabled={saving || !dirty}>{saving ? <Spinner /> : <Save className="h-4 w-4" />}<span className="hidden sm:inline">{dirty ? "Salvar" : "Salvo"}</span></button>}
           <button className="btn-accent btn-sm" onClick={() => setExportOpen(true)}><Download className="h-4 w-4" /><span className="hidden sm:inline">Exportar</span></button>
         </div>
@@ -239,8 +239,8 @@ export function Editor({ ctx, initial }: { ctx: StudioContext; initial: EditorPr
 
       <div className="flex min-h-0 flex-1 flex-col md:flex-row">
         {/* Painel esquerdo */}
-        <aside className="order-2 flex max-h-[42vh] w-full shrink-0 flex-col border-t border-slate-200 bg-white md:order-1 md:max-h-none md:w-[340px] md:border-r md:border-t-0">
-          <nav className="grid grid-cols-4 border-b border-slate-100" aria-label="Painéis">
+        <aside className="order-2 flex max-h-[42vh] w-full shrink-0 flex-col border-t border-zinc-200 bg-white md:order-1 md:max-h-none md:w-[340px] md:border-r md:border-t-0">
+          <nav className="grid grid-cols-4 border-b border-zinc-100" aria-label="Painéis">
             {([["elementos", "Elementos", Shapes], ["produtos", "Produtos", Package], ["layout", "Modelo", LayoutTemplate], ["camadas", "Camadas", Layers]] as const).map(([k, l, I]) => (
               <button key={k} onClick={() => setTab(k)} className={cn("flex flex-col items-center gap-0.5 py-2 text-[11px] font-semibold", tab === k ? "border-b-2 border-brand-600 text-brand-700" : "text-ink-muted hover:text-ink")}><I className="h-4 w-4" />{l}</button>
             ))}
@@ -257,14 +257,14 @@ export function Editor({ ctx, initial }: { ctx: StudioContext; initial: EditorPr
                 {ctx.brandKit.logo && (
                   <div>
                     <p className="label">Logotipo oficial</p>
-                    <button className="flex h-16 w-full items-center justify-center rounded-lg border border-slate-200 bg-white p-2 hover:border-brand-300" disabled={readOnly} onClick={() => addBrandAsset({ ...ctx.brandKit.logo!, name: "Logotipo Digitusul" }, "logo")}>
+                    <button className="flex h-16 w-full items-center justify-center rounded-lg border border-zinc-200 bg-white p-2 hover:border-brand-300" disabled={readOnly} onClick={() => addBrandAsset({ ...ctx.brandKit.logo!, name: "Logotipo Digitusul" }, "logo")}>
                       <img src={ctx.brandKit.logo.url} alt="Logotipo" className="max-h-full object-contain" />
                     </button>
                   </div>
                 )}
                 {ctx.brandKit.mascots.length > 0 && <AssetGrid title="Mascote Digu" items={ctx.brandKit.mascots} disabled={readOnly} onPick={(a) => addBrandAsset(a, "mascot")} />}
                 {ctx.brandKit.elements.length > 0 && <AssetGrid title="Elementos institucionais" items={ctx.brandKit.elements} disabled={readOnly} onPick={(a) => addBrandAsset(a, "custom")} />}
-                <div className="rounded-lg bg-slate-50 p-3 text-xs text-ink-muted">
+                <div className="rounded-lg bg-zinc-50 p-3 text-xs text-ink-muted">
                   <p className="mb-1 font-semibold text-ink-soft">Atalhos</p>
                   Ctrl+Z desfazer · Ctrl+Y refazer · Ctrl+S salvar · Ctrl+D duplicar · Del excluir · setas movem (Shift = 10px)
                 </div>
@@ -282,23 +282,23 @@ export function Editor({ ctx, initial }: { ctx: StudioContext; initial: EditorPr
                 {!readOnly && <AiComposer ctx={ctx} layout={layout} productNames={products.map((p) => p.name)} onApply={(l) => { commit({ layout: l }); setRegenOpen(true); }} />}
                 <LayoutOptionsForm ctx={ctx} layout={layout} onChange={(l) => commit({ layout: l }, "layout")} />
                 {!readOnly && <button className="btn-primary w-full" onClick={() => setRegenOpen(true)}><Wand2 className="h-4 w-4" />Aplicar modelo (regerar layout)</button>}
-                <div className="border-t border-slate-100 pt-3">
+                <div className="border-t border-zinc-100 pt-3">
                   <p className="label">Fundo do flyer</p>
                   <div className="flex items-center gap-2">
-                    <input type="color" className="h-9 w-12 rounded border border-slate-200" value={toHex(doc.background.color)} disabled={readOnly} onChange={(e) => commit({ doc: { ...doc, background: { ...doc.background, color: e.target.value.toUpperCase() } } }, "bg")} aria-label="Cor de fundo" />
+                    <input type="color" className="h-9 w-12 rounded border border-zinc-200" value={toHex(doc.background.color)} disabled={readOnly} onChange={(e) => commit({ doc: { ...doc, background: { ...doc.background, color: e.target.value.toUpperCase() } } }, "bg")} aria-label="Cor de fundo" />
                     <label className={cn("btn-secondary btn-sm cursor-pointer", readOnly && "pointer-events-none opacity-50")}>Imagem de fundo<input type="file" hidden accept="image/png,image/jpeg,image/webp" onChange={async (e) => { if (!e.target.files) return; try { const [f] = await uploadFiles([e.target.files[0]], "background"); commit({ doc: { ...doc, background: { ...doc.background, imageFileId: f.id } } }); } catch (err) { toast.error((err as Error).message); } }} /></label>
                     {doc.background.imageFileId && <button className="btn-ghost btn-sm" disabled={readOnly} onClick={() => commit({ doc: { ...doc, background: { ...doc.background, imageFileId: null } } })}>Remover</button>}
                   </div>
-                  <div className="mt-2 flex flex-wrap gap-1.5">{ctx.brandKit.colors.map((c) => <button key={c.key} title={c.name} disabled={readOnly} className="h-6 w-6 rounded-full ring-1 ring-slate-200" style={{ background: c.hex }} onClick={() => commit({ doc: { ...doc, background: { ...doc.background, color: c.hex } } })} />)}</div>
+                  <div className="mt-2 flex flex-wrap gap-1.5">{ctx.brandKit.colors.map((c) => <button key={c.key} title={c.name} disabled={readOnly} className="h-6 w-6 rounded-full ring-1 ring-zinc-200" style={{ background: c.hex }} onClick={() => commit({ doc: { ...doc, background: { ...doc.background, color: c.hex } } })} />)}</div>
                 </div>
               </div>
             )}
             {tab === "camadas" && (
               <ul className="space-y-1">
                 {[...doc.elements].reverse().map((e) => (
-                  <li key={e.id} className={cn("flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm", e.id === selectedId ? "bg-brand-50" : "hover:bg-slate-50")}>
+                  <li key={e.id} className={cn("flex items-center gap-1 rounded-lg px-2 py-1.5 text-sm", e.id === selectedId ? "bg-brand-50" : "hover:bg-zinc-50")}>
                     <button className="min-w-0 flex-1 truncate text-left" onClick={() => setSelectedId(e.id)}>
-                      <span className={cn(!e.visible && "text-slate-400 line-through")}>{e.name}</span>
+                      <span className={cn(!e.visible && "text-zinc-400 line-through")}>{e.name}</span>
                       {e.binding && <Link2 className="ml-1 inline h-3 w-3 text-brand-500" aria-label="vinculado ao produto" />}
                     </button>
                     <button className="btn-icon btn-ghost p-1" disabled={readOnly} onClick={() => updateEl(e.id, { visible: !e.visible })} aria-label={e.visible ? "Ocultar" : "Mostrar"}>{e.visible ? <Eye className="h-3.5 w-3.5" /> : <EyeOff className="h-3.5 w-3.5" />}</button>
@@ -324,7 +324,7 @@ export function Editor({ ctx, initial }: { ctx: StudioContext; initial: EditorPr
         </div>
 
         {/* Propriedades */}
-        <aside className="order-3 hidden w-[300px] shrink-0 border-l border-slate-200 bg-white lg:block">
+        <aside className="order-3 hidden w-[300px] shrink-0 border-l border-zinc-200 bg-white lg:block">
           <div className="thin-scroll h-full overflow-y-auto p-3">
             {selected ? (
               <Properties el={selected} readOnly={readOnly} products={products} ctx={ctx} doc={doc}
@@ -333,7 +333,7 @@ export function Editor({ ctx, initial }: { ctx: StudioContext; initial: EditorPr
                 onAlign={align} onReorder={(to) => reorder(selected.id, to)} onDelete={removeSelected} onDuplicate={duplicateSelected} />
             ) : (
               <div className="space-y-3 text-sm text-ink-muted">
-                <p className="font-display font-bold text-ink">Nenhum elemento selecionado</p>
+                <p className="font-semibold text-ink">Nenhum elemento selecionado</p>
                 <p>Clique em um elemento no flyer ou na lista de camadas para editar suas propriedades.</p>
                 <p className="rounded-lg bg-brand-50 p-3 text-xs text-brand-800"><Link2 className="mr-1 inline h-3 w-3" />Textos de código, nome e preço são vinculados ao cadastro do produto e sempre exibem os dados exatos.</p>
               </div>
@@ -373,7 +373,7 @@ function Properties({ el, readOnly, products, ctx, doc, onChange, onProduct, onA
   return (
     <div className="space-y-4">
       <div>
-        <p className="font-display text-sm font-bold text-ink">{el.name}</p>
+        <p className="text-sm font-semibold text-ink">{el.name}</p>
         <p className="text-[11px] text-ink-muted">{{ text: "Texto", image: "Imagem", rect: "Retângulo", ellipse: "Círculo", polygon: "Forma" }[el.type]}{el.role === "logo" && " · logotipo protegido"}{el.binding && " · vinculado ao produto"}</p>
       </div>
 
@@ -388,7 +388,7 @@ function Properties({ el, readOnly, products, ctx, doc, onChange, onProduct, onA
         <p className="label">Alinhar na página</p>
         <div className="grid grid-cols-6 gap-1">
           {([["left", AlignStartVertical], ["hcenter", AlignCenterVertical], ["right", AlignEndVertical], ["top", AlignStartHorizontal], ["vcenter", AlignCenterHorizontal], ["bottom", AlignEndHorizontal]] as const).map(([d, I]) => (
-            <button key={d} className="btn-icon btn-ghost border border-slate-200" disabled={dis} onClick={() => onAlign(d)} aria-label={`Alinhar ${d}`}><I className="h-4 w-4" /></button>
+            <button key={d} className="btn-icon btn-ghost border border-zinc-200" disabled={dis} onClick={() => onAlign(d)} aria-label={`Alinhar ${d}`}><I className="h-4 w-4" /></button>
           ))}
         </div>
       </section>
@@ -401,10 +401,10 @@ function Properties({ el, readOnly, products, ctx, doc, onChange, onProduct, onA
       <section>
         <p className="label">Ordem</p>
         <div className="grid grid-cols-4 gap-1">
-          <button className="btn-icon btn-ghost border border-slate-200" disabled={readOnly} onClick={() => onReorder("top")} aria-label="Trazer para o topo"><ChevronsUp className="h-4 w-4" /></button>
-          <button className="btn-icon btn-ghost border border-slate-200" disabled={readOnly} onClick={() => onReorder("up")} aria-label="Avançar"><ChevronUp className="h-4 w-4" /></button>
-          <button className="btn-icon btn-ghost border border-slate-200" disabled={readOnly} onClick={() => onReorder("down")} aria-label="Recuar"><ChevronDown className="h-4 w-4" /></button>
-          <button className="btn-icon btn-ghost border border-slate-200" disabled={readOnly} onClick={() => onReorder("bottom")} aria-label="Enviar para o fundo"><ChevronsDown className="h-4 w-4" /></button>
+          <button className="btn-icon btn-ghost border border-zinc-200" disabled={readOnly} onClick={() => onReorder("top")} aria-label="Trazer para o topo"><ChevronsUp className="h-4 w-4" /></button>
+          <button className="btn-icon btn-ghost border border-zinc-200" disabled={readOnly} onClick={() => onReorder("up")} aria-label="Avançar"><ChevronUp className="h-4 w-4" /></button>
+          <button className="btn-icon btn-ghost border border-zinc-200" disabled={readOnly} onClick={() => onReorder("down")} aria-label="Recuar"><ChevronDown className="h-4 w-4" /></button>
+          <button className="btn-icon btn-ghost border border-zinc-200" disabled={readOnly} onClick={() => onReorder("bottom")} aria-label="Enviar para o fundo"><ChevronsDown className="h-4 w-4" /></button>
         </div>
       </section>
 
@@ -412,7 +412,7 @@ function Properties({ el, readOnly, products, ctx, doc, onChange, onProduct, onA
       {el.type === "image" && <ImageProps el={el} dis={dis} onChange={onChange} />}
       {(el.type === "rect" || el.type === "ellipse") && <ShapeProps el={el} dis={dis} ctx={ctx} onChange={onChange} />}
       {el.type === "polygon" && <Field label="Cor"><ColorInput value={el.fill} disabled={dis} ctx={ctx} onChange={(c) => onChange({ fill: c }, `fill-${el.id}`)} /></Field>}
-      <p className="text-[10px] text-slate-400">Canvas {doc.width}×{doc.height}px</p>
+      <p className="text-[10px] text-zinc-400">Canvas {doc.width}×{doc.height}px</p>
     </div>
   );
 }
@@ -422,7 +422,7 @@ function TextProps({ el, dis, readOnly, product, ctx, onChange, onProduct }: { e
   const [price, setPrice] = useState(product?.priceCents != null ? formatPrice(product.priceCents).replace("R$ ", "") : "");
   useEffect(() => setPrice(product?.priceCents != null ? formatPrice(product.priceCents).replace("R$ ", "") : ""), [product?.priceCents]);
   return (
-    <section className="space-y-2 border-t border-slate-100 pt-3">
+    <section className="space-y-2 border-t border-zinc-100 pt-3">
       {el.binding && product ? (
         <div className="rounded-lg bg-brand-50 p-2.5">
           <p className="mb-1.5 flex items-center gap-1 text-[11px] font-semibold text-brand-800"><Link2 className="h-3 w-3" />Dado comercial do produto</p>
@@ -459,7 +459,7 @@ function TextProps({ el, dis, readOnly, product, ctx, onChange, onProduct }: { e
 function ImageProps({ el, dis, onChange }: { el: ImageElement; dis: boolean; onChange: (p: Partial<FlyerElement>, k?: string) => void }) {
   if (el.role === "logo") return null;
   return (
-    <section className="space-y-2 border-t border-slate-100 pt-3">
+    <section className="space-y-2 border-t border-zinc-100 pt-3">
       <Field label="Enquadramento"><select className="input" disabled={dis} value={el.fit} onChange={(e) => onChange({ fit: e.target.value as ImageElement["fit"], zoom: 1, focusX: 0.5, focusY: 0.5 })}>
         <option value="contain">Imagem inteira (recomendado para produtos)</option><option value="cover">Preencher a área (recorta)</option>
       </select></Field>
@@ -476,7 +476,7 @@ function ImageProps({ el, dis, onChange }: { el: ImageElement; dis: boolean; onC
 
 function ShapeProps({ el, dis, ctx, onChange }: { el: ShapeElement; dis: boolean; ctx: StudioContext; onChange: (p: Partial<FlyerElement>, k?: string) => void }) {
   return (
-    <section className="grid grid-cols-2 gap-2 border-t border-slate-100 pt-3">
+    <section className="grid grid-cols-2 gap-2 border-t border-zinc-100 pt-3">
       <Field label="Preenchimento" className="col-span-2"><ColorInput value={el.fill} disabled={dis} ctx={ctx} onChange={(c) => onChange({ fill: c }, `fill-${el.id}`)} /></Field>
       <Field label="Borda" className="col-span-2"><ColorInput value={el.stroke || "#000000"} disabled={dis} ctx={ctx} onChange={(c) => onChange({ stroke: c }, `st-${el.id}`)} /></Field>
       <Field label="Espessura"><input type="number" min={0} className="input" disabled={dis} value={el.strokeWidth} onChange={(e) => onChange({ strokeWidth: Math.max(0, Number(e.target.value)) }, `sw-${el.id}`)} /></Field>
@@ -489,10 +489,10 @@ function ColorInput({ value, onChange, disabled, ctx }: { value: string; onChang
   return (
     <div>
       <div className="flex gap-2">
-        <input type="color" className="h-9 w-12 shrink-0 rounded border border-slate-200" disabled={disabled} value={toHex(value)} onChange={(e) => onChange(e.target.value.toUpperCase())} />
+        <input type="color" className="h-9 w-12 shrink-0 rounded border border-zinc-200" disabled={disabled} value={toHex(value)} onChange={(e) => onChange(e.target.value.toUpperCase())} />
         <input className="input font-mono text-xs" disabled={disabled} value={value} onChange={(e) => /^#[0-9a-fA-F]{6}$/.test(e.target.value) && onChange(e.target.value.toUpperCase())} />
       </div>
-      <div className="mt-1.5 flex flex-wrap gap-1">{ctx.brandKit.colors.map((c) => <button key={c.key} title={c.name} disabled={disabled} className="h-5 w-5 rounded-full ring-1 ring-slate-200" style={{ background: c.hex }} onClick={() => onChange(c.hex)} />)}</div>
+      <div className="mt-1.5 flex flex-wrap gap-1">{ctx.brandKit.colors.map((c) => <button key={c.key} title={c.name} disabled={disabled} className="h-5 w-5 rounded-full ring-1 ring-zinc-200" style={{ background: c.hex }} onClick={() => onChange(c.hex)} />)}</div>
     </div>
   );
 }
@@ -503,7 +503,7 @@ function AssetGrid({ title, items, onPick, disabled }: { title: string; items: {
       <p className="label">{title}</p>
       <div className="grid grid-cols-3 gap-2">
         {items.map((a) => (
-          <button key={a.fileId} disabled={disabled} title={a.name} onClick={() => onPick(a)} className="flex aspect-square items-center justify-center rounded-lg border border-slate-200 bg-white p-1.5 hover:border-brand-300">
+          <button key={a.fileId} disabled={disabled} title={a.name} onClick={() => onPick(a)} className="flex aspect-square items-center justify-center rounded-lg border border-zinc-200 bg-white p-1.5 hover:border-brand-300">
             <img src={a.url} alt={a.name} className="max-h-full max-w-full object-contain" />
           </button>
         ))}
@@ -515,7 +515,7 @@ function AssetGrid({ title, items, onPick, disabled }: { title: string; items: {
 function ReadOnlyProducts({ products }: { products: Product[] }) {
   return (
     <ul className="space-y-2 text-sm">
-      {products.map((p) => <li key={p.id} className="rounded-lg border border-slate-200 p-2"><p className="font-semibold">{p.name}</p><p className="text-xs text-ink-muted">Cód. {p.code} · {p.priceCents != null ? formatPrice(p.priceCents) : "sem preço"}</p></li>)}
+      {products.map((p) => <li key={p.id} className="rounded-lg border border-zinc-200 p-2"><p className="font-semibold">{p.name}</p><p className="text-xs text-ink-muted">Cód. {p.code} · {p.priceCents != null ? formatPrice(p.priceCents) : "sem preço"}</p></li>)}
     </ul>
   );
 }

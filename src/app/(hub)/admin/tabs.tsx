@@ -6,7 +6,7 @@ import { cn } from "@/core/util";
 export function AdminTabs({ tabs }: { tabs: { href: string; label: string }[] }) {
   const pathname = usePathname();
   return (
-    <nav aria-label="Seções da administração" className="thin-scroll -mx-4 overflow-x-auto border-b border-slate-200 px-4 sm:mx-0 sm:px-0">
+    <nav aria-label="Seções da administração" className="thin-scroll -mx-4 overflow-x-auto border-b border-zinc-200 px-4 sm:mx-0 sm:px-0">
       <ul className="flex gap-1">
         {tabs.map((t) => {
           const active = pathname.startsWith(t.href);

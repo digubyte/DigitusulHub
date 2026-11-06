@@ -180,6 +180,10 @@ model FlyerProject {
   isTemplate   Boolean   @default(false)
   version      Int       @default(1)
   lastExportAt DateTime?
+  mode         String    @default("editor") // editor (montagem manual) | chatgpt (arte gerada no ChatGPT)
+  prompt       String?   // prompt aprovado enviado ao ChatGPT
+  resultFileId String?   // arte final enviada de volta (modo chatgpt)
+  batchId      String?   // flyers criados juntos no mesmo lote
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   deletedAt    DateTime?
@@ -188,6 +192,7 @@ model FlyerProject {
 
   @@index([ownerId])
   @@index([category])
+  @@index([batchId])
 }
 
 model FlyerVersion {

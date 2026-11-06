@@ -34,7 +34,7 @@ export function LoginForm({ next, notice }: { next: string; notice: string | nul
       <Field label="Senha">
         <div className="relative">
           <input className="input pr-10" type={show ? "text" : "password"} autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />
-          <button type="button" className="absolute inset-y-0 right-0 px-3 text-slate-400 hover:text-ink" onClick={() => setShow((s) => !s)} aria-label={show ? "Ocultar senha" : "Mostrar senha"}>
+          <button type="button" className="absolute inset-y-0 right-0 px-3 text-zinc-400 hover:text-ink" onClick={() => setShow((s) => !s)} aria-label={show ? "Ocultar senha" : "Mostrar senha"}>
             {show ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
         </div>

@@ -30,9 +30,9 @@ export function ModulesAdmin({ initial }: { initial: M[] }) {
   return (
     <div>
       <p className="mb-4 max-w-3xl text-sm text-ink-muted">
-        Ordem, nome exibido, status e visibilidade de cada módulo no menu. Novos módulos são registrados em <code className="rounded bg-slate-100 px-1">src/core/modules/registry.ts</code> e aparecem aqui automaticamente. Módulos sem implementação só podem ficar “Em desenvolvimento” ou “Desativado”.
+        Ordem, nome exibido, status e visibilidade de cada módulo no menu. Novos módulos são registrados em <code className="rounded bg-zinc-100 px-1">src/core/modules/registry.ts</code> e aparecem aqui automaticamente. Módulos sem implementação só podem ficar “Em desenvolvimento” ou “Desativado”.
       </p>
-      <div className="card divide-y divide-slate-100">
+      <div className="card divide-y divide-zinc-100">
         {mods.map((m, i) => (
           <div key={m.key} className="grid items-center gap-3 p-4 md:grid-cols-[auto_1.2fr_1fr_auto_auto]">
             <div className="flex gap-1">

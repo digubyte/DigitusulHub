@@ -52,7 +52,7 @@ function ResetForm() {
 export default function ResetPage() {
   return (
     <>
-      <h2 className="font-display text-2xl font-extrabold text-ink">Definir nova senha</h2>
+      <h2 className="text-2xl font-semibold tracking-tight text-ink">Definir nova senha</h2>
       <Suspense><ResetForm /></Suspense>
     </>
   );

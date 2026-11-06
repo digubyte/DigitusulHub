@@ -101,13 +101,13 @@ export function ExportDialog({ open, onClose, stage, project, logoIds, ensureSav
     }>
       <div className="grid gap-2 sm:grid-cols-2">
         {options.map((o) => (
-          <button key={o.key} onClick={() => setFmt(o.key)} className={cn("flex items-start gap-3 rounded-xl border p-3 text-left", fmt === o.key ? "border-brand-600 ring-2 ring-brand-600/20" : "border-slate-200 hover:border-brand-300")}>
+          <button key={o.key} onClick={() => setFmt(o.key)} className={cn("flex items-start gap-3 rounded-xl border p-3 text-left", fmt === o.key ? "border-brand-600 ring-2 ring-brand-600/20" : "border-zinc-200 hover:border-brand-300")}>
             <o.icon className="mt-0.5 h-5 w-5 text-brand-600" />
             <span><span className="block text-sm font-semibold">{o.label}</span><span className="text-xs text-ink-muted">{o.desc}</span></span>
           </button>
         ))}
       </div>
-      <div className="mt-4 rounded-xl border border-slate-200 p-3">
+      <div className="mt-4 rounded-xl border border-zinc-200 p-3">
         <p className="mb-2 text-sm font-semibold">Validação antes da exportação</p>
         {checking ? <p className="flex items-center gap-2 text-sm text-ink-muted"><Spinner />Verificando imagens…</p> : issues.length === 0 ? (
           <p className="flex items-center gap-2 text-sm text-emerald-700"><CheckCircle2 className="h-4 w-4" />Códigos, preços, nomes, imagens, área útil, logotipo e dimensões conferidos.</p>

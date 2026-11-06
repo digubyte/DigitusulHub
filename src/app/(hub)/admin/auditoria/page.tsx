@@ -18,17 +18,17 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
   return (
     <div>
       <div className="mb-3 flex flex-wrap gap-2">
-        <Link href="/admin/auditoria" className={`badge px-3 py-1 ${!acao ? "bg-brand-600 text-white" : "bg-white text-ink-soft ring-1 ring-slate-200"}`}>Todas</Link>
+        <Link href="/admin/auditoria" className={`badge px-3 py-1 ${!acao ? "bg-brand-600 text-white" : "bg-white text-ink-soft ring-1 ring-zinc-200"}`}>Todas</Link>
         {Object.entries(ACTION_LABELS).map(([k, v]) => (
-          <Link key={k} href={`/admin/auditoria?acao=${k}`} className={`badge px-3 py-1 ${acao === k ? "bg-brand-600 text-white" : "bg-white text-ink-soft ring-1 ring-slate-200"}`}>{v}</Link>
+          <Link key={k} href={`/admin/auditoria?acao=${k}`} className={`badge px-3 py-1 ${acao === k ? "bg-brand-600 text-white" : "bg-white text-ink-soft ring-1 ring-zinc-200"}`}>{v}</Link>
         ))}
       </div>
       <div className="card overflow-x-auto">
         <table className="w-full min-w-[720px] text-sm">
-          <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-ink-muted">
+          <thead className="bg-zinc-50 text-left text-xs font-semibold uppercase tracking-wide text-ink-muted">
             <tr><th className="px-4 py-3">Data</th><th className="px-4 py-3">Usuário</th><th className="px-4 py-3">Ação</th><th className="px-4 py-3">Detalhes</th></tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+          <tbody className="divide-y divide-zinc-100">
             {rows.length === 0 && <tr><td colSpan={4} className="px-4 py-8 text-center text-ink-muted">Nenhum registro.</td></tr>}
             {rows.map((r) => (
               <tr key={r.id}>

@@ -2,7 +2,7 @@ import { apiRoute, HttpError, jsonOk } from "@/core/http";
 import { publicFileInfo, storeImage, type FilePurpose } from "@/core/storage/storage";
 import { logActivity } from "@/core/audit";
 
-const PURPOSES: FilePurpose[] = ["product", "background", "element", "brand", "misc"];
+const PURPOSES: FilePurpose[] = ["product", "background", "element", "brand", "result", "misc"];
 
 /** Upload de imagens (multipart). Valida conteúdo real, tamanho e dimensões. */
 export const POST = apiRoute({}, async ({ req, user }) => {

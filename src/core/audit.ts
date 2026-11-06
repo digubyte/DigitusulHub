@@ -22,6 +22,7 @@ export const ACTION_LABELS: Record<string, string> = {
   "flyer.delete": "Excluiu flyer",
   "flyer.export": "Exportou flyer",
   "flyer.template": "Alterou template salvo",
+  "flyer.result": "Enviou a arte gerada no ChatGPT",
   "ai.compose": "Usou Criar com IA",
 };
 

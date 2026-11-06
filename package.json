@@ -21,6 +21,7 @@
     "@prisma/client": "6.19.3",
     "@vercel/blob": "^1.1.1",
     "bcryptjs": "3.0.2",
+    "fflate": "0.8.3",
     "jspdf": "3.0.3",
     "konva": "9.3.22",
     "lucide-react": "0.468.0",

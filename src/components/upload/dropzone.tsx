@@ -70,7 +70,7 @@ export function Dropzone({ onFiles, multiple = true, accept = ACCEPT_IMAGES, lab
       className={cn(
         "flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed text-center transition focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500",
         compact ? "gap-1 p-3" : "gap-2 p-6",
-        over ? "border-brand-500 bg-brand-50" : "border-slate-200 bg-slate-50/60 hover:border-brand-300 hover:bg-brand-50/40",
+        over ? "border-brand-500 bg-brand-50" : "border-zinc-200 bg-zinc-50/60 hover:border-brand-300 hover:bg-brand-50/40",
       )}
     >
       {busy ? <Spinner className="h-5 w-5 text-brand-600" /> : <ImagePlus className={cn("text-brand-600", compact ? "h-5 w-5" : "h-7 w-7")} />}

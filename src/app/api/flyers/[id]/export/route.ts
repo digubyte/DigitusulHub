@@ -14,6 +14,13 @@ import { validateFlyer } from "@/modules/flyer-studio/domain/validation";
 export const POST = apiRoute<{ id: string }>({ permission: "flyers.access" }, async ({ req, user, params }) => {
   const body = await parseBody(req, z.object({ format: z.enum(["png", "jpg", "pdf", "json"]), width: z.number().int(), height: z.number().int(), version: z.number().int() }));
   const flyer = await getFlyer(user, params.id);
+  if (flyer.mode === "chatgpt") {
+    // A arte veio do ChatGPT: a conferência dos dados foi feita ao salvar a arte.
+    if (!flyer.resultFileId) throw new HttpError(422, "Envie a arte gerada no ChatGPT antes de baixar.");
+    await db.flyerProject.update({ where: { id: flyer.id }, data: { lastExportAt: new Date() } });
+    await logActivity(user.id, "flyer.export", { type: "flyer", id: flyer.id }, { format: body.format, width: body.width, height: body.height, mode: "chatgpt" });
+    return jsonOk({ ok: true });
+  }
   if (body.version !== flyer.version) throw new HttpError(409, "Salve o projeto antes de exportar.");
   if (body.format !== "json" && (body.width !== flyer.width || body.height !== flyer.height)) {
     throw new HttpError(422, `Arquivo gerado com ${body.width}×${body.height}px, mas o formato exige ${flyer.width}×${flyer.height}px.`);

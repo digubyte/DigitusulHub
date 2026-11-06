@@ -97,6 +97,24 @@ O projeto anterior foi reescrito e integrado ao Estúdio:
 - **Lista** "Código - Nome - Valor" e **CSV** no modelo `Sku,Nome,Ativo,Ordem`.
 - Removido: gateway de IA do Lovable, dezenas de componentes não usados, código duplicado entre as funções de catálogo.
 
+## Criar flyers com o ChatGPT (um flyer ou lote)
+
+Fluxo padrão em **Estúdio › Novo flyer ou lote**:
+
+1. **Configuração** — lote (2 a 8 flyers, padrão 6) ou flyer único, segmento (Gamer, Limpeza, Escritório…), tipo e formato.
+2. **Produtos** — catálogo do site, digitados ou por print. No lote, são divididos em ordem entre os flyers.
+3. **Estilo** — título, subtítulo, rodapé, destaque, mascote e instruções extras.
+4. **Aprovação** — resumo de cada flyer (produtos e preços) e o prompt completo, editável. Nada é salvo antes de aprovar.
+
+Depois de aprovar, cada flyer tem: **Baixar ZIP** (fotos com os nomes citados no prompt + logo + mascote),
+**Copiar e abrir** (copia o prompt e abre o chatgpt.com; também dá para colar no app do ChatGPT) e **Enviar a arte gerada**.
+Ao enviar a arte, o usuário marca produto por produto que nome, código e preço conferem — só então ela é salva.
+O download sai no tamanho exato do formato (recorte centralizado) ou no original.
+
+Proteções: o prompt é montado pelo aplicativo com os dados do cadastro; o servidor recusa prompts (mesmo editados)
+que não contenham o nome, o código e o preço exatos de cada produto. A montagem manual no editor continua em
+**Montar manualmente** (`/estudio/novo?modo=manual`) para quando o preço precisa sair garantido ao centavo.
+
 ## Integrações opcionais (`.env`)
 - `ANTHROPIC_API_KEY` (+ `AI_MODEL`, padrão `claude-opus-5-5`): Criar com IA, leitura de imagens, busca inteligente no catálogo. Usa fallback de servidor da Anthropic em caso de recusa.
 - `REMOVE_BG_API_KEY`: remoção de fundo (a original é preservada).

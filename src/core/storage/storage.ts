@@ -62,7 +62,7 @@ export const driver: StorageDriver = process.env.BLOB_READ_WRITE_TOKEN
   ? new VercelBlobDriver()
   : new LocalDriver(path.resolve(process.cwd(), process.env.STORAGE_DIR || "storage"));
 
-export type FilePurpose = "product" | "brand" | "background" | "thumbnail" | "element" | "misc";
+export type FilePurpose = "product" | "brand" | "background" | "thumbnail" | "element" | "result" | "misc";
 const EXT: Record<string, string> = { "image/png": "png", "image/jpeg": "jpg", "image/webp": "webp", "image/svg+xml": "svg" };
 
 export async function storeImage(opts: {

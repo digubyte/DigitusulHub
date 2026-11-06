@@ -4,8 +4,9 @@ import { HttpError } from "@/core/http";
 import { getStudioContext } from "@/modules/flyer-studio/services/studio-context";
 import { getFlyer } from "@/modules/flyer-studio/services/flyer-service";
 import { EditorClient } from "@/modules/flyer-studio/components/client-loaders";
+import { ChatGptProjectView } from "@/modules/flyer-studio/components/chatgpt-views";
 
-export const metadata = { title: "Editor de flyer" };
+export const metadata = { title: "Flyer" };
 
 export default async function EditorPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requirePageUser("flyers.access");
@@ -18,6 +19,15 @@ export default async function EditorPage({ params }: { params: Promise<{ id: str
     throw e;
   }
   const ctx = await getStudioContext(user);
+  if (f.mode === "chatgpt") {
+    return (
+      <ChatGptProjectView
+        ctx={ctx}
+        batchId={f.batchId}
+        flyer={{ id: f.id, name: f.name, products: f.products, prompt: f.prompt ?? "", resultFileId: f.resultFileId, width: f.width, height: f.height, formatKey: f.formatKey, canEdit: f.canEdit, layout: f.layoutConfig }}
+      />
+    );
+  }
   return (
     <EditorClient
       ctx={ctx}

@@ -89,7 +89,7 @@ export function ProductsEditor({ products, onChange, ctx, compact }: { products:
 
       <Dropzone compact={compact || products.length > 0} busy={bulkBusy} onFiles={bulk} label="Arraste várias fotos para criar um produto por imagem" />
 
-      {products.length === 0 && <p className="rounded-lg bg-slate-50 p-4 text-center text-sm text-ink-muted">Nenhum produto. Para flyers institucionais, os produtos são opcionais.</p>}
+      {products.length === 0 && <p className="rounded-lg bg-zinc-50 p-4 text-center text-sm text-ink-muted">Nenhum produto. Para flyers institucionais, os produtos são opcionais.</p>}
 
       <ol className="space-y-3">
         {products.map((p, i) => {
@@ -144,7 +144,7 @@ export function ProductsEditor({ products, onChange, ctx, compact }: { products:
       </ol>
 
       {products.length > 0 && (
-        <div className="flex flex-wrap items-center gap-2 border-t border-slate-100 pt-3">
+        <div className="flex flex-wrap items-center gap-2 border-t border-zinc-100 pt-3">
           {errors.length === 0 ? <span className="flex items-center gap-1 text-xs text-emerald-700"><CheckCircle2 className="h-3.5 w-3.5" />Dados obrigatórios completos</span> : <span className="text-xs text-accent-600">{errors.length} pendência(s) obrigatória(s)</span>}
           <button className="btn-ghost btn-sm ml-auto" onClick={() => { navigator.clipboard.writeText(buildProductList(products)); toast.success("Lista copiada (Código - Nome - Valor)."); }}><ClipboardCopy className="h-3.5 w-3.5" />Copiar lista</button>
           <button className="btn-ghost btn-sm" onClick={() => download("produtos-digitusul.csv", buildCategoryCsv(products), "text/csv;charset=utf-8")}><Download className="h-3.5 w-3.5" />CSV (Sku,Nome,Ativo,Ordem)</button>

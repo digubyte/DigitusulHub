@@ -16,7 +16,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   const notice = sp.expirada ? "Sua sessão expirou. Entre novamente." : sp.erro === "acesso" ? "Seu usuário não tem acesso à plataforma." : null;
   return (
     <>
-      <h2 className="font-display text-2xl font-extrabold text-ink">Entrar</h2>
+      <h2 className="text-2xl font-semibold tracking-tight text-ink">Entrar</h2>
       <p className="mb-6 mt-1 text-sm text-ink-muted">Use seu e-mail corporativo e senha.</p>
       <LoginForm next={next} notice={notice} />
     </>

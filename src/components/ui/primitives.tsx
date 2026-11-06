@@ -29,14 +29,14 @@ export function Modal({ open, onClose, title, children, footer, size = "md" }: {
   if (!open) return null;
   const w = { sm: "max-w-sm", md: "max-w-lg", lg: "max-w-2xl", xl: "max-w-4xl" }[size];
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/40 p-0 sm:items-center sm:p-4" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-zinc-900/30 p-0 backdrop-blur-[2px] sm:items-center sm:p-4" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
       <div ref={ref} role="dialog" aria-modal="true" aria-label={title} className={cn("flex max-h-[92vh] w-full flex-col rounded-t-2xl bg-white shadow-pop sm:rounded-2xl", w)}>
-        <div className="flex items-center justify-between border-b border-slate-100 px-5 py-3.5">
-          <h2 className="font-display text-base font-bold text-ink">{title}</h2>
+        <div className="flex items-center justify-between px-6 pb-2 pt-5">
+          <h2 className="text-base font-semibold tracking-tight text-ink">{title}</h2>
           <button className="btn-icon btn-ghost" onClick={onClose} aria-label="Fechar"><X className="h-4 w-4" /></button>
         </div>
-        <div className="thin-scroll overflow-y-auto px-5 py-4">{children}</div>
-        {footer && <div className="flex flex-wrap justify-end gap-2 border-t border-slate-100 px-5 py-3">{footer}</div>}
+        <div className="thin-scroll overflow-y-auto px-6 py-3">{children}</div>
+        {footer && <div className="flex flex-wrap justify-end gap-2 px-6 pb-5 pt-3">{footer}</div>}
       </div>
     </div>
   );
@@ -59,9 +59,9 @@ export function ConfirmDialog({ open, title, message, confirmLabel = "Confirmar"
 
 export function EmptyState({ icon, title, text, action }: { icon?: React.ReactNode; title: string; text?: string; action?: React.ReactNode }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-white px-6 py-12 text-center">
-      {icon && <div className="mb-3 text-slate-300">{icon}</div>}
-      <p className="font-display font-bold text-ink">{title}</p>
+    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-zinc-200 px-6 py-16 text-center">
+      {icon && <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-white text-zinc-400 ring-1 ring-zinc-200 [&>svg]:h-5 [&>svg]:w-5">{icon}</div>}
+      <p className="font-medium text-ink">{title}</p>
       {text && <p className="mt-1 max-w-md text-sm text-ink-muted">{text}</p>}
       {action && <div className="mt-4">{action}</div>}
     </div>
@@ -70,10 +70,10 @@ export function EmptyState({ icon, title, text, action }: { icon?: React.ReactNo
 
 export function PageHeader({ title, subtitle, actions }: { title: string; subtitle?: string; actions?: React.ReactNode }) {
   return (
-    <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+    <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <h1 className="font-display text-2xl font-extrabold tracking-tight text-ink">{title}</h1>
-        {subtitle && <p className="mt-1 text-sm text-ink-muted">{subtitle}</p>}
+        <h1 className="text-2xl font-semibold tracking-tight text-ink">{title}</h1>
+        {subtitle && <p className="mt-1 text-sm text-zinc-500">{subtitle}</p>}
       </div>
       {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
     </div>

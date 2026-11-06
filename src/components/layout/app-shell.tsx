@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LogOut, Menu, X } from "lucide-react";
+import { LogOut, Menu, PanelLeftClose, PanelLeftOpen, X } from "lucide-react";
 import { HubLogo } from "./logo";
 import { ModuleIcon } from "./icons";
 import { cn } from "@/core/util";
@@ -10,14 +10,21 @@ import { cn } from "@/core/util";
 export interface ShellNavItem { key: string; name: string; icon: string; route: string; status: string; section: string }
 export interface ShellUser { name: string; email: string; roleName: string }
 
+const COLLAPSE_KEY = "dh:sidebar-collapsed";
+
 export function AppShell({ nav, user, children }: { nav: ShellNavItem[]; user: ShellUser; children: React.ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   useEffect(() => setOpen(false), [pathname]);
+  useEffect(() => { try { setCollapsed(localStorage.getItem(COLLAPSE_KEY) === "1"); } catch {} }, []);
+  function toggleCollapsed() {
+    setCollapsed((c) => { try { localStorage.setItem(COLLAPSE_KEY, c ? "0" : "1"); } catch {} return !c; });
+  }
 
   // O editor ocupa a tela inteira
-  const fullBleed = /^\/estudio\/[^/]+$/.test(pathname) && pathname !== "/estudio/novo";
+  const fullBleed = /^\/estudio\/[^/]+$/.test(pathname) && !["/estudio/novo", "/estudio/lote"].includes(pathname) && !pathname.startsWith("/estudio/lote");
 
   async function logout() {
     setLoggingOut(true);
@@ -31,15 +38,19 @@ export function AppShell({ nav, user, children }: { nav: ShellNavItem[]; user: S
     { key: "system", label: "Sistema", items: nav.filter((n) => n.section === "system") },
   ];
 
-  const sidebar = (
+  const sidebar = (mini: boolean) => (
     <nav aria-label="Navegação principal" className="flex h-full flex-col">
-      <div className="flex h-16 items-center px-5">
-        <Link href="/dashboard" aria-label="Início"><HubLogo className="h-6" /></Link>
+      <div className={cn("flex h-16 items-center", mini ? "justify-center" : "justify-between pl-5 pr-3")}>
+        {!mini && <Link href="/dashboard" aria-label="Início"><HubLogo className="h-[22px]" /></Link>}
+        <button className="btn-icon btn-ghost hidden h-8 w-8 lg:inline-flex" onClick={toggleCollapsed} aria-label={mini ? "Expandir menu" : "Recolher menu"} title={mini ? "Expandir menu" : "Recolher menu"}>
+          {mini ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
+        </button>
       </div>
       <div className="thin-scroll flex-1 overflow-y-auto px-3 pb-4">
         {sections.map((s) => s.items.length > 0 && (
-          <div key={s.key} className="mt-4">
-            <p className="px-3 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400">{s.label}</p>
+          <div key={s.key} className="mt-3 first:mt-1">
+            {!mini && <p className="px-2.5 pb-1 pt-2 text-[11px] font-medium text-zinc-400">{s.label}</p>}
+            {mini && s.key === "system" && <div className="mx-2 my-2 border-t border-zinc-200" />}
             <ul className="space-y-0.5">
               {s.items.map((item) => {
                 const active = pathname === item.route || pathname.startsWith(item.route + "/");
@@ -47,15 +58,17 @@ export function AppShell({ nav, user, children }: { nav: ShellNavItem[]; user: S
                   <li key={item.key}>
                     <Link
                       href={item.route}
+                      title={mini ? item.name : undefined}
                       aria-current={active ? "page" : undefined}
                       className={cn(
-                        "group flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition",
-                        active ? "bg-brand-50 text-brand-700" : "text-ink-soft hover:bg-slate-100 hover:text-ink",
+                        "group flex items-center gap-2.5 rounded-lg text-[13.5px] font-medium transition-colors",
+                        mini ? "h-9 justify-center" : "px-2.5 py-[7px]",
+                        active ? "bg-white text-ink shadow-card ring-1 ring-zinc-200/80" : "text-zinc-500 hover:bg-zinc-200/50 hover:text-ink",
                       )}
                     >
-                      <ModuleIcon name={item.icon} className={cn("h-[18px] w-[18px]", active ? "text-brand-600" : "text-slate-400 group-hover:text-ink-soft")} />
-                      <span className="flex-1 truncate">{item.name}</span>
-                      {item.status === "development" && <span className="badge bg-slate-100 text-[10px] text-slate-500">Em breve</span>}
+                      <ModuleIcon name={item.icon} className={cn("h-[17px] w-[17px] shrink-0", active ? "text-brand-600" : "text-zinc-400 group-hover:text-zinc-600")} />
+                      {!mini && <span className="flex-1 truncate">{item.name}</span>}
+                      {!mini && item.status === "development" && <span className="text-[10px] font-medium text-zinc-400">em breve</span>}
                     </Link>
                   </li>
                 );
@@ -64,14 +77,16 @@ export function AppShell({ nav, user, children }: { nav: ShellNavItem[]; user: S
           </div>
         ))}
       </div>
-      <div className="border-t border-slate-100 p-3">
-        <div className="flex items-center gap-3 rounded-lg px-2 py-2">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-600 text-xs font-bold text-white" aria-hidden>{initials}</div>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold text-ink">{user.name}</p>
-            <p className="truncate text-xs text-ink-muted">{user.roleName}</p>
-          </div>
-          <button className="btn-icon btn-ghost" onClick={logout} disabled={loggingOut} title="Sair" aria-label="Sair">
+      <div className="p-3">
+        <div className={cn("flex items-center gap-2.5 rounded-xl", mini ? "flex-col" : "px-1.5 py-1.5")}>
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-zinc-900 text-[11px] font-semibold text-white" title={mini ? `${user.name} · ${user.roleName}` : undefined} aria-hidden>{initials}</div>
+          {!mini && (
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-[13px] font-medium text-ink">{user.name}</p>
+              <p className="truncate text-xs text-zinc-500">{user.roleName}</p>
+            </div>
+          )}
+          <button className="btn-icon btn-ghost h-8 w-8" onClick={logout} disabled={loggingOut} title="Sair" aria-label="Sair">
             <LogOut className="h-4 w-4" />
           </button>
         </div>
@@ -79,24 +94,27 @@ export function AppShell({ nav, user, children }: { nav: ShellNavItem[]; user: S
     </nav>
   );
 
+  const sideW = collapsed ? "lg:w-[68px]" : "lg:w-60";
+  const padL = collapsed ? "lg:pl-[68px]" : "lg:pl-60";
+
   return (
     <div className="min-h-screen lg:flex">
-      <aside className={cn("hidden w-64 shrink-0 border-r border-slate-200 bg-white lg:fixed lg:inset-y-0 lg:block", fullBleed && "lg:hidden")}>{sidebar}</aside>
+      <aside className={cn("hidden shrink-0 border-r border-zinc-200/70 bg-zinc-50 lg:fixed lg:inset-y-0 lg:block", sideW, fullBleed && "lg:hidden")}>{sidebar(collapsed)}</aside>
       {open && (
         <div className="fixed inset-0 z-40 lg:hidden" role="dialog" aria-modal="true">
-          <div className="absolute inset-0 bg-slate-900/40" onClick={() => setOpen(false)} />
-          <aside className="absolute inset-y-0 left-0 w-72 bg-white shadow-pop">
-            <button className="btn-icon btn-ghost absolute right-2 top-3" onClick={() => setOpen(false)} aria-label="Fechar menu"><X className="h-5 w-5" /></button>
-            {sidebar}
+          <div className="absolute inset-0 bg-zinc-900/30 backdrop-blur-[2px]" onClick={() => setOpen(false)} />
+          <aside className="absolute inset-y-0 left-0 w-72 bg-zinc-50 shadow-pop">
+            <button className="btn-icon btn-ghost absolute right-2 top-3.5" onClick={() => setOpen(false)} aria-label="Fechar menu"><X className="h-5 w-5" /></button>
+            {sidebar(false)}
           </aside>
         </div>
       )}
-      <div className={cn("flex min-w-0 flex-1 flex-col", !fullBleed && "lg:pl-64")}>
-        <header className={cn("sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-slate-200 bg-white/90 px-4 backdrop-blur lg:hidden", fullBleed && "hidden")}>
+      <div className={cn("flex min-w-0 flex-1 flex-col", !fullBleed && padL)}>
+        <header className={cn("sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-zinc-200/70 bg-white/80 px-4 backdrop-blur lg:hidden", fullBleed && "hidden")}>
           <button className="btn-icon btn-ghost" onClick={() => setOpen(true)} aria-label="Abrir menu"><Menu className="h-5 w-5" /></button>
           <HubLogo className="h-5" />
         </header>
-        <main className={cn("flex-1", fullBleed ? "" : "mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 lg:py-8")}>{children}</main>
+        <main className={cn("flex-1", fullBleed ? "" : "mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-10 lg:py-10")}>{children}</main>
       </div>
     </div>
   );

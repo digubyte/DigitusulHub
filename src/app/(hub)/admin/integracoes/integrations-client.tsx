@@ -29,14 +29,14 @@ export function IntegrationsAdmin({ items, pricing }: { items: { name: string; e
   return (
     <div className="space-y-8">
       <section>
-        <h2 className="mb-3 font-display text-lg font-bold">Integrações</h2>
+        <h2 className="mb-3 text-lg font-semibold">Integrações</h2>
         <p className="mb-3 text-sm text-ink-muted">As credenciais são lidas somente no servidor (arquivo <code>.env</code>) e nunca são expostas no navegador.</p>
-        <div className="card divide-y divide-slate-100">
+        <div className="card divide-y divide-zinc-100">
           {items.map((i) => (
             <div key={i.name} className="flex items-start gap-3 p-4">
-              {i.ok ? <CheckCircle2 className="mt-0.5 h-5 w-5 text-emerald-600" /> : <CircleSlash className="mt-0.5 h-5 w-5 text-slate-400" />}
+              {i.ok ? <CheckCircle2 className="mt-0.5 h-5 w-5 text-emerald-600" /> : <CircleSlash className="mt-0.5 h-5 w-5 text-zinc-400" />}
               <div className="flex-1">
-                <p className="font-semibold">{i.name} <span className={`badge ml-1 ${i.ok ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-500"}`}>{i.ok ? "Configurado" : "Indisponível"}</span></p>
+                <p className="font-semibold">{i.name} <span className={`badge ml-1 ${i.ok ? "bg-emerald-50 text-emerald-700" : "bg-zinc-100 text-zinc-500"}`}>{i.ok ? "Configurado" : "Indisponível"}</span></p>
                 <p className="text-sm text-ink-muted">{i.detail}</p>
               </div>
               <code className="hidden text-xs text-ink-muted sm:block">{i.env}</code>
@@ -46,7 +46,7 @@ export function IntegrationsAdmin({ items, pricing }: { items: { name: string; e
       </section>
 
       <section>
-        <h2 className="font-display text-lg font-bold">Regra de preço do Estúdio</h2>
+        <h2 className="text-lg font-semibold">Regra de preço do Estúdio</h2>
         <p className="mb-3 max-w-3xl text-sm text-ink-muted">Aplicada a produtos importados do catálogo do site ou lidos de imagens: o valor PIX nunca é usado; o valor final é calculado pelo sistema a partir do valor no cartão. Preços digitados manualmente são usados como informados.</p>
         <div className="card grid gap-4 p-4 md:grid-cols-[1fr_1fr_1fr_1.2fr]">
           <label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={rule.markupEnabled} onChange={(e) => setRule({ ...rule, markupEnabled: e.target.checked })} />Aplicar acréscimo sobre o valor no cartão</label>
@@ -57,7 +57,7 @@ export function IntegrationsAdmin({ items, pricing }: { items: { name: string; e
               <option value="cents">Duas casas decimais</option>
             </select>
           </Field>
-          <div className="rounded-lg bg-slate-50 p-3 text-sm">
+          <div className="rounded-lg bg-zinc-50 p-3 text-sm">
             <Field label="Simular valor no cartão"><input className="input" value={sample} onChange={(e) => setSample(e.target.value)} /></Field>
             <p className="mt-2">Valor final: <strong className="text-brand-700">{sampleCents ? formatPrice(applyPricingRule(sampleCents, preview)) : "—"}</strong></p>
             <p className="text-xs text-ink-muted">{describeRule(preview)}</p>

@@ -21,7 +21,7 @@ export default async function FutureModulePage({ params }: { params: Promise<{ s
         <ModuleIcon name={mod.icon} className="h-7 w-7" />
       </div>
       <span className="badge bg-amber-50 text-amber-700"><Construction className="h-3 w-3" />Em desenvolvimento</span>
-      <h1 className="mt-3 font-display text-2xl font-extrabold text-ink">{mod.name}</h1>
+      <h1 className="mt-3 text-2xl font-semibold tracking-tight text-ink">{mod.name}</h1>
       <p className="mt-2 text-ink-muted">{mod.description}</p>
       <p className="mt-6 text-sm text-ink-muted">
         Este módulo está planejado e já possui ponto de extensão na plataforma (navegação e permissões). Nenhuma funcionalidade dele está disponível ainda.

@@ -19,7 +19,7 @@ export function PasswordForm() {
   }
   return (
     <form onSubmit={submit} className="card grid gap-4 p-5 sm:grid-cols-3">
-      <h2 className="font-display text-base font-bold sm:col-span-3">Alterar senha</h2>
+      <h2 className="text-base font-bold sm:col-span-3">Alterar senha</h2>
       <Field label="Senha atual"><input className="input" type="password" autoComplete="current-password" value={f.current} onChange={(e) => setF({ ...f, current: e.target.value })} /></Field>
       <Field label="Nova senha" hint="Mín. 10 caracteres, letras e números"><input className="input" type="password" autoComplete="new-password" value={f.next} onChange={(e) => setF({ ...f, next: e.target.value })} /></Field>
       <Field label="Confirmar nova senha"><input className="input" type="password" autoComplete="new-password" value={f.confirm} onChange={(e) => setF({ ...f, confirm: e.target.value })} /></Field>

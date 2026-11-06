@@ -63,15 +63,15 @@ export function UsersAdmin() {
     <div className="space-y-10">
       <section>
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="font-display text-lg font-bold">Usuários ({users.length})</h2>
+          <h2 className="text-lg font-semibold">Usuários ({users.length})</h2>
           <button className="btn-primary" onClick={() => setEditing({ active: true, roleId: roles.find((r) => r.key === "COLABORADOR")?.id })}><Plus className="h-4 w-4" />Novo usuário</button>
         </div>
         <div className="card overflow-x-auto">
           <table className="w-full min-w-[720px] text-sm">
-            <thead className="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-ink-muted">
+            <thead className="bg-zinc-50 text-left text-xs font-semibold uppercase tracking-wide text-ink-muted">
               <tr><th className="px-4 py-3">Nome</th><th className="px-4 py-3">Perfil</th><th className="px-4 py-3">Área</th><th className="px-4 py-3">Último acesso</th><th className="px-4 py-3">Status</th><th className="px-4 py-3 text-right">Ações</th></tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-zinc-100">
               {users.map((u) => (
                 <tr key={u.id}>
                   <td className="px-4 py-3"><p className="font-semibold text-ink">{u.name}</p><p className="text-xs text-ink-muted">{u.email}</p></td>
@@ -79,7 +79,7 @@ export function UsersAdmin() {
                   <td className="px-4 py-3 text-ink-muted">{u.department || "—"}</td>
                   <td className="px-4 py-3 text-ink-muted">{u.lastLoginAt ? relativeTime(u.lastLoginAt) : "Nunca"}</td>
                   <td className="px-4 py-3">
-                    {u.active ? <span className="badge bg-emerald-50 text-emerald-700">Ativo</span> : <span className="badge bg-slate-100 text-slate-500">Inativo</span>}
+                    {u.active ? <span className="badge bg-emerald-50 text-emerald-700">Ativo</span> : <span className="badge bg-zinc-100 text-zinc-500">Inativo</span>}
                     {u.locked && <span className="badge ml-1 bg-amber-50 text-amber-700">Bloqueado</span>}
                   </td>
                   <td className="px-4 py-3">
@@ -97,7 +97,7 @@ export function UsersAdmin() {
       </section>
 
       <section>
-        <h2 className="mb-1 font-display text-lg font-bold">Perfis e permissões</h2>
+        <h2 className="mb-1 text-lg font-semibold">Perfis e permissões</h2>
         <p className="mb-3 text-sm text-ink-muted">As permissões são verificadas no servidor em cada página e requisição.</p>
         <div className="grid gap-3 md:grid-cols-3">
           {roles.map((r) => (
@@ -148,7 +148,7 @@ export function UsersAdmin() {
             <legend className="label uppercase tracking-wide">{mod === "core" ? "Plataforma" : "Estúdio de Flyers"}</legend>
             <div className="grid gap-1.5 sm:grid-cols-2">
               {perms.filter((p) => p.module === mod).map((p) => (
-                <label key={p.key} className="flex items-start gap-2 rounded-lg p-2 text-sm hover:bg-slate-50">
+                <label key={p.key} className="flex items-start gap-2 rounded-lg p-2 text-sm hover:bg-zinc-50">
                   <input type="checkbox" className="mt-0.5" checked={roleEdit.permissions.includes(p.key)} onChange={(e) => setRoleEdit({ ...roleEdit, permissions: e.target.checked ? [...roleEdit.permissions, p.key] : roleEdit.permissions.filter((k) => k !== p.key) })} />
                   <span><span className="font-medium text-ink">{p.description}</span><span className="block font-mono text-[11px] text-ink-muted">{p.key}</span></span>
                 </label>

@@ -89,3 +89,25 @@ export const ProjectWriteSchema = z.object({
 
 export type ProjectWrite = z.infer<typeof ProjectWriteSchema>;
 export { MAX_PRODUCTS };
+
+/** Criação de flyers gerados no ChatGPT (1 flyer ou um lote de até 8). */
+export const MAX_BATCH = 8;
+export const ChatGptBatchSchema = z.object({
+  campaign: z.string().trim().max(80).optional().nullable(),
+  formatKey: z.enum(FORMATS.map((f) => f.key) as [string, ...string[]]),
+  width: z.number().int().min(200).max(6000),
+  height: z.number().int().min(200).max(6000),
+  layoutConfig: LayoutOptionsSchema,
+  flyers: z.array(z.object({
+    name: z.string().trim().min(1, "Informe o nome do flyer.").max(120),
+    products: z.array(ProductSchema).max(MAX_PRODUCTS, `Máximo de ${MAX_PRODUCTS} produtos por flyer.`),
+    prompt: z.string().trim().min(40, "Prompt muito curto.").max(20000),
+  })).min(1).max(MAX_BATCH, `Máximo de ${MAX_BATCH} flyers por lote.`),
+});
+export type ChatGptBatch = z.infer<typeof ChatGptBatchSchema>;
+
+export const ChatGptResultSchema = z.object({
+  fileId: z.string().min(1).max(64).nullable(),
+  /** Confirmação de que nome, código e preço de cada produto foram conferidos na arte. */
+  checked: z.boolean(),
+});
