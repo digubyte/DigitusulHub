@@ -5,7 +5,7 @@ import { NextResponse, type NextRequest } from "next/server";
  * A validação real (sessão no banco, permissões) acontece no servidor de cada
  * página e rota de API — este middleware é apenas conveniência de navegação.
  */
-const PUBLIC = ["/login", "/recuperar-senha", "/redefinir-senha", "/brand/", "/_next", "/favicon"];
+const PUBLIC = ["/login", "/primeiro-acesso", "/recuperar-senha", "/redefinir-senha", "/brand/", "/_next", "/favicon"];
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;

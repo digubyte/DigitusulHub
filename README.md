@@ -9,12 +9,9 @@ Tudo no plano gratuito. Cada `git push` na branch `main` publica uma nova versã
 1. **Vercel:** entre em [vercel.com](https://vercel.com) com a conta do GitHub → **Add New… › Project** → importe `digubyte/DigitusulHub` → **Deploy**. O primeiro deploy vai falhar por falta do banco; é esperado.
 2. **Banco (Neon):** no projeto da Vercel, aba **Storage › Create Database › Neon (Postgres)** → crie e conecte ao projeto. Isso preenche `DATABASE_URL` e `DATABASE_URL_UNPOOLED`.
 3. **Imagens (Blob):** na mesma aba **Storage › Create › Blob** → conecte ao projeto. Isso preenche `BLOB_READ_WRITE_TOKEN`.
-4. **Variáveis:** em **Settings › Environment Variables**, adicione:
-   - `SEED_ADMIN_EMAIL` — e-mail do primeiro administrador
-   - `SEED_ADMIN_PASSWORD` — senha forte (mín. 10 caracteres, letras e números)
-   - opcional: `ANTHROPIC_API_KEY` (IA) e `REMOVE_BG_API_KEY` (remoção de fundo)
-5. **Deployments › ⋯ › Redeploy.** O build (`npm run vercel-build`) aplica as migrações do banco, cria o administrador (só se ainda não existir) e publica.
-6. Acesse a URL `https://<projeto>.vercel.app`, entre com o administrador e troque a senha em **Configurações**.
+4. **Variáveis:** em **Settings › Environment Variables**, adicione `SEED_ADMIN_EMAIL` com o e-mail do administrador (opcional: `ANTHROPIC_API_KEY` para IA e `REMOVE_BG_API_KEY` para remoção de fundo).
+5. **Deployments › ⋯ › Redeploy.** O build (`npm run vercel-build`) aplica as migrações do banco e publica.
+6. Acesse `https://<projeto>.vercel.app`: enquanto não houver administrador, abre a tela de **Primeiro acesso**, onde a pessoa com o e-mail de `SEED_ADMIN_EMAIL` escolhe a própria senha. Depois disso a tela deixa de existir.
 
 Limites do plano gratuito que importam aqui: uploads de até 4 MB por imagem (fotos maiores são reduzidas automaticamente no navegador, mantendo a proporção) e banco/armazenamento com cota gratuita do Neon e da Vercel.
 
