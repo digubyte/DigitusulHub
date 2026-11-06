@@ -1,0 +1,205 @@
+// Digitusul Hub — modelo de dados central.
+//
+// Desenvolvimento: SQLite (zero configuração).
+// Produção: troque `provider` para "postgresql" e DATABASE_URL para a instância Postgres.
+// Campos JSON são armazenados como String (serializados em src/core/json.ts) para
+// manter o schema idêntico nos dois bancos.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ───────────────────────── Identidade e acesso ─────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  passwordHash  String
+  roleId        String
+  role          Role      @relation(fields: [roleId], references: [id])
+  department    String?
+  active        Boolean   @default(true)
+  failedLogins  Int       @default(0)
+  lockedUntil   DateTime?
+  lastLoginAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  sessions      Session[]
+  resetTokens   PasswordResetToken[]
+  files         StoredFile[]
+  flyers        FlyerProject[]
+  activities    ActivityLog[]
+}
+
+model Role {
+  id          String           @id @default(cuid())
+  key         String           @unique // ADMIN | GESTOR | COLABORADOR | ...
+  name        String
+  description String?
+  system      Boolean          @default(false) // papéis de sistema não podem ser excluídos
+  users       User[]
+  permissions RolePermission[]
+}
+
+model Permission {
+  id          String           @id @default(cuid())
+  key         String           @unique // ex.: flyers.create
+  module      String           // ex.: flyers, core
+  description String
+  roles       RolePermission[]
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+}
+
+model Session {
+  id         String   @id @default(cuid())
+  tokenHash  String   @unique
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  lastSeenAt DateTime @default(now())
+  ip         String?
+  userAgent  String?
+
+  @@index([userId])
+}
+
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  tokenHash String    @unique
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+}
+
+// ───────────────────────── Plataforma ─────────────────────────
+
+/// Estado configurável dos módulos. O manifesto (código) fica em src/core/modules/registry.ts.
+model Module {
+  key       String   @id
+  name      String
+  status    String   // active | development | disabled
+  order     Int
+  visible   Boolean  @default(true)
+  updatedAt DateTime @updatedAt
+}
+
+model StoredFile {
+  id           String   @id @default(cuid())
+  ownerId      String
+  owner        User     @relation(fields: [ownerId], references: [id])
+  originalName String
+  mimeType     String
+  size         Int
+  storageKey   String   @unique // caminho relativo no storage privado
+  sha256       String
+  purpose      String   // product | brand | background | thumbnail | element | misc
+  width        Int?
+  height       Int?
+  derivedFromId String? // ex.: imagem com fundo removido aponta para a original
+  createdAt    DateTime @default(now())
+
+  @@index([ownerId])
+}
+
+model ActivityLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id])
+  action     String   // ex.: flyer.create, flyer.export, auth.login
+  entityType String?
+  entityId   String?
+  metadata   String?  // JSON
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([userId])
+}
+
+model Setting {
+  key       String   @id
+  value     String   // JSON
+  updatedAt DateTime @updatedAt
+}
+
+// ───────────────────────── Brand Kit ─────────────────────────
+
+model BrandKit {
+  id               String   @id @default("default")
+  logoFileId       String?
+  logoOnDarkFileId String?
+  colors           String   // JSON: [{name, hex, usage}]
+  fonts            String   // JSON: {heading, body, price}
+  rules            String   // texto livre com regras de aplicação
+  approvedPhrases  String   // JSON: [{category, text}]
+  updatedAt        DateTime @updatedAt
+  updatedById      String?
+}
+
+model BrandAsset {
+  id        String   @id @default(cuid())
+  kind      String   // mascot | element
+  name      String
+  fileId    String
+  createdAt DateTime @default(now())
+}
+
+// ───────────────────────── Módulo: Estúdio de Flyers ─────────────────────────
+
+model FlyerProject {
+  id           String    @id @default(cuid())
+  name         String
+  ownerId      String
+  owner        User      @relation(fields: [ownerId], references: [id])
+  category     String    // novidade | promocional | reposicao | queima | blackfriday | institucional
+  campaign     String?
+  formatKey    String
+  width        Int
+  height       Int
+  products     String    // JSON: Product[] (fonte da verdade dos dados comerciais)
+  layoutConfig String    // JSON: LayoutOptions usadas na geração
+  canvasState  String    // JSON: FlyerDocument (estado editável)
+  thumbnailId  String?
+  isTemplate   Boolean   @default(false)
+  version      Int       @default(1)
+  lastExportAt DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  versions     FlyerVersion[]
+
+  @@index([ownerId])
+  @@index([category])
+}
+
+model FlyerVersion {
+  id          String       @id @default(cuid())
+  projectId   String
+  project     FlyerProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  version     Int
+  products    String
+  canvasState String
+  note        String?
+  createdById String
+  createdAt   DateTime     @default(now())
+
+  @@unique([projectId, version])
+}
