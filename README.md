@@ -7,7 +7,7 @@ Plataforma interna modular da Digitusul. Núcleo (login, perfis, permissões, m�
 Tudo no plano gratuito. Cada `git push` na branch `main` publica uma nova versão.
 
 1. **Vercel:** entre em [vercel.com](https://vercel.com) com a conta do GitHub → **Add New… › Project** → importe `digubyte/DigitusulHub` → **Deploy**. O primeiro deploy vai falhar por falta do banco; é esperado.
-2. **Banco (Neon):** no projeto da Vercel, aba **Storage › Create Database › Neon (Postgres)** → crie e conecte ao projeto. Isso preenche `DATABASE_URL` e `DATABASE_URL_UNPOOLED`.
+2. **Banco:** no projeto da Vercel, aba **Storage** → crie um **Prisma Postgres** ou **Neon** (ambos gratuitos) e conecte ao projeto. Isso preenche `DATABASE_URL`.
 3. **Imagens (Blob):** na mesma aba **Storage › Create › Blob** → conecte ao projeto. Isso preenche `BLOB_READ_WRITE_TOKEN`.
 4. **Variáveis:** em **Settings › Environment Variables**, adicione `SEED_ADMIN_EMAIL` com o e-mail do administrador (opcional: `ANTHROPIC_API_KEY` para IA e `REMOVE_BG_API_KEY` para remoção de fundo).
 5. **Deployments › ⋯ › Redeploy.** O build (`npm run vercel-build`) aplica as migrações do banco e publica.
