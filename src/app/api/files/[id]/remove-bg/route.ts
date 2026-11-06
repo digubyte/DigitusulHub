@@ -25,3 +25,6 @@ export const POST = apiRoute<{ id: string }>({ permission: "flyers.access" }, as
   await logActivity(user.id, "file.remove_bg", { type: "file", id: out.id }, { from: f.id });
   return jsonOk({ file: publicFileInfo(out) });
 });
+
+/** Chamadas a serviços externos podem demorar (limite da função na Vercel). */
+export const maxDuration = 60;

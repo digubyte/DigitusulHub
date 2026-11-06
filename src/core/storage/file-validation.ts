@@ -2,7 +2,8 @@
  * Validação de uploads pelo conteúdo real (assinatura binária), não pela
  * extensão nem pelo Content-Type informado pelo navegador.
  */
-export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024; // 10 MB
+// 4 MB: a Vercel limita o corpo de cada requisição a 4,5 MB. Fotos maiores são reduzidas no navegador antes do envio.
+export const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
 
 export type AllowedMime = "image/png" | "image/jpeg" | "image/webp" | "image/svg+xml";
 

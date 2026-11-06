@@ -2,20 +2,36 @@
 
 Plataforma interna modular da Digitusul. Núcleo (login, perfis, permissões, módulos, Brand Kit, auditoria) + primeiro módulo funcional: **Estúdio de Flyers**.
 
-## Como rodar (desenvolvimento)
+## Publicar grátis (Vercel + Neon + Vercel Blob)
 
-Requisitos: Node.js 22+ (instalado em `C:\Program Files\nodejs`).
+Tudo no plano gratuito. Cada `git push` na branch `main` publica uma nova versão.
+
+1. **Vercel:** entre em [vercel.com](https://vercel.com) com a conta do GitHub → **Add New… › Project** → importe `digubyte/DigitusulHub` → **Deploy**. O primeiro deploy vai falhar por falta do banco; é esperado.
+2. **Banco (Neon):** no projeto da Vercel, aba **Storage › Create Database › Neon (Postgres)** → crie e conecte ao projeto. Isso preenche `DATABASE_URL` e `DATABASE_URL_UNPOOLED`.
+3. **Imagens (Blob):** na mesma aba **Storage › Create › Blob** → conecte ao projeto. Isso preenche `BLOB_READ_WRITE_TOKEN`.
+4. **Variáveis:** em **Settings › Environment Variables**, adicione:
+   - `SEED_ADMIN_EMAIL` — e-mail do primeiro administrador
+   - `SEED_ADMIN_PASSWORD` — senha forte (mín. 10 caracteres, letras e números)
+   - opcional: `ANTHROPIC_API_KEY` (IA) e `REMOVE_BG_API_KEY` (remoção de fundo)
+5. **Deployments › ⋯ › Redeploy.** O build (`npm run vercel-build`) aplica as migrações do banco, cria o administrador (só se ainda não existir) e publica.
+6. Acesse a URL `https://<projeto>.vercel.app`, entre com o administrador e troque a senha em **Configurações**.
+
+Limites do plano gratuito que importam aqui: uploads de até 4 MB por imagem (fotos maiores são reduzidas automaticamente no navegador, mantendo a proporção) e banco/armazenamento com cota gratuita do Neon e da Vercel.
+
+## Rodar localmente
+
+Requisitos: Node.js 20+.
 
 ```bash
 npm install
-cp .env.example .env        # defina SEED_ADMIN_PASSWORD (mín. 10 caracteres, letras e números)
-npm run setup               # cria o banco e o primeiro administrador
+cp .env.example .env        # cole as URLs do Neon (pode usar um branch "dev" do banco) e defina SEED_ADMIN_PASSWORD
+npm run setup               # aplica as migrações e cria o primeiro administrador
 npm run dev                 # http://localhost:3000
 ```
 
-No Windows também dá para usar `start-dev.cmd`. As credenciais do primeiro administrador ficam em `.env` (`SEED_ADMIN_EMAIL` / `SEED_ADMIN_PASSWORD`) — troque a senha após o primeiro acesso em **Configurações**.
+No Windows também dá para usar `start-dev.cmd`. Sem `BLOB_READ_WRITE_TOKEN`, as imagens ficam na pasta `storage/` local.
 
-Outros comandos: `npm test` (testes), `npm run typecheck`, `npm run build && npm start` (produção).
+Outros comandos: `npm test` (testes), `npm run typecheck`, `npm run build && npm start`.
 
 ## Stack e por quê
 
@@ -23,7 +39,7 @@ Outros comandos: `npm test` (testes), `npm run typecheck`, `npm run build && npm
 |---|---|---|
 | App | Next.js 15 (App Router) + React 19 + TypeScript | Front e back no mesmo projeto, rotas de servidor tipadas, SSR para checar sessão antes de renderizar |
 | UI | Tailwind CSS + componentes próprios + lucide-react | Design system leve, tokens da marca em um só lugar |
-| Banco | Prisma ORM — SQLite em dev, PostgreSQL em produção | Zero configuração local; mesmo schema nos dois (JSON salvo como texto) |
+| Banco | Prisma ORM + PostgreSQL (Neon) | Gratuito, gerenciado, com migrações versionadas em `prisma/migrations` |
 | Autenticação | Sessões próprias no banco (cookie httpOnly) + bcrypt | Controle total de perfis/permissões e revogação imediata de sessões |
 | Editor | Konva (react-konva) | Canvas performático com seleção/transformação; textos e preços continuam objetos editáveis |
 | Validação | Zod no servidor | Todo payload validado antes de tocar o banco |
@@ -65,7 +81,7 @@ Os módulos futuros (Gestão Comercial, CRM, Marketing, Relatórios) já estão 
 - Permissões verificadas **no servidor** em toda página e rota de API; consultas de flyers sempre filtradas pelo escopo do usuário (projetos alheios respondem 404).
 - Sessões no banco (12 h, renovação por uso), cookie `httpOnly`/`SameSite=Lax`, verificação de origem (CSRF) em requisições que alteram dados.
 - Bloqueio de 15 min após 5 senhas erradas; limitador por IP; resposta idêntica para e-mail inexistente.
-- Uploads validados pelo **conteúdo** (assinatura binária), limite de 10 MB e 12.000 px; SVG só no Brand Kit e sem scripts/referências externas; arquivos fora de `/public`, servidos apenas com sessão e cabeçalhos que impedem execução.
+- Uploads validados pelo **conteúdo** (assinatura binária), limite de 4 MB e 12.000 px; SVG só no Brand Kit e sem scripts/referências externas; arquivos fora de `/public` (disco local ou Vercel Blob com endereço aleatório guardado só no banco), servidos apenas com sessão e cabeçalhos que impedem execução.
 - Chaves de API apenas em `.env` no servidor; a tela de Integrações mostra só se estão configuradas.
 - Sempre resta ao menos um administrador ativo; administradores não podem rebaixar a si mesmos.
 
@@ -89,11 +105,10 @@ O projeto anterior foi reescrito e integrado ao Estúdio:
 - `REMOVE_BG_API_KEY`: remoção de fundo (a original é preservada).
 - E-mail: não implementado — links de redefinição são gerados pelo administrador em **Usuários**. Ponto de extensão: `sendResetEmail` em `src/core/auth/auth-service.ts`.
 
-## Produção — checklist
-1. `provider = "postgresql"` em `prisma/schema.prisma` e `DATABASE_URL` do Postgres; `npx prisma migrate deploy` (gere as migrações com `prisma migrate dev`).
-2. Driver de armazenamento S3/R2 em `src/core/storage/storage.ts` (interface `StorageDriver`).
-3. `APP_URL` com HTTPS; limitador de tentativas em Redis se houver mais de uma instância.
-4. Provedor de e-mail para redefinição de senha.
+## Próximos passos de infraestrutura
+- Provedor de e-mail para redefinição de senha (`sendResetEmail` em `src/core/auth/auth-service.ts`).
+- Limitador de tentativas de login em Redis (hoje é por instância).
+- Domínio próprio na Vercel (Settings › Domains).
 
 ## Testes
 `npm test` cobre: regra de preço, parse de valores, motor de layout (6 categorias × 8 formatos × 1/2/4/6 produtos, todos validados), preservação de código/nome/preço, logotipo, cobertura de preço, omissão de produto, área útil, dimensões, perfis e permissões, validação de uploads e SVG, e a proteção contra a IA inserir valores comerciais.

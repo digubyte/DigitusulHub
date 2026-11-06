@@ -7,23 +7,48 @@ import { Spinner } from "@/components/ui/primitives";
 export interface UploadedFile { id: string; name: string; mimeType: string; width: number | null; height: number | null; size: number; url: string }
 
 const ACCEPT_IMAGES = "image/png,image/jpeg,image/webp";
-const MAX = 10 * 1024 * 1024;
+/** Mesmo limite do servidor (a hospedagem aceita até 4,5 MB por requisição). */
+const MAX = 4 * 1024 * 1024;
+const RASTER = ["image/png", "image/jpeg", "image/webp"];
 
-/** Envia arquivos para o armazenamento privado. Validação final acontece no servidor. */
-export async function uploadFiles(files: File[], purpose: string): Promise<UploadedFile[]> {
-  const tooBig = files.find((f) => f.size > MAX);
-  if (tooBig) throw new Error(`"${tooBig.name}" é maior que 10 MB.`);
-  const form = new FormData();
-  form.append("purpose", purpose);
-  files.forEach((f) => form.append("file", f));
-  const res = await fetch("/api/files", { method: "POST", body: form }).catch(() => null);
-  if (!res) throw new Error("Sem conexão com o servidor.");
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || "Falha no envio.");
-  return data.files;
+/**
+ * Fotos acima do limite são reduzidas no navegador mantendo a proporção
+ * (sem recorte nem distorção) e recodificadas em WEBP, que preserva transparência.
+ */
+async function shrinkIfNeeded(f: File): Promise<File> {
+  if (f.size <= MAX || !RASTER.includes(f.type)) return f;
+  const bmp = await createImageBitmap(f);
+  for (const maxSide of [4000, 3000, 2400, 1800]) {
+    const s = Math.min(1, maxSide / Math.max(bmp.width, bmp.height));
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(bmp.width * s);
+    canvas.height = Math.round(bmp.height * s);
+    canvas.getContext("2d")!.drawImage(bmp, 0, 0, canvas.width, canvas.height);
+    const blob = await new Promise<Blob | null>((r) => canvas.toBlob(r, "image/webp", 0.92));
+    if (blob && blob.size <= MAX) return new File([blob], f.name.replace(/\.\w+$/, "") + ".webp", { type: "image/webp" });
+  }
+  throw new Error(`"${f.name}" é muito grande. Reduza a imagem para menos de 4 MB.`);
 }
 
-export function Dropzone({ onFiles, multiple = true, accept = ACCEPT_IMAGES, label = "Arraste imagens aqui ou clique para escolher", hint = "PNG, JPG ou WEBP · até 10 MB cada", compact, busy }: {
+/** Envia arquivos (um por requisição) para o armazenamento privado. Validação final acontece no servidor. */
+export async function uploadFiles(files: File[], purpose: string): Promise<UploadedFile[]> {
+  const out: UploadedFile[] = [];
+  for (const original of files) {
+    const f = await shrinkIfNeeded(original);
+    if (f.size > MAX) throw new Error(`"${f.name}" é maior que 4 MB.`);
+    const form = new FormData();
+    form.append("purpose", purpose);
+    form.append("file", f);
+    const res = await fetch("/api/files", { method: "POST", body: form }).catch(() => null);
+    if (!res) throw new Error("Sem conexão com o servidor.");
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || (res.status === 413 ? "Arquivo grande demais." : "Falha no envio."));
+    out.push(...data.files);
+  }
+  return out;
+}
+
+export function Dropzone({ onFiles, multiple = true, accept = ACCEPT_IMAGES, label = "Arraste imagens aqui ou clique para escolher", hint = "PNG, JPG ou WEBP · fotos grandes são reduzidas automaticamente", compact, busy }: {
   onFiles: (files: File[]) => void; multiple?: boolean; accept?: string; label?: string; hint?: string; compact?: boolean; busy?: boolean;
 }) {
   const input = useRef<HTMLInputElement>(null);

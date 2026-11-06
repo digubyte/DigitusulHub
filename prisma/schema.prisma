@@ -1,17 +1,17 @@
 // Digitusul Hub — modelo de dados central.
 //
-// Desenvolvimento: SQLite (zero configuração).
-// Produção: troque `provider` para "postgresql" e DATABASE_URL para a instância Postgres.
-// Campos JSON são armazenados como String (serializados em src/core/json.ts) para
-// manter o schema idêntico nos dois bancos.
+// Banco: PostgreSQL (Neon gratuito em produção e desenvolvimento).
+// DATABASE_URL = conexão com pooling; DATABASE_URL_UNPOOLED = conexão direta (migrações).
+// Campos JSON são armazenados como texto (serializados em src/core/util.ts).
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_UNPOOLED")
 }
 
 // ───────────────────────── Identidade e acesso ─────────────────────────

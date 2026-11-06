@@ -43,3 +43,6 @@ export const POST = apiRoute({ permission: "flyers.ai.use" }, async ({ req, user
     note: r.observacao,
   });
 });
+
+/** Chamadas a serviços externos podem demorar (limite da função na Vercel). */
+export const maxDuration = 60;

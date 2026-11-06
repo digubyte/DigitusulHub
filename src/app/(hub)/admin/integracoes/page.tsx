@@ -15,7 +15,7 @@ export default async function Page() {
     { name: "Remoção de fundo (remove.bg)", env: "REMOVE_BG_API_KEY", ok: !!process.env.REMOVE_BG_API_KEY, detail: "Remove o fundo de fotos de produtos, mantendo a original." },
     { name: "Catálogo do site Digitusul", env: "CATALOG_*", ok: true, detail: `Busca pública do e-commerce (${SITE_URL}). Usado para importar produtos com valor no cartão, imagem e código.` },
     { name: "Envio de e-mails", env: "—", ok: false, detail: "Não configurado. Links de redefinição de senha são gerados pelo administrador em Usuários." },
-    { name: "Armazenamento de arquivos", env: "STORAGE_DIR", ok: true, detail: "Disco local privado (fora da pasta pública). Para produção, implemente um driver S3/R2 em src/core/storage/storage.ts." },
+    { name: "Armazenamento de arquivos", env: "BLOB_READ_WRITE_TOKEN", ok: true, detail: process.env.BLOB_READ_WRITE_TOKEN ? "Vercel Blob (arquivos entregues somente pela plataforma, com sessão)." : "Disco local privado (desenvolvimento). Em produção na Vercel, conecte um Blob Store ao projeto." },
   ];
   return <IntegrationsAdmin items={items} pricing={await getPricingRule()} />;
 }

@@ -29,3 +29,6 @@ export const POST = apiRoute({ permission: "flyers.ai.use" }, async ({ req, user
   await logActivity(user.id, "ai.compose", null, { source: suggestion.source });
   return jsonOk({ suggestion, fallbackReason });
 });
+
+/** Chamadas a serviços externos podem demorar (limite da função na Vercel). */
+export const maxDuration = 60;

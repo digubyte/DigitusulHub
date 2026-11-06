@@ -54,7 +54,7 @@ export async function createResetLink(userId: string) {
   await db.passwordResetToken.deleteMany({ where: { userId, usedAt: null } });
   const token = newToken();
   await db.passwordResetToken.create({ data: { userId, tokenHash: hashToken(token), expiresAt: new Date(Date.now() + RESET_TTL_MS) } });
-  const base = process.env.APP_URL || "http://localhost:3000";
+  const base = process.env.APP_URL || (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:3000");
   return `${base}/redefinir-senha?token=${encodeURIComponent(token)}`;
 }
 

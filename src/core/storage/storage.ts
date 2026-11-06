@@ -7,13 +7,15 @@ import { HttpError } from "@/core/http";
 import { MAX_UPLOAD_BYTES, isSafeSvg, readImageSize, sniffImageMime } from "./file-validation";
 
 /**
- * Armazenamento privado de arquivos.
- * Os arquivos ficam fora de /public e só são servidos por /api/files/[id],
- * que verifica a sessão. Para produção, implemente StorageDriver com S3/R2/GCS
- * (URLs assinadas) e troque `driver` abaixo.
+ * Armazenamento de arquivos.
+ * Os arquivos só chegam ao navegador por /api/files/[id], que verifica a sessão.
+ *  - Local (desenvolvimento): disco, fora de /public.
+ *  - Vercel Blob (produção, quando BLOB_READ_WRITE_TOKEN existe): o endereço do
+ *    blob tem sufixo aleatório e fica guardado apenas no banco — nunca é enviado ao navegador.
  */
 export interface StorageDriver {
-  put(key: string, data: Uint8Array): Promise<void>;
+  /** Grava e devolve a chave definitiva (caminho local ou URL do blob). */
+  put(key: string, data: Uint8Array, contentType: string): Promise<string>;
   get(key: string): Promise<Uint8Array>;
   remove(key: string): Promise<void>;
 }
@@ -29,6 +31,7 @@ class LocalDriver implements StorageDriver {
     const p = this.resolve(key);
     await mkdir(path.dirname(p), { recursive: true });
     await writeFile(p, data);
+    return key;
   }
   async get(key: string) {
     return new Uint8Array(await readFile(this.resolve(key)));
@@ -38,7 +41,26 @@ class LocalDriver implements StorageDriver {
   }
 }
 
-export const driver: StorageDriver = new LocalDriver(path.resolve(process.cwd(), process.env.STORAGE_DIR || "storage"));
+class VercelBlobDriver implements StorageDriver {
+  async put(key: string, data: Uint8Array, contentType: string) {
+    const { put } = await import("@vercel/blob");
+    const r = await put(`files/${key}`, Buffer.from(data), { access: "public", addRandomSuffix: true, contentType });
+    return r.url;
+  }
+  async get(key: string) {
+    const res = await fetch(key, { cache: "no-store" });
+    if (!res.ok) throw new Error(`Blob indisponível (${res.status})`);
+    return new Uint8Array(await res.arrayBuffer());
+  }
+  async remove(key: string) {
+    const { del } = await import("@vercel/blob");
+    await del(key).catch(() => {});
+  }
+}
+
+export const driver: StorageDriver = process.env.BLOB_READ_WRITE_TOKEN
+  ? new VercelBlobDriver()
+  : new LocalDriver(path.resolve(process.cwd(), process.env.STORAGE_DIR || "storage"));
 
 export type FilePurpose = "product" | "brand" | "background" | "thumbnail" | "element" | "misc";
 const EXT: Record<string, string> = { "image/png": "png", "image/jpeg": "jpg", "image/webp": "webp", "image/svg+xml": "svg" };
@@ -53,7 +75,7 @@ export async function storeImage(opts: {
 }) {
   const { data } = opts;
   if (data.byteLength === 0) throw new HttpError(400, "Arquivo vazio.");
-  if (data.byteLength > MAX_UPLOAD_BYTES) throw new HttpError(413, "Arquivo maior que 10 MB.");
+  if (data.byteLength > MAX_UPLOAD_BYTES) throw new HttpError(413, `Arquivo maior que ${MAX_UPLOAD_BYTES / 1024 / 1024} MB.`);
   const mime = sniffImageMime(data);
   if (!mime) throw new HttpError(415, "Formato não suportado. Envie PNG, JPG ou WEBP.");
   if (mime === "image/svg+xml") {
@@ -63,8 +85,7 @@ export async function storeImage(opts: {
   const size = readImageSize(data, mime);
   if (size && (size.width > 12000 || size.height > 12000)) throw new HttpError(413, "Imagem com dimensões acima de 12000 px.");
   const now = new Date();
-  const key = `${now.getUTCFullYear()}/${String(now.getUTCMonth() + 1).padStart(2, "0")}/${randomUUID()}.${EXT[mime]}`;
-  await driver.put(key, data);
+  const key = await driver.put(`${now.getUTCFullYear()}/${String(now.getUTCMonth() + 1).padStart(2, "0")}/${randomUUID()}.${EXT[mime]}`, data, mime);
   return db.storedFile.create({
     data: {
       ownerId: opts.ownerId,

@@ -85,3 +85,6 @@ export const POST = apiRoute({ permission: "flyers.create" }, async ({ req, user
   }
   return jsonOk({ products: out, notFound, imageErrors });
 });
+
+/** Chamadas a serviços externos podem demorar (limite da função na Vercel). */
+export const maxDuration = 60;

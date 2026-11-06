@@ -29,7 +29,7 @@ export async function listFlyers(user: CurrentUser, f: ListFilters = {}) {
   if (f.scope === "all" || !f.scope) and.push({ isTemplate: false });
   if (f.category) and.push({ category: f.category });
   if (f.campaign) and.push({ campaign: f.campaign });
-  if (f.q?.trim()) and.push({ OR: [{ name: { contains: f.q.trim() } }, { campaign: { contains: f.q.trim() } }, { products: { contains: f.q.trim() } }] });
+  if (f.q?.trim()) { const q = f.q.trim(); and.push({ OR: [{ name: { contains: q, mode: "insensitive" } }, { campaign: { contains: q, mode: "insensitive" } }, { products: { contains: q, mode: "insensitive" } }] }); }
   const rows = await db.flyerProject.findMany({
     where: { AND: and },
     orderBy: { updatedAt: "desc" },
