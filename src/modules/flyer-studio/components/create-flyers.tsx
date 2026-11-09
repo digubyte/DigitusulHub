@@ -202,7 +202,7 @@ export function CreateFlyers({ ctx }: { ctx: StudioContext }) {
       products: g,
       prompt: buildChatGptPrompt({
         category: layout.category, formatKey, width: fmt.width, height: fmt.height, headline: layout.headline, subheadline: layout.subheadline, footerText: layout.footerText,
-        segment: segment.trim() || undefined, products: g, colors: brand.colors, fonts: brand.fonts, hasLogo: true, logoUrl: ctx.brandKit.logo ? undefined : SITE_LOGO.siteUrl, hasMascot, emphasis: layout.emphasis,
+        segment: segment.trim() || undefined, products: g, colors: brand.colors, fonts: brand.fonts, hasLogo: true, logoUrl: SITE_LOGO.siteUrl, hasMascot, emphasis: layout.emphasis,
         extraInstructions: extra, batch: groups.length > 1 ? { index: i, total: groups.length } : undefined,
       }),
     }));

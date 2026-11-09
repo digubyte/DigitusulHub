@@ -36,14 +36,14 @@ export interface PromptInput {
   batch?: { index: number; total: number };
 }
 
-/** Direção visual por tipo de flyer. */
+/** Clima de cada tipo de flyer (ponto de partida para a criatividade, não uma regra rígida). */
 const CATEGORY_STYLE: Record<CategoryKey, string> = {
-  novidade: "visual moderno e limpo, fundo claro com formas geométricas suaves, destaque para o produto como lançamento, selo \"NOVIDADE\"",
-  promocional: "visual de oferta forte e organizado, fundo na cor principal, preços em grande destaque, energia de varejo sem poluição visual",
-  reposicao: "visual informativo e confiável, selo \"DE VOLTA AO ESTOQUE\", foco na disponibilidade do produto",
-  queima: "visual de urgência e oportunidade, faixas diagonais e selo \"QUEIMA DE ESTOQUE\", contraste alto, preços enormes",
-  blackfriday: "visual escuro e premium (fundo quase preto), detalhes na cor de destaque, tipografia condensada e impactante, selo \"BLACK FRIDAY\"",
-  institucional: "visual institucional sóbrio e elegante, muito espaço em branco, comunicação clara e direta",
+  novidade: "lançamento: moderno, tecnológico e convidativo, com selo \"NOVIDADE\"",
+  promocional: "oferta: energia de varejo, chamativo e vibrante, com os preços saltando aos olhos",
+  reposicao: "reposição: confiável e positivo, com selo \"DE VOLTA AO ESTOQUE\"",
+  queima: "queima de estoque: urgência e oportunidade, contraste alto, selo \"QUEIMA DE ESTOQUE\" e preços enormes",
+  blackfriday: "Black Friday: escuro e premium, com brilhos e detalhes na cor de destaque, selo \"BLACK FRIDAY\"",
+  institucional: "institucional: elegante, sóbrio e claro",
 };
 
 /** Proporção legível + orientação para o ChatGPT (que gera 1:1, 2:3 ou 3:2). */
@@ -59,7 +59,7 @@ export function aspectDescription(width: number, height: number) {
 }
 
 const EXT: Record<string, string> = { "image/png": "png", "image/jpeg": "jpg", "image/webp": "webp", "image/svg+xml": "svg" };
-const slug = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40) || "produto";
+const slug = (s: string) => s.normalize("NFD").replace(/\p{M}/gu, "").replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40) || "produto";
 
 /** Nome do arquivo de foto do produto — o mesmo nome é citado no prompt. */
 /** Nome (sem extensão) usado no prompt e no arquivo anexado. */
@@ -107,18 +107,21 @@ export function buildChatGptPrompt(input: PromptInput): string {
   lines.push(`- ${fmt?.label ?? "Personalizado"}: ${input.width} × ${input.height} px, proporção ${a.ratio} (${a.orientation}). Gere a imagem na proporção ${a.closest}, a mais próxima disponível.`);
   lines.push("- Mantenha textos, preços e logo afastados das bordas (margem de segurança de 6%), pois a arte pode ser recortada para o tamanho exato.");
   lines.push("");
-  lines.push("ESTILO");
-  lines.push(`- ${CATEGORY_STYLE[input.category]}.`);
-  lines.push(`- Cores da marca: principal ${input.colors.primary}, destaque ${input.colors.accent}, escuro ${input.colors.dark}, claro ${input.colors.light}. Use apenas essa paleta.`);
-  lines.push(`- Tipografia sem serifa e moderna (referência: ${input.fonts.heading} para títulos e ${input.fonts.price} para preços), sempre legível.`);
-  lines.push(input.emphasis === "price" ? "- O maior destaque visual é o preço de cada produto." : "- O maior destaque visual é a foto de cada produto; o preço vem logo em seguida.");
+  lines.push("DIREÇÃO DE ARTE (você tem liberdade criativa)");
+  lines.push("- Pense como um diretor de arte: crie um design rico e marcante a partir dos próprios produtos — cenário, fundo, iluminação, texturas e elementos gráficos inspirados no universo deles (ex.: limpeza → frescor, água e brilho; gamer → luzes neon e setup; escritório → mesa organizada e produtividade).");
+  lines.push("- Evite fundo liso ou chapado: use profundidade, luz, sombras, camadas, formas e movimento, sem deixar a arte poluída.");
+  lines.push(`- Clima do flyer — ${CATEGORY_STYLE[input.category]}.`);
+  lines.push(`- Paleta a partir das cores da marca: principal ${input.colors.primary}, destaque ${input.colors.accent}, escuro ${input.colors.dark}, claro ${input.colors.light}. Pode usar variações, degradês e tons que combinem com os produtos.`);
+  lines.push(`- Tipografia moderna, com hierarquia forte e criativa (referência: ${input.fonts.heading} nos títulos e ${input.fonts.price} nos preços), sempre legível.`);
+  lines.push(input.emphasis === "price" ? "- Os preços são o principal destaque, logo depois vêm as fotos." : "- As fotos dos produtos são o principal destaque, logo depois vêm os preços.");
   lines.push(input.products.length <= 1
-    ? "- Composição de destaque único: o produto no centro, foto grande, nome legível e preço em tamanho grande."
-    : `- Composição em grade organizada com os ${input.products.length} produtos, todos com o mesmo peso visual; cada um com foto, nome, código e preço próximos.`);
+    ? "- Destaque único: o produto é o herói da arte, com foto grande e um cenário pensado para ele; nome legível e preço em tamanho grande."
+    : `- Organize os ${input.products.length} produtos com clareza (grade, vitrine ou mosaico criativo), cada um com foto, nome, código e preço próximos e com o mesmo peso visual.`);
   if (input.theme && input.theme !== "Variados" && input.products.length > 1) lines.push(`- Tema do flyer: ${input.theme}.`);
   if (input.batch && input.batch.total > 1) {
-    lines.push(`- Este é o flyer ${input.batch.index + 1} de ${input.batch.total} de uma mesma série: mantenha a identidade visual da série, variando a composição.`);
+    lines.push(`- Este é o flyer ${input.batch.index + 1} de ${input.batch.total} de uma série: mantenha a identidade da série, mas crie uma composição própria para estes produtos.`);
   }
+  lines.push("- Limite da criatividade: a liberdade vale para o design. Os produtos (fotos), os dados comerciais e o logo não mudam.");
   lines.push("");
   lines.push("TEXTOS (escreva exatamente assim)");
   lines.push(`- Título: "${input.headline.trim()}"`);
@@ -145,7 +148,7 @@ export function buildChatGptPrompt(input: PromptInput): string {
     if (p.imageFileId) lines.push(`${n++}. "${productAttachmentBase(p, i)}" — foto de ${p.name.trim()}${p.imageUrl ? ` (${p.imageUrl})` : ""}`);
   });
   if (n === 1) lines.push("- Nenhuma imagem anexada.");
-  if (withImages.length) lines.push("- Use as fotos dos produtos como estão: não redesenhe, não troque o modelo, a cor ou a marca do produto. Pode remover o fundo e adicionar sombra suave.");
+  if (withImages.length) lines.push("- Use as fotos reais dos produtos: não redesenhe nem troque modelo, cor ou marca. Pode recortar o fundo, girar levemente, dar escala, reflexo, sombra e integrar o produto ao cenário.");
   else lines.push("- Não há fotos dos produtos: não desenhe produtos inventados; use composição tipográfica e elementos gráficos.");
   if (input.hasLogo) lines.push("- Aplique o logo exatamente como na imagem anexada: sem alterar cores, proporção ou letras, em área limpa e bem visível.");
   else lines.push("- Escreva o nome \"Digitusul\" de forma discreta; não invente um logotipo.");
@@ -162,6 +165,7 @@ export function buildChatGptPrompt(input: PromptInput): string {
   lines.push("- Não invente, arredonde ou altere preços, códigos ou nomes.");
   lines.push("- Não adicione preço \"de/por\", parcelamento, porcentagem de desconto, frete, prazos, telefones, endereços ou qualquer texto que não esteja listado acima.");
   lines.push("- Todo texto em português do Brasil, sem erros de ortografia.");
+  lines.push("- Não invente produtos, brindes ou selos de garantia que não foram pedidos.");
   lines.push("- Gere uma única imagem, sem moldura de mockup.");
   return lines.join("\n");
 }

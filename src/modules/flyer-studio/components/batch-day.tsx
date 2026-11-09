@@ -114,7 +114,7 @@ export function BatchDay({ ctx }: { ctx: StudioContext }) {
       prompt: buildChatGptPrompt({
         category: layout.category, formatKey, width: fmt.width, height: fmt.height, headline: layout.headline, subheadline: layout.subheadline, footerText: layout.footerText,
         segment: segment || undefined, products: g.products, colors: brand.colors, fonts: brand.fonts, emphasis: layout.emphasis,
-        hasLogo: true, logoUrl: ctx.brandKit.logo ? undefined : SITE_LOGO.siteUrl, hasMascot, theme: g.theme,
+        hasLogo: true, logoUrl: SITE_LOGO.siteUrl, hasMascot, theme: g.theme,
         extraInstructions: extra, batch: valid.length > 1 ? { index: i, total: valid.length } : undefined,
       }),
     }));
