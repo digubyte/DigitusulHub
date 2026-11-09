@@ -38,7 +38,7 @@ export function BatchDay({ ctx }: { ctx: StudioContext }) {
   const [multiSize, setMultiSize] = useState(6);
   const [singleCount, setSingleCount] = useState(3);
   const [formatKey, setFormatKey] = useState("ig-stories");
-  const [layout, setLayout] = useState<LayoutOptions>(defaultLayout());
+  const [layout, setLayout] = useState<LayoutOptions>({ ...defaultLayout(), headline: "" });
   const [extra, setExtra] = useState("");
   const [groups, setGroups] = useState<Group[] | null>(null);
   const [spare, setSpare] = useState<Spare[]>([]);
@@ -63,7 +63,7 @@ export function BatchDay({ ctx }: { ctx: StudioContext }) {
 
   function setStyle(c: CategoryKey) {
     const prev = CATEGORIES.find((x) => x.key === layout.category)?.defaultHeadline;
-    setLayout({ ...layout, category: c, headline: !layout.headline || layout.headline === prev ? CATEGORIES.find((x) => x.key === c)!.defaultHeadline : layout.headline });
+    setLayout({ ...layout, category: c, headline: layout.headline === prev ? "" : layout.headline });
   }
 
   const build = () => run("plan", async () => {
@@ -194,7 +194,7 @@ export function BatchDay({ ctx }: { ctx: StudioContext }) {
           <Chips label="Formato" value={formatKey} onChange={setFormatKey} options={[...FORMATS.filter((f) => MAIN_FORMATS.includes(f.key)), ...FORMATS.filter((f) => !MAIN_FORMATS.includes(f.key) && !f.customizable)].map((f) => ({ value: f.key, label: f.label.replace("Instagram ", "").replace(/^./, (c) => c.toUpperCase()), hint: f.hint }))} />
           <Chips label="Estilo" value={layout.category} onChange={(v) => setStyle(v as CategoryKey)} options={CATEGORIES.map((c) => ({ value: c.key, label: c.label }))} />
           <div className="grid gap-4 sm:grid-cols-2">
-            <label><span className="label">Título dos flyers</span><input className="input" maxLength={80} value={layout.headline} onChange={(e) => setLayout({ ...layout, headline: e.target.value })} /></label>
+            <label><span className="label">Título dos flyers <span className="font-normal text-zinc-400">(opcional)</span></span><input className="input" maxLength={80} placeholder="Sem título — a arte destaca os produtos" value={layout.headline} onChange={(e) => setLayout({ ...layout, headline: e.target.value })} /></label>
             <label><span className="label">Instruções extras (opcional)</span><input className="input" maxLength={1500} placeholder="Ex.: clima de setup gamer, luzes neon" value={extra} onChange={(e) => setExtra(e.target.value)} /></label>
           </div>
         </div>

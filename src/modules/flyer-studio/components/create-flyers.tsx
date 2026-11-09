@@ -41,7 +41,7 @@ export function CreateFlyers({ ctx }: { ctx: StudioContext }) {
   // Passo 3
   const [flyers, setFlyers] = useState(1);
   const [formatKey, setFormatKey] = useState("ig-stories");
-  const [layout, setLayout] = useState<LayoutOptions>(defaultLayout());
+  const [layout, setLayout] = useState<LayoutOptions>({ ...defaultLayout(), headline: "" });
   const [segment, setSegment] = useState("");
   const [extra, setExtra] = useState("");
   const [result, setResult] = useState<{ flyers: ChatGptFlyer[]; list: Product[] } | null>(null);
@@ -189,7 +189,7 @@ export function CreateFlyers({ ctx }: { ctx: StudioContext }) {
 
   function setStyle(c: CategoryKey) {
     const prev = CATEGORIES.find((x) => x.key === layout.category)?.defaultHeadline;
-    setLayout({ ...layout, category: c, headline: !layout.headline || layout.headline === prev ? CATEGORIES.find((x) => x.key === c)!.defaultHeadline : layout.headline });
+    setLayout({ ...layout, category: c, headline: layout.headline === prev ? "" : layout.headline });
   }
 
   const generate = () => run("generate", async () => {
@@ -329,7 +329,7 @@ export function CreateFlyers({ ctx }: { ctx: StudioContext }) {
             <Chips label="Formato" value={formatKey} onChange={setFormatKey} options={[...FORMATS.filter((f) => MAIN_FORMATS.includes(f.key)), ...FORMATS.filter((f) => !MAIN_FORMATS.includes(f.key) && !f.customizable)].map((f) => ({ value: f.key, label: f.label.replace("Instagram ", "").replace(/^./, (c) => c.toUpperCase()), hint: f.hint }))} />
             <Chips label="Estilo" value={layout.category} onChange={(v) => setStyle(v as CategoryKey)} options={CATEGORIES.map((c) => ({ value: c.key, label: c.label }))} />
             <div className="grid gap-4 sm:grid-cols-2">
-              <label><span className="label">Título do flyer</span><input className="input" maxLength={80} value={layout.headline} onChange={(e) => setLayout({ ...layout, headline: e.target.value })} /></label>
+              <label><span className="label">Título do flyer <span className="font-normal text-zinc-400">(opcional)</span></span><input className="input" maxLength={80} placeholder="Sem título — a arte destaca os produtos" value={layout.headline} onChange={(e) => setLayout({ ...layout, headline: e.target.value })} /></label>
               <label><span className="label">Segmento (opcional)</span><input className="input" maxLength={60} placeholder="Gamer, Limpeza, Escritório…" value={segment} onChange={(e) => setSegment(e.target.value)} /></label>
             </div>
             <details className="group rounded-xl border border-zinc-200 px-4 py-3">
@@ -362,7 +362,7 @@ export function CreateFlyers({ ctx }: { ctx: StudioContext }) {
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
-              <button className="btn-accent h-11 px-5 text-[15px]" onClick={generate} disabled={!!busy || blockers.length > 0 || tooMany || !layout.headline.trim()}>
+              <button className="btn-accent h-11 px-5 text-[15px]" onClick={generate} disabled={!!busy || blockers.length > 0 || tooMany}>
                 {busy === "generate" ? <Spinner /> : <Wand2 className="h-4 w-4" />}Aprovar e gerar {groups.length > 1 ? `${groups.length} prompts` : "prompt"}
               </button>
               {blockers.length > 0 && <span className="text-xs text-zinc-500">Corrija os produtos do passo 2 para continuar.</span>}

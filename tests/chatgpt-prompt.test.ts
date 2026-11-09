@@ -92,3 +92,14 @@ describe("imagens de referência", () => {
     expect(p).toContain("Tema do flyer: Mouse.");
   });
 });
+
+describe("título opcional", () => {
+  it("sem título, o prompt não pede chamada escrita", () => {
+    const p = buildChatGptPrompt(base({ headline: "" }));
+    expect(p).not.toContain("Título:");
+    expect(p).toContain("Sem título nem chamada escrita");
+  });
+  it("com título, ele vai exatamente como digitado", () => {
+    expect(buildChatGptPrompt(base({ headline: "Semana Gamer" }))).toContain('- Título: "Semana Gamer"');
+  });
+});

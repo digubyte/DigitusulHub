@@ -16,7 +16,8 @@ export interface PromptInput {
   formatKey: string;
   width: number;
   height: number;
-  headline: string;
+  /** Título opcional: vazio = arte sem chamada escrita. */
+  headline?: string;
   subheadline?: string;
   footerText?: string;
   /** Segmento do lote (ex.: Gamer, Limpeza, Escritório). */
@@ -123,10 +124,18 @@ export function buildChatGptPrompt(input: PromptInput): string {
   }
   lines.push("- Limite da criatividade: a liberdade vale para o design. Os produtos (fotos), os dados comerciais e o logo não mudam.");
   lines.push("");
-  lines.push("TEXTOS (escreva exatamente assim)");
-  lines.push(`- Título: "${input.headline.trim()}"`);
-  if (input.subheadline?.trim()) lines.push(`- Subtítulo: "${input.subheadline.trim()}"`);
-  if (input.footerText?.trim()) lines.push(`- Rodapé: "${input.footerText.trim()}"`);
+  const texts = [
+    input.headline?.trim() && `- Título: "${input.headline.trim()}"`,
+    input.subheadline?.trim() && `- Subtítulo: "${input.subheadline.trim()}"`,
+    input.footerText?.trim() && `- Rodapé: "${input.footerText.trim()}"`,
+  ].filter(Boolean) as string[];
+  if (texts.length) {
+    lines.push("TEXTOS (escreva exatamente assim)");
+    lines.push(...texts);
+  } else {
+    lines.push("TEXTOS");
+    lines.push("- Sem título nem chamada escrita: os únicos textos da arte são os dados dos produtos abaixo (e o selo do clima do flyer, se houver).");
+  }
 
   if (input.products.length) {
     lines.push("");
