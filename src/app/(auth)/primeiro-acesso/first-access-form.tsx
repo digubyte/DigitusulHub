@@ -14,7 +14,7 @@ export function FirstAccessForm() {
     setError(null);
     try {
       await api("/api/auth/first-access", { method: "POST", json: { name: f.name, email: f.email, password: f.password } });
-      window.location.href = "/criar";
+      window.location.href = "/inicio";
     } catch (err) {
       setError((err as Error).message);
       setBusy(false);

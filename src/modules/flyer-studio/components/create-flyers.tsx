@@ -18,6 +18,7 @@ import { brandFromContext, newId, type StudioContext } from "./studio-types";
 import { copyText, downloadBlob } from "./chatgpt-assets";
 import type { ChatGptFlyer } from "./chatgpt-flyer";
 import { ChatGptBatchView } from "./chatgpt-views";
+import { FlyersHeader } from "./flyers-header";
 
 const MAX_TOTAL = 60;
 const PER_FLYER = 24;
@@ -226,10 +227,7 @@ export function CreateFlyers({ ctx }: { ctx: StudioContext }) {
 
   return (
     <div className="space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">Gerador de flyers</h1>
-        <p className="mt-1 text-sm text-zinc-500">Até {MAX_TOTAL} produtos · {describeRule(ctx.pricingRule).toLowerCase()} · nunca usa o valor PIX</p>
-      </header>
+      <div className="-mb-2"><FlyersHeader active="criar" subtitle={`Até ${MAX_TOTAL} produtos · ${describeRule(ctx.pricingRule).toLowerCase()} · nunca usa o valor PIX`} /></div>
 
       {/* 1. Adicionar */}
       <Section n={1} title="Adicionar produtos" subtitle="Do site, por código, fotos ou prints colados." aside={<span className="rounded-full bg-brand-50 px-3 py-1 text-sm font-semibold text-brand-700">{items.length}/{MAX_TOTAL}</span>}>

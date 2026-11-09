@@ -4,7 +4,8 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Copy, FileImage, Layers, LayoutTemplate, MoreVertical, Pencil, Plus, Search, Sparkles, Trash2 } from "lucide-react";
-import { api, ConfirmDialog, EmptyState, PageHeader, Spinner } from "@/components/ui/primitives";
+import { api, ConfirmDialog, EmptyState, Spinner } from "@/components/ui/primitives";
+import { FlyersHeader } from "./flyers-header";
 import { useToast } from "@/components/ui/toast";
 import { cn, relativeTime } from "@/core/util";
 import { categoryLabel } from "../domain/brand";
@@ -59,9 +60,7 @@ export function StudioHome({ ctx, campaigns }: { ctx: StudioContext; campaigns: 
 
   return (
     <div>
-      <PageHeader title="Histórico" subtitle="Todos os flyers gerados. Abra um para enviar ou baixar a arte." actions={ctx.perms.create && (
-        <Link href="/criar" className="btn-accent"><Plus className="h-4 w-4" />Criar flyers</Link>
-      )} />
+      <FlyersHeader active="historico" canCreate={ctx.perms.create} subtitle="Todos os flyers gerados. Abra um para enviar ou baixar a arte." />
 
       <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-center">
         <div className="flex gap-0.5 rounded-lg bg-zinc-100 p-0.5">

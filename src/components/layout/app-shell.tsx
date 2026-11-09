@@ -2,15 +2,18 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { History, KeyRound, LogOut, Settings2, Sparkles } from "lucide-react";
+import { Home, KeyRound, LogOut, Settings2 } from "lucide-react";
 import { HubLogo } from "./logo";
 import { ThemeToggle } from "./theme-toggle";
+import { ModuleIcon } from "./icons";
 import { cn } from "@/core/util";
 
 export interface ShellUser { name: string; email: string; roleName: string }
 
-/** Barra superior simples: Criar flyers · Histórico · Admin. */
-export function AppShell({ user, canCreate, canAdmin, children }: { user: ShellUser; canCreate: boolean; canAdmin: boolean; children: React.ReactNode }) {
+export interface ShellSolution { key: string; name: string; icon: string; route: string }
+
+/** Barra superior do Hub: Início · soluções ativas · Admin. */
+export function AppShell({ user, solutions, canAdmin, children }: { user: ShellUser; solutions: ShellSolution[]; canAdmin: boolean; children: React.ReactNode }) {
   const pathname = usePathname();
   const [menu, setMenu] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
@@ -32,10 +35,12 @@ export function AppShell({ user, canCreate, canAdmin, children }: { user: ShellU
     window.location.href = "/login";
   }
 
+  // Rotas que pertencem a cada solução (para marcar o item ativo).
+  const extraMatch: Record<string, string[]> = { flyers: ["/estudio"] };
   const links = [
-    ...(canCreate ? [{ href: "/criar", label: "Criar flyers", icon: Sparkles, match: ["/criar"] }] : []),
-    { href: "/estudio", label: "Histórico", icon: History, match: ["/estudio"] },
-    ...(canAdmin ? [{ href: "/admin", label: "Admin", icon: Settings2, match: ["/admin"] }] : []),
+    { href: "/inicio", label: "Início", icon: <Home className="h-4 w-4" />, match: ["/inicio"] },
+    ...solutions.map((s) => ({ href: s.route, label: s.name, icon: <ModuleIcon name={s.icon} className="h-4 w-4" />, match: [s.route, ...(extraMatch[s.key] ?? [])] })),
+    ...(canAdmin ? [{ href: "/admin", label: "Admin", icon: <Settings2 className="h-4 w-4" />, match: ["/admin"] }] : []),
   ];
   const initials = user.name.split(" ").map((p) => p[0]).slice(0, 2).join("").toUpperCase();
 
@@ -47,14 +52,14 @@ export function AppShell({ user, canCreate, canAdmin, children }: { user: ShellU
       <header className="sticky top-0 z-30 border-b border-zinc-200/70 bg-surface/80 backdrop-blur">
         <div aria-hidden className="h-[3px] bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500" />
         <div className="mx-auto flex h-14 max-w-5xl items-center gap-2 px-4">
-          <Link href="/criar" aria-label="Início" className="mr-3 shrink-0"><HubLogo className="h-5 sm:h-[22px]" /></Link>
+          <Link href="/inicio" aria-label="Início" className="mr-3 shrink-0"><HubLogo className="h-5 sm:h-[22px]" /></Link>
           <nav aria-label="Navegação principal" className="flex flex-1 items-center gap-1">
             {links.map((l) => {
               const active = l.match.some((m) => pathname === m || pathname.startsWith(m + "/"));
               return (
                 <Link key={l.href} href={l.href} aria-current={active ? "page" : undefined}
                   className={cn("flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[13.5px] font-medium transition-colors", active ? "bg-brand-600 text-white shadow-card" : "text-zinc-500 hover:bg-brand-50 hover:text-brand-700")}>
-                  <l.icon className="h-4 w-4" /><span className="hidden sm:inline">{l.label}</span>
+                  {l.icon}<span className="hidden sm:inline">{l.label}</span>
                 </Link>
               );
             })}

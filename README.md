@@ -97,7 +97,14 @@ O projeto anterior foi reescrito e integrado ao Estúdio:
 - **Lista** "Código - Nome - Valor" e **CSV** no modelo `Sku,Nome,Ativo,Ordem`.
 - Removido: gateway de IA do Lovable, dezenas de componentes não usados, código duplicado entre as funções de catálogo.
 
-## Como funciona (tela única em /criar)
+## Hub de soluções
+
+`/inicio` mostra as soluções da Digitusul: as ativas (hoje, o **Gerador de flyers**) e as “Em breve”
+(Gestão Comercial, CRM, Marketing, Relatórios). Em **Admin › Soluções** dá para renomear, reordenar,
+desativar ou esconder cada uma. Novas soluções entram em `src/core/modules/registry.ts`.
+Modo claro (tons da marca) e escuro: botão sol/lua no topo.
+
+## Gerador de flyers (tela única em /criar)
 
 Inspirado no Digitusul Prompt Generator (Lovable): uma tela só, em passos.
 
@@ -109,7 +116,7 @@ Inspirado no Digitusul Prompt Generator (Lovable): uma tela só, em passos.
    e conferir produto por produto. Também: lista de produtos (copiar/TXT) e planilha CSV (Sku,Nome,Ativo,Ordem).
 
 O servidor recusa prompts que não contenham o nome, o código e o preço exatos de cada produto.
-Menu: **Criar flyers · Histórico · Admin** (usuários, Brand Kit, preços e integrações, auditoria).
+Menu do topo: **Início · Gerador de flyers · Admin**; dentro do gerador, abas **Criar | Histórico**.
 O editor manual antigo continua acessível em `/estudio/novo?modo=manual`.
 
 ## Integrações opcionais (`.env`)

@@ -5,6 +5,7 @@ import { AdminTabs } from "./tabs";
 
 const TABS = [
   { href: "/admin/usuarios", label: "Usuários", perm: "users.manage" },
+  { href: "/admin/modulos", label: "Soluções", perm: "modules.manage" },
   { href: "/admin/brand-kit", label: "Brand Kit", perm: "brandkit.manage" },
   { href: "/admin/integracoes", label: "Preços e integrações", perm: "integrations.manage" },
   { href: "/admin/auditoria", label: "Auditoria", perm: "audit.view" },
@@ -16,7 +17,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   if (tabs.length === 0) redirect("/sem-permissao");
   return (
     <div>
-      <PageHeader title="Administração" subtitle="Usuários, logo e regras de preço." />
+      <PageHeader title="Administração" subtitle="Usuários, soluções do Hub, logo e regras de preço." />
       <AdminTabs tabs={tabs} />
       <div className="mt-6">{children}</div>
     </div>

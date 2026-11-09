@@ -41,6 +41,8 @@ async function main() {
       create: { key: m.key, name: m.name, status: m.defaultStatus, order: m.defaultOrder },
     });
   }
+  // Nome antigo do módulo de flyers (só troca se o administrador não tiver renomeado).
+  await db.module.updateMany({ where: { key: "flyers", name: "Estúdio de Flyers" }, data: { name: "Gerador de flyers" } });
 
   await db.brandKit.upsert({
     where: { id: "default" },

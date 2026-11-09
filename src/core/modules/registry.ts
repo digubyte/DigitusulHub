@@ -27,9 +27,14 @@ export interface ModuleManifest {
 }
 
 export const MODULES: ModuleManifest[] = [
-  { key: "flyers", name: "Flyers", description: "Gerador de flyers da Digitusul.", icon: "Palette", route: "/criar", section: "main", defaultStatus: "active", defaultOrder: 10, permission: "flyers.access", showOnDashboard: true },
+  { key: "inicio", name: "Início", description: "Todas as soluções da Digitusul", icon: "LayoutDashboard", route: "/inicio", section: "main", defaultStatus: "active", defaultOrder: 0, permission: "hub.access", showOnDashboard: false },
+  { key: "flyers", name: "Gerador de flyers", description: "Monte o lote do dia, gere os prompts e crie os flyers no ChatGPT com os preços certos.", icon: "Palette", route: "/criar", section: "main", defaultStatus: "active", defaultOrder: 10, permission: "flyers.access", showOnDashboard: true },
+  { key: "comercial", name: "Gestão Comercial", description: "Metas, vendas, produtividade e indicadores.", icon: "TrendingUp", route: "/modulos/comercial", section: "main", defaultStatus: "development", defaultOrder: 20, permission: "hub.access", showOnDashboard: true },
+  { key: "crm", name: "CRM e Reativação", description: "Carteira, contatos e reativação de clientes.", icon: "Users", route: "/modulos/crm", section: "main", defaultStatus: "development", defaultOrder: 30, permission: "hub.access", showOnDashboard: true },
+  { key: "marketing", name: "Marketing e Campanhas", description: "Campanhas, calendário e produção de conteúdo.", icon: "Megaphone", route: "/modulos/marketing", section: "main", defaultStatus: "development", defaultOrder: 40, permission: "hub.access", showOnDashboard: true },
+  { key: "relatorios", name: "Relatórios", description: "Análises e painéis gerenciais.", icon: "BarChart3", route: "/modulos/relatorios", section: "main", defaultStatus: "development", defaultOrder: 50, permission: "hub.access", showOnDashboard: true },
   { key: "configuracoes", name: "Configurações", description: "Perfil, senha e preferências.", icon: "Settings", route: "/configuracoes", section: "system", defaultStatus: "active", defaultOrder: 90, permission: "hub.access", showOnDashboard: false },
-  { key: "admin", name: "Administração", description: "Usuários, módulos, Brand Kit e integrações.", icon: "ShieldCheck", route: "/admin", section: "system", defaultStatus: "active", defaultOrder: 100, permission: "users.manage", showOnDashboard: false },
+  { key: "admin", name: "Administração", description: "Usuários, soluções, Brand Kit e integrações.", icon: "ShieldCheck", route: "/admin", section: "system", defaultStatus: "active", defaultOrder: 100, permission: "users.manage", showOnDashboard: false },
 ];
 
 export function getManifest(key: string) {
@@ -37,4 +42,4 @@ export function getManifest(key: string) {
 }
 
 /** Módulos de núcleo — não podem ser desativados. */
-export const CORE_MODULES = new Set(["flyers", "configuracoes", "admin"]);
+export const CORE_MODULES = new Set(["inicio", "configuracoes", "admin"]);
