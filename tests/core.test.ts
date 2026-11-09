@@ -80,3 +80,15 @@ describe("IA: proteção dos dados comerciais", () => {
     expect(interpretPrompt("stories de black friday sem mascote")).toMatchObject({ category: "blackfriday", formatKey: "ig-stories", showMascot: false });
   });
 });
+
+describe("conexão com o banco", () => {
+  it("limita a 1 conexão por instância, sem sobrescrever o que já veio na URL", async () => {
+    const { withConnectionLimit } = await import("@/core/db");
+    const a = new URL(withConnectionLimit("postgres://u:p@db.prisma.io:5432/postgres?sslmode=require")!);
+    expect(a.searchParams.get("connection_limit")).toBe("1");
+    expect(a.searchParams.get("sslmode")).toBe("require");
+    expect(new URL(withConnectionLimit("postgresql://h/db?connection_limit=5")!).searchParams.get("connection_limit")).toBe("5");
+    expect(withConnectionLimit("prisma+postgres://accelerate.prisma-data.net/?api_key=x")).toBe("prisma+postgres://accelerate.prisma-data.net/?api_key=x");
+    expect(withConnectionLimit(undefined)).toBeUndefined();
+  });
+});
