@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { aspectDescription, buildChatGptPrompt, productAttachmentBase, promptBlockers, splitIntoFlyers, type PromptInput } from "@/modules/flyer-studio/domain/chatgpt-prompt";
+import { aspectDescription, buildChatGptPrompt, heroProduct, productAttachmentBase, promptBlockers, splitIntoFlyers, type PromptInput } from "@/modules/flyer-studio/domain/chatgpt-prompt";
 import type { Product } from "@/modules/flyer-studio/domain/types";
 
 const product = (over: Partial<Product> = {}): Product => ({ id: Math.random().toString(36), code: "12345", name: "Mouse Gamer RGB 7200 DPI", priceCents: 12990, imageFileId: "f1", ...over });
@@ -96,10 +96,28 @@ describe("imagens de referência", () => {
 describe("título opcional", () => {
   it("sem título, o prompt não pede chamada escrita", () => {
     const p = buildChatGptPrompt(base({ headline: "" }));
-    expect(p).not.toContain("Título:");
-    expect(p).toContain("Sem título nem chamada escrita");
+    expect(p).not.toContain('Título: "');
+    expect(p).toContain("crie uma chamada curta");
   });
   it("com título, ele vai exatamente como digitado", () => {
     expect(buildChatGptPrompt(base({ headline: "Semana Gamer" }))).toContain('- Título: "Semana Gamer"');
   });
 });
+
+describe("selos e hierarquia", () => {
+  it("selos aprovados vão no rodapé e liberam só essas condições", () => {
+    const p = buildChatGptPrompt(base({ seals: ["10% OFF no PIX", "10x sem juros"] }));
+    expect(p).toContain("SELOS DE CONDIÇÕES");
+    expect(p).toContain('- "10x sem juros"');
+    expect(p).toContain("condições além dos selos listados");
+    expect(buildChatGptPrompt(base())).toContain("parcelamento, descontos, frete");
+  });
+  it("produto bem mais caro vira o principal", () => {
+    const filamentos = [1, 2, 3, 4, 5].map((i) => product({ id: String(i), code: `F${i}`, name: `Filamento ${i}`, priceCents: 11590 }));
+    const impressora = product({ id: "0", code: "47659", name: "Impressora 3D LAB A1", priceCents: 492599 });
+    expect(heroProduct([impressora, ...filamentos])?.code).toBe("47659");
+    expect(buildChatGptPrompt(base({ products: [impressora, ...filamentos] }))).toContain('"Impressora 3D LAB A1" é o produto principal');
+    expect(heroProduct(filamentos)).toBeNull();
+  });
+});
+

@@ -5,7 +5,7 @@ import { Check, Dices, Layers, RotateCcw, Search, Tag, Wand2, X } from "lucide-r
 import { api, Spinner } from "@/components/ui/primitives";
 import { useToast } from "@/components/ui/toast";
 import { cn } from "@/core/util";
-import { CATEGORIES, SITE_LOGO } from "../domain/brand";
+import { CATEGORIES, SITE_LOGO, sealsFromKit } from "../domain/brand";
 import { FORMATS, getFormat } from "../domain/formats";
 import { formatPrice } from "../domain/product-format";
 import { describeRule } from "../domain/pricing";
@@ -17,7 +17,7 @@ import { brandFromContext, type StudioContext } from "./studio-types";
 import type { ChatGptFlyer } from "./chatgpt-flyer";
 import { ChatGptBatchView } from "./chatgpt-views";
 import { FlyersHeader } from "./flyers-header";
-import { Chips, Section } from "./create-flyers";
+import { Chips, SealsPicker, Section } from "./create-flyers";
 
 interface Spare { code: string; name: string; imageUrl: string | null; finalPriceCents: number }
 interface Group { theme: string; products: Product[] }
@@ -40,6 +40,8 @@ export function BatchDay({ ctx }: { ctx: StudioContext }) {
   const [formatKey, setFormatKey] = useState("ig-stories");
   const [layout, setLayout] = useState<LayoutOptions>({ ...defaultLayout(), headline: "" });
   const [extra, setExtra] = useState("");
+  const allSeals = useMemo(() => sealsFromKit(ctx.brandKit.approvedPhrases), [ctx.brandKit.approvedPhrases]);
+  const [seals, setSeals] = useState<string[]>(allSeals);
   const [groups, setGroups] = useState<Group[] | null>(null);
   const [spare, setSpare] = useState<Spare[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
@@ -114,7 +116,7 @@ export function BatchDay({ ctx }: { ctx: StudioContext }) {
       prompt: buildChatGptPrompt({
         category: layout.category, formatKey, width: fmt.width, height: fmt.height, headline: layout.headline, subheadline: layout.subheadline, footerText: layout.footerText,
         segment: segment || undefined, products: g.products, colors: brand.colors, fonts: brand.fonts, emphasis: layout.emphasis,
-        hasLogo: true, logoUrl: SITE_LOGO.siteUrl, hasMascot, theme: g.theme,
+        hasLogo: true, logoUrl: SITE_LOGO.siteUrl, seals, hasMascot, theme: g.theme,
         extraInstructions: extra, batch: valid.length > 1 ? { index: i, total: valid.length } : undefined,
       }),
     }));
@@ -193,8 +195,9 @@ export function BatchDay({ ctx }: { ctx: StudioContext }) {
         <div className="mt-5 space-y-4">
           <Chips label="Formato" value={formatKey} onChange={setFormatKey} options={[...FORMATS.filter((f) => MAIN_FORMATS.includes(f.key)), ...FORMATS.filter((f) => !MAIN_FORMATS.includes(f.key) && !f.customizable)].map((f) => ({ value: f.key, label: f.label.replace("Instagram ", "").replace(/^./, (c) => c.toUpperCase()), hint: f.hint }))} />
           <Chips label="Estilo" value={layout.category} onChange={(v) => setStyle(v as CategoryKey)} options={CATEGORIES.map((c) => ({ value: c.key, label: c.label }))} />
+          <SealsPicker all={allSeals} value={seals} onChange={setSeals} />
           <div className="grid gap-4 sm:grid-cols-2">
-            <label><span className="label">Título dos flyers <span className="font-normal text-zinc-400">(opcional)</span></span><input className="input" maxLength={80} placeholder="Sem título — a arte destaca os produtos" value={layout.headline} onChange={(e) => setLayout({ ...layout, headline: e.target.value })} /></label>
+            <label><span className="label">Título dos flyers <span className="font-normal text-zinc-400">(opcional)</span></span><input className="input" maxLength={80} placeholder="Vazio = o ChatGPT cria uma chamada curta sobre os produtos" value={layout.headline} onChange={(e) => setLayout({ ...layout, headline: e.target.value })} /></label>
             <label><span className="label">Instruções extras (opcional)</span><input className="input" maxLength={1500} placeholder="Ex.: clima de setup gamer, luzes neon" value={extra} onChange={(e) => setExtra(e.target.value)} /></label>
           </div>
         </div>

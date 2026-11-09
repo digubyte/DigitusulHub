@@ -28,6 +28,8 @@ export interface PromptInput {
   hasLogo: boolean;
   /** Link público do logo (referência extra além do anexo). */
   logoUrl?: string;
+  /** Selos de condições aprovados (ex.: "10x sem juros"), escritos exatamente assim. */
+  seals?: string[];
   /** Tema do flyer no lote (ex.: "Mouse", "Variados"). */
   theme?: string;
   hasMascot: boolean;
@@ -92,6 +94,15 @@ export function promptBlockers(products: Product[], category: CategoryKey): stri
   return out;
 }
 
+/** Produto principal do flyer: só quando um item vale bem mais que os outros (ex.: impressora + filamentos). */
+export function heroProduct(products: Product[]): Product | null {
+  if (products.length < 3) return null;
+  const sorted = [...products].sort((a, b) => (b.priceCents ?? 0) - (a.priceCents ?? 0));
+  const [top, ...rest] = sorted;
+  const median = rest[Math.floor(rest.length / 2)]?.priceCents ?? 0;
+  return median > 0 && (top.priceCents ?? 0) >= median * 4 ? top : null;
+}
+
 export function buildChatGptPrompt(input: PromptInput): string {
   const blockers = promptBlockers(input.products, input.category);
   if (blockers.length) throw new Error(blockers.join(" "));
@@ -115,9 +126,15 @@ export function buildChatGptPrompt(input: PromptInput): string {
   lines.push(`- Paleta a partir das cores da marca: principal ${input.colors.primary}, destaque ${input.colors.accent}, escuro ${input.colors.dark}, claro ${input.colors.light}. Pode usar variações, degradês e tons que combinem com os produtos.`);
   lines.push(`- Tipografia moderna, com hierarquia forte e criativa (referência: ${input.fonts.heading} nos títulos e ${input.fonts.price} nos preços), sempre legível.`);
   lines.push(input.emphasis === "price" ? "- Os preços são o principal destaque, logo depois vêm as fotos." : "- As fotos dos produtos são o principal destaque, logo depois vêm os preços.");
-  lines.push(input.products.length <= 1
-    ? "- Destaque único: o produto é o herói da arte, com foto grande e um cenário pensado para ele; nome legível e preço em tamanho grande."
-    : `- Organize os ${input.products.length} produtos com clareza (grade, vitrine ou mosaico criativo), cada um com foto, nome, código e preço próximos e com o mesmo peso visual.`);
+  const hero = heroProduct(input.products);
+  if (input.products.length <= 1) {
+    lines.push("- Destaque único: o produto é o herói da arte, com foto grande e um cenário pensado para ele; nome legível e preço em tamanho grande.");
+  } else if (hero) {
+    lines.push(`- Hierarquia: "${hero.name.trim()}" é o produto principal — maior, em posição de destaque, com cartão próprio; os outros ${input.products.length - 1} aparecem como complementares, menores e organizados abaixo ou ao lado.`);
+  } else {
+    lines.push(`- Organize os ${input.products.length} produtos com clareza (grade, vitrine ou mosaico criativo), cada um com foto, nome, código e preço próximos e com o mesmo peso visual.`);
+  }
+  lines.push("- Preços em etiquetas fortes; pode deixar os centavos menores e elevados (ex.: R$ 115,⁹⁰), sem mudar o valor.");
   if (input.theme && input.theme !== "Variados" && input.products.length > 1) lines.push(`- Tema do flyer: ${input.theme}.`);
   if (input.batch && input.batch.total > 1) {
     lines.push(`- Este é o flyer ${input.batch.index + 1} de ${input.batch.total} de uma série: mantenha a identidade da série, mas crie uma composição própria para estes produtos.`);
@@ -134,7 +151,12 @@ export function buildChatGptPrompt(input: PromptInput): string {
     lines.push(...texts);
   } else {
     lines.push("TEXTOS");
-    lines.push("- Sem título nem chamada escrita: os únicos textos da arte são os dados dos produtos abaixo (e o selo do clima do flyer, se houver).");
+    lines.push("- Título: crie uma chamada curta e chamativa (até 6 palavras) sobre o tema dos produtos, sem números, preços, descontos ou promessas.");
+  }
+  if (input.seals?.length) {
+    lines.push("");
+    lines.push("SELOS DE CONDIÇÕES (faixa no rodapé, com ícones, escritos exatamente assim)");
+    input.seals.forEach((s) => lines.push(`- "${s}"`));
   }
 
   if (input.products.length) {
@@ -159,7 +181,7 @@ export function buildChatGptPrompt(input: PromptInput): string {
   if (n === 1) lines.push("- Nenhuma imagem anexada.");
   if (withImages.length) lines.push("- Use as fotos reais dos produtos: não redesenhe nem troque modelo, cor ou marca. Pode recortar o fundo, girar levemente, dar escala, reflexo, sombra e integrar o produto ao cenário.");
   else lines.push("- Não há fotos dos produtos: não desenhe produtos inventados; use composição tipográfica e elementos gráficos.");
-  if (input.hasLogo) lines.push("- Aplique o logo exatamente como na imagem anexada: sem alterar cores, proporção ou letras, em área limpa e bem visível.");
+  if (input.hasLogo) lines.push("- Aplique o logo exatamente como na imagem anexada (sem alterar cores, proporção ou letras), em área limpa e bem visível, mas em tamanho moderado — no topo ou no rodapé, sem ocupar mais que cerca de um terço da largura. Os produtos são o foco.");
   else lines.push("- Escreva o nome \"Digitusul\" de forma discreta; não invente um logotipo.");
   if (input.hasMascot) lines.push("- Inclua o mascote anexado sem redesenhá-lo.");
 
@@ -172,7 +194,7 @@ export function buildChatGptPrompt(input: PromptInput): string {
   lines.push("");
   lines.push("REGRAS OBRIGATÓRIAS");
   lines.push("- Não invente, arredonde ou altere preços, códigos ou nomes.");
-  lines.push("- Não adicione preço \"de/por\", parcelamento, porcentagem de desconto, frete, prazos, telefones, endereços ou qualquer texto que não esteja listado acima.");
+  lines.push(`- Não adicione preço \"de/por\", valor no PIX, ${input.seals?.length ? "condições além dos selos listados, " : "parcelamento, descontos, frete, "}prazos, telefones, endereços ou qualquer outro texto comercial que não esteja listado acima.`);
   lines.push("- Todo texto em português do Brasil, sem erros de ortografia.");
   lines.push("- Não invente produtos, brindes ou selos de garantia que não foram pedidos.");
   lines.push("- Gere uma única imagem, sem moldura de mockup.");

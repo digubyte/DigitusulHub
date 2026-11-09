@@ -6,7 +6,7 @@ import { api, Spinner } from "@/components/ui/primitives";
 import { uploadFiles } from "@/components/upload/dropzone";
 import { useToast } from "@/components/ui/toast";
 import { cn } from "@/core/util";
-import { CATEGORIES, SITE_LOGO } from "../domain/brand";
+import { CATEGORIES, SITE_LOGO, sealsFromKit } from "../domain/brand";
 import { FORMATS, getFormat } from "../domain/formats";
 import { formatPrice, parsePriceInput } from "../domain/product-format";
 import { applyPricingRule, describeRule } from "../domain/pricing";
@@ -44,6 +44,8 @@ export function CreateFlyers({ ctx }: { ctx: StudioContext }) {
   const [layout, setLayout] = useState<LayoutOptions>({ ...defaultLayout(), headline: "" });
   const [segment, setSegment] = useState("");
   const [extra, setExtra] = useState("");
+  const allSeals = useMemo(() => sealsFromKit(ctx.brandKit.approvedPhrases), [ctx.brandKit.approvedPhrases]);
+  const [seals, setSeals] = useState<string[]>(allSeals);
   const [result, setResult] = useState<{ flyers: ChatGptFlyer[]; list: Product[] } | null>(null);
   const resultRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -202,7 +204,7 @@ export function CreateFlyers({ ctx }: { ctx: StudioContext }) {
       products: g,
       prompt: buildChatGptPrompt({
         category: layout.category, formatKey, width: fmt.width, height: fmt.height, headline: layout.headline, subheadline: layout.subheadline, footerText: layout.footerText,
-        segment: segment.trim() || undefined, products: g, colors: brand.colors, fonts: brand.fonts, hasLogo: true, logoUrl: SITE_LOGO.siteUrl, hasMascot, emphasis: layout.emphasis,
+        segment: segment.trim() || undefined, products: g, colors: brand.colors, fonts: brand.fonts, hasLogo: true, logoUrl: SITE_LOGO.siteUrl, seals, hasMascot, emphasis: layout.emphasis,
         extraInstructions: extra, batch: groups.length > 1 ? { index: i, total: groups.length } : undefined,
       }),
     }));
@@ -329,9 +331,10 @@ export function CreateFlyers({ ctx }: { ctx: StudioContext }) {
             <Chips label="Formato" value={formatKey} onChange={setFormatKey} options={[...FORMATS.filter((f) => MAIN_FORMATS.includes(f.key)), ...FORMATS.filter((f) => !MAIN_FORMATS.includes(f.key) && !f.customizable)].map((f) => ({ value: f.key, label: f.label.replace("Instagram ", "").replace(/^./, (c) => c.toUpperCase()), hint: f.hint }))} />
             <Chips label="Estilo" value={layout.category} onChange={(v) => setStyle(v as CategoryKey)} options={CATEGORIES.map((c) => ({ value: c.key, label: c.label }))} />
             <div className="grid gap-4 sm:grid-cols-2">
-              <label><span className="label">Título do flyer <span className="font-normal text-zinc-400">(opcional)</span></span><input className="input" maxLength={80} placeholder="Sem título — a arte destaca os produtos" value={layout.headline} onChange={(e) => setLayout({ ...layout, headline: e.target.value })} /></label>
+              <label><span className="label">Título do flyer <span className="font-normal text-zinc-400">(opcional)</span></span><input className="input" maxLength={80} placeholder="Vazio = o ChatGPT cria uma chamada curta sobre os produtos" value={layout.headline} onChange={(e) => setLayout({ ...layout, headline: e.target.value })} /></label>
               <label><span className="label">Segmento (opcional)</span><input className="input" maxLength={60} placeholder="Gamer, Limpeza, Escritório…" value={segment} onChange={(e) => setSegment(e.target.value)} /></label>
             </div>
+            <SealsPicker all={allSeals} value={seals} onChange={setSeals} />
             <details className="group rounded-xl border border-zinc-200 px-4 py-3">
               <summary className="cursor-pointer list-none text-sm font-medium text-zinc-600 hover:text-ink">Mais opções</summary>
               <div className="mt-4 grid gap-4 sm:grid-cols-2">
@@ -431,6 +434,26 @@ export function Chips({ label, value, onChange, options }: { label: string; valu
             {o.label}
           </button>
         ))}
+      </div>
+    </div>
+  );
+}
+
+/** Selos de condições (rodapé): todos ligados por padrão; clique para ligar/desligar. */
+export function SealsPicker({ all, value, onChange }: { all: string[]; value: string[]; onChange: (v: string[]) => void }) {
+  return (
+    <div>
+      <p className="label">Selos de condições <span className="font-normal text-zinc-400">(rodapé — edite a lista em Admin › Brand Kit)</span></p>
+      <div className="flex flex-wrap gap-1.5">
+        {all.map((s) => {
+          const on = value.includes(s);
+          return (
+            <button key={s} type="button" role="checkbox" aria-checked={on} onClick={() => onChange(on ? value.filter((x) => x !== s) : all.filter((x) => x === s || value.includes(x)))}
+              className={cn("rounded-lg border px-3 py-1.5 text-[13px] font-medium transition-colors", on ? "border-brand-600 bg-brand-50 text-brand-700" : "border-zinc-200 bg-surface text-zinc-400 line-through hover:text-zinc-600")}>
+              {on ? "✓ " : ""}{s}
+            </button>
+          );
+        })}
       </div>
     </div>
   );

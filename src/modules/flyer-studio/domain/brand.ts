@@ -15,6 +15,14 @@ export const SITE_LOGO = {
   siteUrl: "https://www.digitusul.com.br/media/digitusul-logo-25-d7aed9306c.webp",
 };
 
+/** Selos de condições reais do site (rodapé do flyer). Editáveis no Brand Kit como frases da categoria "selo". */
+export const DEFAULT_SEALS = ["10% OFF no PIX", "10x sem juros", "Entrega para todo o Brasil"];
+export const SEAL_CATEGORY = "selo";
+export function sealsFromKit(phrases: { category: string; text: string }[]): string[] {
+  const own = phrases.filter((p) => p.category === SEAL_CATEGORY).map((p) => p.text);
+  return own.length ? own : DEFAULT_SEALS;
+}
+
 export const DEFAULT_BRAND_FONTS = { heading: "Montserrat", body: "Inter", price: "Montserrat" };
 
 /** Fontes disponíveis no editor (carregadas via Google Fonts em app/layout.tsx). */

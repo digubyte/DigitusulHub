@@ -121,11 +121,12 @@ export function BrandKitAdmin({ initial }: { initial: BrandKitView }) {
 
       <section>
         <h2 className="text-lg font-semibold">Frases e chamadas aprovadas</h2>
-        <p className="mb-3 text-sm text-ink-muted">Ficam disponíveis no Estúdio e são priorizadas pelo assistente de IA.</p>
+        <p className="mb-3 text-sm text-ink-muted">Frases ficam disponíveis no gerador. Os <strong>selos de condição</strong> (ex.: “10x sem juros”) aparecem para ligar/desligar em cada flyer; sem nenhum cadastrado, valem os padrões: 10% OFF no PIX · 10x sem juros · Entrega para todo o Brasil.</p>
         <div className="card p-4">
           <div className="mb-3 flex flex-col gap-2 sm:flex-row">
             <select className="input sm:w-48" value={phrase.category} onChange={(e) => setPhrase({ ...phrase, category: e.target.value })}>
               <option value="geral">Geral</option>
+              <option value="selo">Selo de condição (rodapé)</option>
               {CATEGORIES.map((c) => <option key={c.key} value={c.key}>{c.label}</option>)}
             </select>
             <input className="input" placeholder="Ex.: Tecnologia que move o seu negócio" value={phrase.text} onChange={(e) => setPhrase({ ...phrase, text: e.target.value })} />
@@ -135,7 +136,7 @@ export function BrandKitAdmin({ initial }: { initial: BrandKitView }) {
             <ul className="divide-y divide-zinc-100">
               {kit.approvedPhrases.map((p, i) => (
                 <li key={i} className="flex items-center gap-3 py-2 text-sm">
-                  <span className="badge bg-brand-50 text-brand-700">{p.category === "geral" ? "Geral" : CATEGORIES.find((c) => c.key === p.category)?.label}</span>
+                  <span className="badge bg-brand-50 text-brand-700">{p.category === "geral" ? "Geral" : p.category === "selo" ? "Selo" : CATEGORIES.find((c) => c.key === p.category)?.label}</span>
                   <span className="flex-1">{p.text}</span>
                   <button className="btn-icon btn-ghost" aria-label="Remover frase" onClick={() => setKit({ ...kit, approvedPhrases: kit.approvedPhrases.filter((_, j) => j !== i) })}><Trash2 className="h-4 w-4" /></button>
                 </li>
