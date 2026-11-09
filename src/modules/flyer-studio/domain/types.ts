@@ -30,6 +30,8 @@ export interface Product {
   /** true quando não foi possível confirmar se o valor lido é cartão ou PIX — bloqueia exportação. */
   priceUncertain?: boolean;
   sourceUrl?: string;
+  /** Endereço público da foto no site (referência no prompt do ChatGPT). */
+  imageUrl?: string;
 }
 
 export type BindingField = "code" | "name" | "description" | "brand" | "price" | "extra" | "image";

@@ -36,7 +36,7 @@ export function AppShell({ user, solutions, canAdmin, children }: { user: ShellU
   }
 
   // Rotas que pertencem a cada solução (para marcar o item ativo).
-  const extraMatch: Record<string, string[]> = { flyers: ["/estudio"] };
+  const extraMatch: Record<string, string[]> = { flyers: ["/estudio", "/criar"] };
   const links = [
     { href: "/inicio", label: "Início", icon: <Home className="h-4 w-4" />, match: ["/inicio"] },
     ...solutions.map((s) => ({ href: s.route, label: s.name, icon: <ModuleIcon name={s.icon} className="h-4 w-4" />, match: [s.route, ...(extraMatch[s.key] ?? [])] })),

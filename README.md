@@ -104,7 +104,17 @@ O projeto anterior foi reescrito e integrado ao Estúdio:
 desativar ou esconder cada uma. Novas soluções entram em `src/core/modules/registry.ts`.
 Modo claro (tons da marca) e escuro: botão sol/lua no topo.
 
-## Gerador de flyers (tela única em /criar)
+## Gerador de flyers — Lote do dia (/lote)
+
+Entrada principal do gerador. Escolhe-se uma categoria do site (ou palavra-chave) e quantos flyers de cada tipo
+(padrão: 3 flyers com 6 produtos + 3 destaques de 1 produto). O servidor busca os produtos com foto e estoque
+na ordem de relevância do site, separa os destaques (maior valor entre os relevantes, tipos diferentes) e agrupa
+o restante pelo que tem em comum (tipo de produto, marca, palavras do nome) — `domain/batch-plan.ts`.
+Cada produto pode ser trocado por um reserva parecido ou removido. O prompt de cada flyer lista todas as
+imagens de referência (logo oficial + fotos, com os links do site); “Imagens” baixa os arquivos soltos e “ZIP” junto.
+Sem logo no Brand Kit, usa o logo oficial do site (`public/brand/digitusul-logo.webp`).
+
+## Gerador de flyers — Criar avulso (/criar)
 
 Inspirado no Digitusul Prompt Generator (Lovable): uma tela só, em passos.
 

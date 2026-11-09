@@ -28,7 +28,7 @@ export interface ModuleManifest {
 
 export const MODULES: ModuleManifest[] = [
   { key: "inicio", name: "Início", description: "Todas as soluções da Digitusul", icon: "LayoutDashboard", route: "/inicio", section: "main", defaultStatus: "active", defaultOrder: 0, permission: "hub.access", showOnDashboard: false },
-  { key: "flyers", name: "Gerador de flyers", description: "Monte o lote do dia, gere os prompts e crie os flyers no ChatGPT com os preços certos.", icon: "Palette", route: "/criar", section: "main", defaultStatus: "active", defaultOrder: 10, permission: "flyers.access", showOnDashboard: true },
+  { key: "flyers", name: "Gerador de flyers", description: "Monte o lote do dia, gere os prompts e crie os flyers no ChatGPT com os preços certos.", icon: "Palette", route: "/lote", section: "main", defaultStatus: "active", defaultOrder: 10, permission: "flyers.access", showOnDashboard: true },
   { key: "comercial", name: "Gestão Comercial", description: "Metas, vendas, produtividade e indicadores.", icon: "TrendingUp", route: "/modulos/comercial", section: "main", defaultStatus: "development", defaultOrder: 20, permission: "hub.access", showOnDashboard: true },
   { key: "crm", name: "CRM e Reativação", description: "Carteira, contatos e reativação de clientes.", icon: "Users", route: "/modulos/crm", section: "main", defaultStatus: "development", defaultOrder: 30, permission: "hub.access", showOnDashboard: true },
   { key: "marketing", name: "Marketing e Campanhas", description: "Campanhas, calendário e produção de conteúdo.", icon: "Megaphone", route: "/modulos/marketing", section: "main", defaultStatus: "development", defaultOrder: 40, permission: "hub.access", showOnDashboard: true },

@@ -25,6 +25,10 @@ export interface PromptInput {
   colors: BrandContext["colors"];
   fonts: BrandContext["fonts"];
   hasLogo: boolean;
+  /** Link público do logo (referência extra além do anexo). */
+  logoUrl?: string;
+  /** Tema do flyer no lote (ex.: "Mouse", "Variados"). */
+  theme?: string;
   hasMascot: boolean;
   emphasis: "price" | "product";
   extraInstructions?: string;
@@ -58,14 +62,19 @@ const EXT: Record<string, string> = { "image/png": "png", "image/jpeg": "jpg", "
 const slug = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-zA-Z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40) || "produto";
 
 /** Nome do arquivo de foto do produto — o mesmo nome é citado no prompt. */
+/** Nome (sem extensão) usado no prompt e no arquivo anexado. */
+export const productAttachmentBase = (p: Product, index: number) => `produto-${index + 1}-${slug(p.code || p.name)}`;
+export const LOGO_ATTACHMENT_BASE = "logo-digitusul";
+export const MASCOT_ATTACHMENT_BASE = "mascote-digu";
+
 export function productAttachmentName(p: Product, index: number, mimeType = "image/png") {
-  return `produto-${index + 1}-${slug(p.code || p.name)}.${EXT[mimeType] ?? "png"}`;
+  return `${productAttachmentBase(p, index)}.${EXT[mimeType] ?? "png"}`;
 }
 export function logoAttachmentName(mimeType = "image/png") {
-  return `logo-digitusul.${EXT[mimeType] ?? "png"}`;
+  return `${LOGO_ATTACHMENT_BASE}.${EXT[mimeType] ?? "png"}`;
 }
 export function mascotAttachmentName(mimeType = "image/png") {
-  return `mascote-digu.${EXT[mimeType] ?? "png"}`;
+  return `${MASCOT_ATTACHMENT_BASE}.${EXT[mimeType] ?? "png"}`;
 }
 
 /** Problemas que impedem montar o prompt (dados comerciais incompletos). */
@@ -103,6 +112,10 @@ export function buildChatGptPrompt(input: PromptInput): string {
   lines.push(`- Cores da marca: principal ${input.colors.primary}, destaque ${input.colors.accent}, escuro ${input.colors.dark}, claro ${input.colors.light}. Use apenas essa paleta.`);
   lines.push(`- Tipografia sem serifa e moderna (referência: ${input.fonts.heading} para títulos e ${input.fonts.price} para preços), sempre legível.`);
   lines.push(input.emphasis === "price" ? "- O maior destaque visual é o preço de cada produto." : "- O maior destaque visual é a foto de cada produto; o preço vem logo em seguida.");
+  lines.push(input.products.length <= 1
+    ? "- Composição de destaque único: o produto no centro, foto grande, nome legível e preço em tamanho grande."
+    : `- Composição em grade organizada com os ${input.products.length} produtos, todos com o mesmo peso visual; cada um com foto, nome, código e preço próximos.`);
+  if (input.theme && input.theme !== "Variados" && input.products.length > 1) lines.push(`- Tema do flyer: ${input.theme}.`);
   if (input.batch && input.batch.total > 1) {
     lines.push(`- Este é o flyer ${input.batch.index + 1} de ${input.batch.total} de uma mesma série: mantenha a identidade visual da série, variando a composição.`);
   }
@@ -119,17 +132,24 @@ export function buildChatGptPrompt(input: PromptInput): string {
       lines.push(`${i + 1}. ${p.name.trim()}`);
       lines.push(`   Código: Cód. ${p.code.trim()}`);
       lines.push(`   Preço: ${formatPrice(p.priceCents!)}`);
-      if (p.imageFileId) lines.push(`   Foto: arquivo anexado "${productAttachmentName(p, i)}" (o nome pode ter outra extensão)`);
+      if (p.imageFileId) lines.push(`   Foto: imagem anexada "${productAttachmentBase(p, i)}"`);
     });
   }
 
   lines.push("");
-  lines.push("IMAGENS ANEXADAS");
-  if (withImages.length) lines.push("- Use as fotos anexadas dos produtos como estão: não redesenhe, não troque o modelo, a cor ou a marca do produto. Pode remover o fundo e adicionar sombra suave.");
+  lines.push("IMAGENS DE REFERÊNCIA (anexadas junto com este prompt)");
+  let n = 1;
+  if (input.hasLogo) lines.push(`${n++}. "${LOGO_ATTACHMENT_BASE}" — logo oficial da Digitusul${input.logoUrl ? ` (${input.logoUrl})` : ""}`);
+  if (input.hasMascot) lines.push(`${n++}. "${MASCOT_ATTACHMENT_BASE}" — mascote Digu`);
+  input.products.forEach((p, i) => {
+    if (p.imageFileId) lines.push(`${n++}. "${productAttachmentBase(p, i)}" — foto de ${p.name.trim()}${p.imageUrl ? ` (${p.imageUrl})` : ""}`);
+  });
+  if (n === 1) lines.push("- Nenhuma imagem anexada.");
+  if (withImages.length) lines.push("- Use as fotos dos produtos como estão: não redesenhe, não troque o modelo, a cor ou a marca do produto. Pode remover o fundo e adicionar sombra suave.");
   else lines.push("- Não há fotos dos produtos: não desenhe produtos inventados; use composição tipográfica e elementos gráficos.");
-  if (input.hasLogo) lines.push(`- Aplique o logo anexado ("${logoAttachmentName()}") sem alterar cores, proporção ou letras, em área limpa e bem visível.`);
+  if (input.hasLogo) lines.push("- Aplique o logo exatamente como na imagem anexada: sem alterar cores, proporção ou letras, em área limpa e bem visível.");
   else lines.push("- Escreva o nome \"Digitusul\" de forma discreta; não invente um logotipo.");
-  if (input.hasMascot) lines.push(`- Inclua o mascote anexado ("${mascotAttachmentName()}") sem redesenhá-lo.`);
+  if (input.hasMascot) lines.push("- Inclua o mascote anexado sem redesenhá-lo.");
 
   if (input.extraInstructions?.trim()) {
     lines.push("");

@@ -7,7 +7,7 @@ import type { Product } from "../domain/types";
 export const CHATGPT_URL = "https://chatgpt.com/";
 
 async function fetchFile(id: string): Promise<Blob> {
-  const res = await fetch(`/api/files/${id}`);
+  const res = await fetch(id.startsWith("/") ? id : `/api/files/${id}`);
   if (!res.ok) throw new Error("Não foi possível baixar uma das imagens.");
   return res.blob();
 }
@@ -28,10 +28,12 @@ async function toAttachable(blob: Blob): Promise<Blob> {
   } finally { URL.revokeObjectURL(url); }
 }
 
+/** logoFileId pode ser um id do armazenamento ou um caminho público (ex.: /brand/digitusul-logo.webp). */
 export interface AttachmentSet { products: Product[]; logoFileId?: string | null; mascotFileId?: string | null }
 
 /** Monta o ZIP com as fotos (nomes iguais aos citados no prompt), logo e mascote. */
-export async function buildAttachmentsZip(sets: { folder?: string; set: AttachmentSet }[]): Promise<Blob | null> {
+/** Lista os arquivos de referência de um ou mais flyers (nome final → conteúdo). */
+async function collectAttachments(sets: { folder?: string; set: AttachmentSet }[]): Promise<Record<string, Uint8Array>> {
   const files: Record<string, Uint8Array> = {};
   const shared = new Map<string, Blob>();
   const get = async (id: string) => { if (!shared.has(id)) shared.set(id, await toAttachable(await fetchFile(id))); return shared.get(id)!; };
@@ -45,9 +47,25 @@ export async function buildAttachmentsZip(sets: { folder?: string; set: Attachme
     if (set.logoFileId) { const b = await get(set.logoFileId); files[prefix + logoAttachmentName(b.type)] = new Uint8Array(await b.arrayBuffer()); }
     if (set.mascotFileId) { const b = await get(set.mascotFileId); files[prefix + mascotAttachmentName(b.type)] = new Uint8Array(await b.arrayBuffer()); }
   }
+  return files;
+}
+
+export async function buildAttachmentsZip(sets: { folder?: string; set: AttachmentSet }[]): Promise<Blob | null> {
+  const files = await collectAttachments(sets);
   if (!Object.keys(files).length) return null;
   const zipped = zipSync(files, { level: 0 });
   return new Blob([zipped as BlobPart], { type: "application/zip" });
+}
+
+/** Baixa as imagens soltas (sem ZIP), para arrastar direto no ChatGPT. */
+export async function downloadAttachmentsLoose(set: AttachmentSet): Promise<number> {
+  const files = await collectAttachments([{ set }]);
+  const names = Object.keys(files);
+  for (const name of names) {
+    downloadBlob(new Blob([files[name] as BlobPart]), name);
+    await new Promise((r) => setTimeout(r, 350));
+  }
+  return names.length;
 }
 
 export function downloadBlob(blob: Blob, name: string) {

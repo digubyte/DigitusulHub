@@ -164,3 +164,38 @@ export async function downloadCatalogImage(url: string): Promise<Uint8Array> {
   if (len > 10 * 1024 * 1024) throw new HttpError(413, "Imagem do catálogo maior que 10 MB.");
   return new Uint8Array(await res.arrayBuffer());
 }
+
+/** SKUs de uma categoria na ordem em que o site lista (= relevância). */
+async function categoryCodesInOrder(slug: string, target: number): Promise<string[]> {
+  if (!/^[a-z0-9-]+$/.test(slug)) throw new HttpError(400, "Categoria inválida.");
+  const codes: string[] = [];
+  for (let page = 1; page <= 8 && codes.length < target; page++) {
+    const res = await fetch(page > 1 ? `${SITE_URL}/${slug}?pg=${page}` : `${SITE_URL}/${slug}`, {
+      headers: { "User-Agent": "DigitusulHub/1.0" }, signal: AbortSignal.timeout(15_000), cache: "no-store",
+    }).catch(() => null);
+    if (!res || !res.ok) { if (page === 1) throw new HttpError(502, "Não foi possível abrir a categoria no site."); break; }
+    const html = await res.text();
+    const before = codes.length;
+    for (const m of html.matchAll(/data-sku="(\d+)"/g)) if (!codes.includes(m[1])) codes.push(m[1]);
+    if (codes.length === before) break; // página vazia: fim da categoria
+  }
+  return codes.slice(0, target);
+}
+
+/**
+ * Candidatos para o lote do dia: produtos com estoque e com foto, na ordem de
+ * relevância do site. Por categoria (ordem da listagem) ou por palavra-chave (ordem da busca).
+ */
+export async function batchCandidates(opts: { category?: string; term?: string }, target = 90): Promise<CatalogProduct[]> {
+  const ok = (p: CatalogProduct) => inStock(p) && !!p.imageUrl;
+  if (opts.category) {
+    const codes = await categoryCodesInOrder(opts.category, Math.round(target * 1.6));
+    const { products } = await productsByCodes(codes);
+    const byCode = new Map(products.map((p) => [p.code, p]));
+    return codes.map((c) => byCode.get(c)).filter((p): p is CatalogProduct => !!p && ok(p)).slice(0, target);
+  }
+  const term = opts.term?.trim();
+  if (!term) throw new HttpError(400, "Escolha uma categoria ou digite uma palavra-chave.");
+  const json = await algolia<{ hits: Hit[] }>(`${INDEX}/query`, { query: term, hitsPerPage: 200, attributesToRetrieve: ATTRS });
+  return json.hits.map(toProduct).filter((p): p is CatalogProduct => !!p && ok(p)).slice(0, target);
+}

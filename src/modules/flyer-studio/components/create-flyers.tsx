@@ -6,7 +6,7 @@ import { api, Spinner } from "@/components/ui/primitives";
 import { uploadFiles } from "@/components/upload/dropzone";
 import { useToast } from "@/components/ui/toast";
 import { cn } from "@/core/util";
-import { CATEGORIES } from "../domain/brand";
+import { CATEGORIES, SITE_LOGO } from "../domain/brand";
 import { FORMATS, getFormat } from "../domain/formats";
 import { formatPrice, parsePriceInput } from "../domain/product-format";
 import { applyPricingRule, describeRule } from "../domain/pricing";
@@ -202,7 +202,7 @@ export function CreateFlyers({ ctx }: { ctx: StudioContext }) {
       products: g,
       prompt: buildChatGptPrompt({
         category: layout.category, formatKey, width: fmt.width, height: fmt.height, headline: layout.headline, subheadline: layout.subheadline, footerText: layout.footerText,
-        segment: segment.trim() || undefined, products: g, colors: brand.colors, fonts: brand.fonts, hasLogo: !!ctx.brandKit.logo, hasMascot, emphasis: layout.emphasis,
+        segment: segment.trim() || undefined, products: g, colors: brand.colors, fonts: brand.fonts, hasLogo: true, logoUrl: ctx.brandKit.logo ? undefined : SITE_LOGO.siteUrl, hasMascot, emphasis: layout.emphasis,
         extraInstructions: extra, batch: groups.length > 1 ? { index: i, total: groups.length } : undefined,
       }),
     }));
@@ -359,7 +359,6 @@ export function CreateFlyers({ ctx }: { ctx: StudioContext }) {
                 ))}
               </ol>
               {tooMany && <p className="mt-2 text-xs text-accent-600">Máximo de {PER_FLYER} produtos por flyer: aumente a quantidade de flyers.</p>}
-              {!ctx.brandKit.logo && <p className="mt-2 text-xs text-amber-700">Logo não cadastrado em Admin › Brand Kit: o prompt pede só o nome “Digitusul”.</p>}
             </div>
 
             <div className="flex flex-wrap items-center gap-3">
@@ -394,7 +393,7 @@ export function CreateFlyers({ ctx }: { ctx: StudioContext }) {
   );
 }
 
-function Section({ n, title, subtitle, aside, children }: { n: number; title: string; subtitle?: string; aside?: React.ReactNode; children: React.ReactNode }) {
+export function Section({ n, title, subtitle, aside, children }: { n: number; title: string; subtitle?: string; aside?: React.ReactNode; children: React.ReactNode }) {
   return (
     <section className="card p-5 sm:p-6">
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
@@ -421,7 +420,7 @@ function Tile({ icon: Icon, title, children }: { icon: typeof Dices; title: stri
   );
 }
 
-function Chips({ label, value, onChange, options }: { label: string; value: string; onChange: (v: string) => void; options: { value: string; label: string; hint?: string }[] }) {
+export function Chips({ label, value, onChange, options }: { label: string; value: string; onChange: (v: string) => void; options: { value: string; label: string; hint?: string }[] }) {
   return (
     <div>
       <p className="label">{label}</p>

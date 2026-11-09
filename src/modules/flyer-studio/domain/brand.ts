@@ -9,6 +9,12 @@ export const DEFAULT_BRAND_COLORS = [
   { key: "surface", name: "Branco", hex: "#FFFFFF", usage: "Cartões e áreas de leitura" },
 ];
 
+/** Logo oficial da Digitusul (copiado do site). Usado quando o Brand Kit ainda não tem logo. */
+export const SITE_LOGO = {
+  publicPath: "/brand/digitusul-logo.webp",
+  siteUrl: "https://www.digitusul.com.br/media/digitusul-logo-25-d7aed9306c.webp",
+};
+
 export const DEFAULT_BRAND_FONTS = { heading: "Montserrat", body: "Inter", price: "Montserrat" };
 
 /** Fontes disponíveis no editor (carregadas via Google Fonts em app/layout.tsx). */

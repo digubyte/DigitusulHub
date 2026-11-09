@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { History, Palette, Sparkles } from "lucide-react";
+import { History, Layers, Palette, Sparkles } from "lucide-react";
 import { cn } from "@/core/util";
 
-/** Cabeçalho da solução "Gerador de flyers" com as abas Criar | Histórico. */
-export function FlyersHeader({ active, subtitle, canCreate = true }: { active: "criar" | "historico"; subtitle: string; canCreate?: boolean }) {
+/** Cabeçalho da solução "Gerador de flyers" com as abas Lote do dia | Criar avulso | Histórico. */
+export function FlyersHeader({ active, subtitle, canCreate = true }: { active: "criar" | "lote" | "historico"; subtitle: string; canCreate?: boolean }) {
   const tabs = [
-    ...(canCreate ? [{ key: "criar", label: "Criar", href: "/criar", icon: Sparkles }] : []),
+    ...(canCreate ? [{ key: "lote", label: "Lote do dia", href: "/lote", icon: Layers }, { key: "criar", label: "Criar avulso", href: "/criar", icon: Sparkles }] : []),
     { key: "historico", label: "Histórico", href: "/estudio", icon: History },
   ];
   return (

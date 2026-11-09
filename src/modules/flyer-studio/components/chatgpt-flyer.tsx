@@ -8,8 +8,9 @@ import { useToast } from "@/components/ui/toast";
 import { cn } from "@/core/util";
 import { formatPrice } from "../domain/product-format";
 import type { LayoutOptions, Product } from "../domain/types";
-import { buildAttachmentsZip, CHATGPT_URL, copyText, downloadBlob, fileSlug, fitToFormat, originalFile } from "./chatgpt-assets";
+import { buildAttachmentsZip, downloadAttachmentsLoose, CHATGPT_URL, copyText, downloadBlob, fileSlug, fitToFormat, originalFile } from "./chatgpt-assets";
 import type { StudioContext } from "./studio-types";
+import { SITE_LOGO } from "../domain/brand";
 
 export interface ChatGptFlyer {
   id: string; name: string; products: Product[]; prompt: string; resultFileId: string | null;
@@ -18,7 +19,7 @@ export interface ChatGptFlyer {
 
 export function attachmentSetFor(f: ChatGptFlyer, ctx: StudioContext) {
   const mascot = f.layout.showMascot ? (ctx.brandKit.mascots.find((m) => m.fileId === f.layout.mascotFileId) ?? ctx.brandKit.mascots[0]) : null;
-  return { products: f.products, logoFileId: ctx.brandKit.logo?.fileId ?? null, mascotFileId: mascot?.fileId ?? null };
+  return { products: f.products, logoFileId: ctx.brandKit.logo?.fileId ?? SITE_LOGO.publicPath, mascotFileId: mascot?.fileId ?? null };
 }
 
 /** Um flyer do fluxo ChatGPT: anexos → prompt → ChatGPT → arte → conferência → download. */
@@ -30,7 +31,7 @@ export function ChatGptFlyerCard({ flyer, ctx, index, onChange }: { flyer: ChatG
   const [copied, setCopied] = useState(false);
   const [editing, setEditing] = useState(false);
   const [promptDraft, setPromptDraft] = useState(flyer.prompt);
-  const hasAttachments = flyer.products.some((p) => p.imageFileId) || !!ctx.brandKit.logo;
+  const hasAttachments = true; // sempre há o logo
   const done = !!flyer.resultFileId;
 
   async function run(key: string, fn: () => Promise<void>) {
@@ -42,6 +43,12 @@ export function ChatGptFlyerCard({ flyer, ctx, index, onChange }: { flyer: ChatG
     const zip = await buildAttachmentsZip([{ set: attachmentSetFor(flyer, ctx) }]);
     if (!zip) return toast.info("Este flyer não tem imagens para anexar.");
     downloadBlob(zip, `imagens-${fileSlug(flyer.name)}.zip`);
+  });
+
+  const downloadLoose = () => run("loose", async () => {
+    const n = await downloadAttachmentsLoose(attachmentSetFor(flyer, ctx));
+    if (!n) toast.info("Este flyer não tem imagens para anexar.");
+    else toast.success(`${n} imagens baixadas. Arraste todas para o ChatGPT.`);
   });
 
   async function copyAndOpen() {
@@ -130,7 +137,10 @@ export function ChatGptFlyerCard({ flyer, ctx, index, onChange }: { flyer: ChatG
           ) : flyer.canEdit ? (
             <ol className="space-y-2 text-[13px]">
               <Step n={1} label="Baixar imagens para anexar" done={false}>
-                <button className="btn-secondary btn-sm" onClick={downloadAttachments} disabled={!hasAttachments || !!busy}>{busy === "zip" ? <Spinner /> : <FileArchive className="h-3.5 w-3.5" />}{hasAttachments ? "Baixar ZIP" : "Sem imagens"}</button>
+                <div className="flex gap-1.5">
+                  <button className="btn-secondary btn-sm" onClick={downloadLoose} disabled={!!busy} title="Baixa cada imagem separada, para arrastar direto no ChatGPT">{busy === "loose" ? <Spinner /> : <Download className="h-3.5 w-3.5" />}Imagens</button>
+                  <button className="btn-ghost btn-sm" onClick={downloadAttachments} disabled={!!busy} title="Todas as imagens em um arquivo .zip">{busy === "zip" ? <Spinner /> : <FileArchive className="h-3.5 w-3.5" />}ZIP</button>
+                </div>
               </Step>
               <Step n={2} label="Copiar prompt e abrir o ChatGPT" done={copied}>
                 <button className="btn-accent btn-sm" onClick={copyAndOpen}><ClipboardCopy className="h-3.5 w-3.5" />Copiar e abrir<ExternalLink className="h-3 w-3 opacity-70" /></button>

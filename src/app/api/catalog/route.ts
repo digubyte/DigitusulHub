@@ -2,7 +2,9 @@ import { randomUUID } from "node:crypto";
 import { z } from "zod";
 import { apiRoute, HttpError, jsonOk, parseBody } from "@/core/http";
 import { storeImage } from "@/core/storage/storage";
-import { downloadCatalogImage, productsByCodes, randomProducts, searchByTerms, type CatalogProduct } from "@/modules/flyer-studio/catalog/catalog";
+import { batchCandidates, downloadCatalogImage, productsByCodes, randomProducts, searchByTerms, type CatalogProduct } from "@/modules/flyer-studio/catalog/catalog";
+import { planBatch } from "@/modules/flyer-studio/domain/batch-plan";
+import type { CurrentUser } from "@/core/auth/session";
 import { aiStatus, catalogPickRelevant, catalogSearchTerms } from "@/modules/flyer-studio/ai/claude";
 import { getPricingRule } from "@/modules/flyer-studio/services/brand-service";
 import { applyPricingRule } from "@/modules/flyer-studio/domain/pricing";
@@ -14,7 +16,35 @@ const Body = z.discriminatedUnion("action", [
   z.object({ action: z.literal("codes"), codes: z.array(z.string().trim().min(1).max(40)).min(1).max(MAX) }),
   z.object({ action: z.literal("ai-search"), prompt: z.string().trim().min(3).max(500) }),
   z.object({ action: z.literal("import"), codes: z.array(z.string().trim().min(1).max(40)).min(1).max(MAX) }),
+  z.object({
+    action: z.literal("batch-plan"),
+    category: z.string().max(120).optional(),
+    term: z.string().trim().max(80).optional(),
+    sizes: z.array(z.number().int().min(1).max(12)).min(1).max(8),
+  }),
 ]);
+
+/** Salva as fotos do site no armazenamento e devolve produtos com o preço da regra (calculado aqui). */
+async function importProducts(user: CurrentUser, products: CatalogProduct[]) {
+  const rule = await getPricingRule();
+  const imageErrors: string[] = [];
+  const out = await Promise.all(products.map(async (p): Promise<Product> => {
+    let file: { id: string; width: number | null; height: number | null } | null = null;
+    if (p.imageUrl) {
+      try {
+        file = await storeImage({ ownerId: user.id, data: await downloadCatalogImage(p.imageUrl), originalName: `${p.code}.img`, purpose: "product" });
+      } catch {
+        imageErrors.push(p.code);
+      }
+    }
+    return {
+      id: randomUUID(), code: p.code, name: p.name, priceCents: applyPricingRule(p.cardPriceCents, rule), cardPriceCents: p.cardPriceCents,
+      priceFromRule: true, priceUncertain: false, origin: "site", sourceUrl: p.url, imageUrl: p.imageUrl ?? undefined,
+      imageFileId: file?.id ?? null, imageWidth: file?.width ?? null, imageHeight: file?.height ?? null,
+    };
+  }));
+  return { products: out, imageErrors };
+}
 
 /** Prévia com o valor final já calculado pela regra (para conferência antes de importar). */
 async function withFinal(list: CatalogProduct[]) {
@@ -63,26 +93,27 @@ export const POST = apiRoute({ permission: "flyers.create" }, async ({ req, user
     }
   }
 
-  // import: os dados são buscados de novo no servidor (o cliente não define preços).
-  const { products, notFound } = await productsByCodes(b.codes);
-  const rule = await getPricingRule();
-  const out: Product[] = [];
-  const imageErrors: string[] = [];
-  for (const p of products) {
-    let file: { id: string; width: number | null; height: number | null } | null = null;
-    if (p.imageUrl) {
-      try {
-        file = await storeImage({ ownerId: user.id, data: await downloadCatalogImage(p.imageUrl), originalName: `${p.code}.img`, purpose: "product" });
-      } catch {
-        imageErrors.push(p.code);
-      }
-    }
-    out.push({
-      id: randomUUID(), code: p.code, name: p.name, priceCents: applyPricingRule(p.cardPriceCents, rule), cardPriceCents: p.cardPriceCents,
-      priceFromRule: true, priceUncertain: false, origin: "site", sourceUrl: p.url,
-      imageFileId: file?.id ?? null, imageWidth: file?.width ?? null, imageHeight: file?.height ?? null,
+  if (b.action === "batch-plan") {
+    const total = b.sizes.reduce((x, y) => x + y, 0);
+    if (total > 48) throw new HttpError(400, "Lote grande demais (máximo de 48 produtos).");
+    const candidates = await batchCandidates({ category: b.category || undefined, term: b.term || undefined }, Math.max(60, total * 3));
+    if (!candidates.length) throw new HttpError(404, "Nenhum produto com foto e estoque encontrado. Tente outra categoria ou palavra.");
+    const { flyers, spare } = planBatch(candidates.map((p, rank) => ({ ...p, rank })), b.sizes);
+    const chosen = flyers.flatMap((f) => f.products);
+    const { products, imageErrors } = await importProducts(user, chosen);
+    const byCode = new Map(products.map((p) => [p.code, p]));
+    const rule = await getPricingRule();
+    return jsonOk({
+      flyers: flyers.map((f) => ({ size: f.size, theme: f.theme, products: f.products.map((p) => byCode.get(p.code)!) })),
+      spare: spare.slice(0, 60).map((p) => ({ code: p.code, name: p.name, imageUrl: p.imageUrl, finalPriceCents: applyPricingRule(p.cardPriceCents, rule) })),
+      found: candidates.length,
+      imageErrors,
     });
   }
+
+  // import: os dados são buscados de novo no servidor (o cliente não define preços).
+  const { products, notFound } = await productsByCodes(b.codes);
+  const { products: out, imageErrors } = await importProducts(user, products);
   return jsonOk({ products: out, notFound, imageErrors });
 });
 

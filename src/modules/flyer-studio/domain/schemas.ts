@@ -24,6 +24,7 @@ export const ProductSchema = z.object({
   priceFromRule: z.boolean().optional(),
   priceUncertain: z.boolean().optional(),
   sourceUrl: z.string().url().max(500).optional(),
+  imageUrl: z.string().url().max(500).optional(),
 });
 
 const binding = z.object({ productId: id, field: z.enum(["code", "name", "description", "brand", "price", "extra", "image"]) }).optional();

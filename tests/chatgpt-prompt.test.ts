@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { aspectDescription, buildChatGptPrompt, productAttachmentName, promptBlockers, splitIntoFlyers, type PromptInput } from "@/modules/flyer-studio/domain/chatgpt-prompt";
+import { aspectDescription, buildChatGptPrompt, productAttachmentBase, promptBlockers, splitIntoFlyers, type PromptInput } from "@/modules/flyer-studio/domain/chatgpt-prompt";
 import type { Product } from "@/modules/flyer-studio/domain/types";
 
 const product = (over: Partial<Product> = {}): Product => ({ id: Math.random().toString(36), code: "12345", name: "Mouse Gamer RGB 7200 DPI", priceCents: 12990, imageFileId: "f1", ...over });
@@ -30,13 +30,13 @@ describe("buildChatGptPrompt", () => {
     expect(p).toContain("4:5");
     expect(p).toContain("2:3");
     expect(p).toMatch(/Não invente, arredonde ou altere preços/);
-    expect(p).toContain("logo-digitusul.png");
+    expect(p).toContain("logo-digitusul");
   });
 
   it("referencia a foto anexada só de quem tem imagem", () => {
     const p = buildChatGptPrompt(base());
-    expect(p).toContain(`"${productAttachmentName(base().products[0], 0)}"`);
-    expect(p.match(/Foto: arquivo anexado/g)).toHaveLength(1);
+    expect(p).toContain(`"${productAttachmentBase(base().products[0], 0)}"`);
+    expect(p.match(/Foto: imagem anexada/g)).toHaveLength(1);
   });
 
   it("inclui segmento, posição no lote e instruções extras", () => {
@@ -74,5 +74,20 @@ describe("splitIntoFlyers", () => {
   it("não cria flyers vazios quando há menos produtos que flyers", () => {
     expect(splitIntoFlyers([1, 2, 3], 6)).toEqual([[1], [2], [3]]);
     expect(splitIntoFlyers([], 6)).toEqual([[]]);
+  });
+});
+
+describe("imagens de referência", () => {
+  it("lista logo e fotos com os links públicos", () => {
+    const p = buildChatGptPrompt(base({ logoUrl: "https://www.digitusul.com.br/media/logo.webp", products: [product({ imageUrl: "https://cdn.exemplo.com/mouse.webp" })] }));
+    expect(p).toContain("IMAGENS DE REFERÊNCIA");
+    expect(p).toContain('1. "logo-digitusul" — logo oficial da Digitusul (https://www.digitusul.com.br/media/logo.webp)');
+    expect(p).toMatch(/2\. "produto-1-12345" — foto de Mouse Gamer RGB 7200 DPI \(https:\/\/cdn\.exemplo\.com\/mouse\.webp\)/);
+    expect(p).toContain("destaque único");
+  });
+  it("flyer com vários produtos pede grade e mostra o tema", () => {
+    const p = buildChatGptPrompt(base({ theme: "Mouse" }));
+    expect(p).toContain("grade organizada com os 2 produtos");
+    expect(p).toContain("Tema do flyer: Mouse.");
   });
 });
