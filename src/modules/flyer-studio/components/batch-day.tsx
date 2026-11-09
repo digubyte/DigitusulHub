@@ -1,7 +1,7 @@
 "use client";
 /* eslint-disable @next/next/no-img-element */
 import { useMemo, useRef, useState } from "react";
-import { Dices, Layers, RotateCcw, Search, Tag, Wand2, X } from "lucide-react";
+import { Check, Dices, Layers, RotateCcw, Search, Tag, Wand2, X } from "lucide-react";
 import { api, Spinner } from "@/components/ui/primitives";
 import { useToast } from "@/components/ui/toast";
 import { cn } from "@/core/util";
@@ -51,7 +51,8 @@ export function BatchDay({ ctx }: { ctx: StudioContext }) {
   const total = sizes.reduce((a, b) => a + b, 0);
   const catLabel = ctx.siteCategories.find((c) => c.slug === category)?.label ?? "";
   const segment = source === "categoria" ? catLabel : term.trim();
-  const cats = ctx.siteCategories.filter((c) => !catFilter.trim() || c.label.toLowerCase().includes(catFilter.trim().toLowerCase()));
+  const fold = (t: string) => t.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
+  const cats = ctx.siteCategories.filter((c) => !catFilter.trim() || fold(c.label).includes(fold(catFilter.trim())));
   const fmt = getFormat(formatKey)!;
   const cat = CATEGORIES.find((c) => c.key === layout.category)!;
 
@@ -149,11 +150,29 @@ export function BatchDay({ ctx }: { ctx: StudioContext }) {
             </div>
             {source === "categoria" ? (
               <div className="space-y-2">
-                <input className="input" placeholder="Filtrar categorias (ex.: mouse, limpeza, papel)" value={catFilter} onChange={(e) => setCatFilter(e.target.value)} />
-                <select className="input" size={6} value={category} onChange={(e) => setCategory(e.target.value)} aria-label="Categoria do site">
-                  {cats.map((c) => <option key={c.slug} value={c.slug}>{c.label}</option>)}
-                </select>
-                {catLabel && <p className="text-xs text-zinc-500">Selecionada: <strong className="text-ink">{catLabel}</strong></p>}
+                {catLabel ? (
+                  <div className="flex items-center gap-2 rounded-xl border border-brand-300 bg-brand-50 px-3 py-2">
+                    <Check className="h-4 w-4 shrink-0 text-brand-600" />
+                    <p className="flex-1 text-sm"><span className="text-zinc-500">Categoria:</span> <strong className="text-brand-700">{catLabel}</strong></p>
+                    <button className="btn-ghost btn-sm" onClick={() => { setCategory(""); setCatFilter(""); }}>Trocar</button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="relative">
+                      <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+                      <input className="input pl-9" placeholder="Buscar categoria (ex.: mouse, limpeza, papel)" value={catFilter} onChange={(e) => setCatFilter(e.target.value)} aria-label="Buscar categoria do site" />
+                    </div>
+                    <div className="thin-scroll flex max-h-52 flex-wrap gap-1.5 overflow-y-auto rounded-xl border border-zinc-200 p-2" role="listbox" aria-label="Categorias do site">
+                      {cats.map((c) => (
+                        <button key={c.slug} type="button" role="option" aria-selected={category === c.slug} onClick={() => setCategory(c.slug)}
+                          className="rounded-lg border border-zinc-200 bg-surface px-2.5 py-1 text-[13px] text-zinc-600 transition-colors hover:border-brand-300 hover:bg-brand-50 hover:text-brand-700">
+                          {c.label}
+                        </button>
+                      ))}
+                      {cats.length === 0 && <p className="p-2 text-xs text-zinc-500">Nenhuma categoria com esse nome. Tente a aba “Palavra-chave”.</p>}
+                    </div>
+                  </>
+                )}
               </div>
             ) : (
               <div className="space-y-1.5">
