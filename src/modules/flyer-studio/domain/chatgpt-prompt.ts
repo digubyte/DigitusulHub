@@ -28,6 +28,8 @@ export interface PromptInput {
   hasLogo: boolean;
   /** Link público do logo (referência extra além do anexo). */
   logoUrl?: string;
+  /** Sem estilo escolhido: o ChatGPT define o clima a partir dos produtos. */
+  freeStyle?: boolean;
   /** Selos de condições aprovados (ex.: "10x sem juros"), escritos exatamente assim. */
   seals?: string[];
   /** Tema do flyer no lote (ex.: "Mouse", "Variados"). */
@@ -113,7 +115,7 @@ export function buildChatGptPrompt(input: PromptInput): string {
   const withImages = input.products.filter((p) => p.imageFileId);
   const lines: string[] = [];
 
-  lines.push(`Crie a arte de um flyer ${cat.label.toLowerCase()} para a loja Digitusul${input.segment ? `, segmento ${input.segment}` : ""}.`);
+  lines.push(`Crie a arte de um flyer ${input.freeStyle ? "" : `${cat.label.toLowerCase()} `}para a loja Digitusul${input.segment ? `, segmento ${input.segment}` : ""}.`);
   lines.push("");
   lines.push("FORMATO");
   lines.push(`- ${fmt?.label ?? "Personalizado"}: ${input.width} × ${input.height} px, proporção ${a.ratio} (${a.orientation}). Gere a imagem na proporção ${a.closest}, a mais próxima disponível.`);
@@ -122,7 +124,7 @@ export function buildChatGptPrompt(input: PromptInput): string {
   lines.push("DIREÇÃO DE ARTE (você tem liberdade criativa)");
   lines.push("- Pense como um diretor de arte: crie um design rico e marcante a partir dos próprios produtos — cenário, fundo, iluminação, texturas e elementos gráficos inspirados no universo deles (ex.: limpeza → frescor, água e brilho; gamer → luzes neon e setup; escritório → mesa organizada e produtividade).");
   lines.push("- Evite fundo liso ou chapado: use profundidade, luz, sombras, camadas, formas e movimento, sem deixar a arte poluída.");
-  lines.push(`- Clima do flyer — ${CATEGORY_STYLE[input.category]}.`);
+  lines.push(input.freeStyle ? "- Clima do flyer: escolha você o que combina melhor com estes produtos (sem selos de campanha como \"Black Friday\" ou \"Queima de estoque\")." : `- Clima do flyer — ${CATEGORY_STYLE[input.category]}.`);
   lines.push(`- Paleta a partir das cores da marca: principal ${input.colors.primary}, destaque ${input.colors.accent}, escuro ${input.colors.dark}, claro ${input.colors.light}. Pode usar variações, degradês e tons que combinem com os produtos.`);
   lines.push(`- Tipografia moderna, com hierarquia forte e criativa (referência: ${input.fonts.heading} nos títulos e ${input.fonts.price} nos preços), sempre legível.`);
   lines.push(input.emphasis === "price" ? "- Os preços são o principal destaque, logo depois vêm as fotos." : "- As fotos dos produtos são o principal destaque, logo depois vêm os preços.");

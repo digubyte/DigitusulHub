@@ -121,3 +121,12 @@ describe("selos e hierarquia", () => {
   });
 });
 
+
+describe("estilo livre", () => {
+  it("sem estilo, o prompt não impõe categoria nem selo de campanha", () => {
+    const p = buildChatGptPrompt(base({ freeStyle: true }));
+    expect(p.split("\n")[0]).toBe("Crie a arte de um flyer para a loja Digitusul.");
+    expect(p).toContain("escolha você o que combina melhor");
+    expect(p).not.toContain("Clima do flyer — oferta");
+  });
+});

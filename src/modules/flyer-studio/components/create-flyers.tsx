@@ -187,7 +187,9 @@ export function CreateFlyers({ ctx }: { ctx: StudioContext }) {
   const blockers = promptBlockers(items, layout.category);
   const tooMany = groups.some((g) => g.length > PER_FLYER);
   const fmt = getFormat(formatKey)!;
+  const [useStyle, setUseStyle] = useState(false);
   const cat = CATEGORIES.find((c) => c.key === layout.category)!;
+  const styleLabel = useStyle ? cat.label : "Estilo livre";
 
   function setStyle(c: CategoryKey) {
     const prev = CATEGORIES.find((x) => x.key === layout.category)?.defaultHeadline;
@@ -198,13 +200,13 @@ export function CreateFlyers({ ctx }: { ctx: StudioContext }) {
     const brand = brandFromContext(ctx, layout.mascotFileId);
     const hasMascot = layout.showMascot && ctx.brandKit.mascots.length > 0;
     const date = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit" }).format(new Date());
-    const base = `${segment.trim() || cat.label} · ${date}`;
+    const base = `${segment.trim() || (useStyle ? cat.label : "Flyers")} · ${date}`;
     const drafts = groups.map((g, i) => ({
       name: groups.length > 1 ? `${base} · ${i + 1}/${groups.length}` : base,
       products: g,
       prompt: buildChatGptPrompt({
         category: layout.category, formatKey, width: fmt.width, height: fmt.height, headline: layout.headline, subheadline: layout.subheadline, footerText: layout.footerText,
-        segment: segment.trim() || undefined, products: g, colors: brand.colors, fonts: brand.fonts, hasLogo: true, logoUrl: SITE_LOGO.siteUrl, seals, hasMascot, emphasis: layout.emphasis,
+        segment: segment.trim() || undefined, products: g, colors: brand.colors, fonts: brand.fonts, hasLogo: true, logoUrl: SITE_LOGO.siteUrl, seals, hasMascot, emphasis: layout.emphasis, freeStyle: !useStyle,
         extraInstructions: extra, batch: groups.length > 1 ? { index: i, total: groups.length } : undefined,
       }),
     }));
@@ -329,7 +331,7 @@ export function CreateFlyers({ ctx }: { ctx: StudioContext }) {
           <div className="space-y-5">
             <Chips label="Quantos flyers?" value={String(flyers)} onChange={(v) => setFlyers(Number(v))} options={[1, 2, 3, 4, 5, 6, 7, 8].map((n) => ({ value: String(n), label: String(n) }))} />
             <Chips label="Formato" value={formatKey} onChange={setFormatKey} options={[...FORMATS.filter((f) => MAIN_FORMATS.includes(f.key)), ...FORMATS.filter((f) => !MAIN_FORMATS.includes(f.key) && !f.customizable)].map((f) => ({ value: f.key, label: f.label.replace("Instagram ", "").replace(/^./, (c) => c.toUpperCase()), hint: f.hint }))} />
-            <Chips label="Estilo" value={layout.category} onChange={(v) => setStyle(v as CategoryKey)} options={CATEGORIES.map((c) => ({ value: c.key, label: c.label }))} />
+            <Chips label="Estilo (opcional)" value={useStyle ? layout.category : ""} onChange={(v) => { setUseStyle(!!v); if (v) setStyle(v as CategoryKey); }} options={[{ value: "", label: "Livre", hint: "O ChatGPT escolhe o clima a partir dos produtos" }, ...CATEGORIES.map((c) => ({ value: c.key, label: c.label }))]} />
             <div className="grid gap-4 sm:grid-cols-2">
               <label><span className="label">Título do flyer <span className="font-normal text-zinc-400">(opcional)</span></span><input className="input" maxLength={80} placeholder="Vazio = o ChatGPT cria uma chamada curta sobre os produtos" value={layout.headline} onChange={(e) => setLayout({ ...layout, headline: e.target.value })} /></label>
               <label><span className="label">Segmento (opcional)</span><input className="input" maxLength={60} placeholder="Gamer, Limpeza, Escritório…" value={segment} onChange={(e) => setSegment(e.target.value)} /></label>
@@ -353,7 +355,7 @@ export function CreateFlyers({ ctx }: { ctx: StudioContext }) {
             </details>
 
             <div className="rounded-xl bg-zinc-50 p-4">
-              <p className="mb-2 text-xs font-medium text-zinc-500">Resumo · {groups.length} {groups.length === 1 ? "flyer" : "flyers"} · {fmt.label} {fmt.width}×{fmt.height} · {cat.label}</p>
+              <p className="mb-2 text-xs font-medium text-zinc-500">Resumo · {groups.length} {groups.length === 1 ? "flyer" : "flyers"} · {fmt.label} {fmt.width}×{fmt.height} · {styleLabel}</p>
               <ol className="space-y-1 text-[13px]">
                 {groups.map((g, i) => (
                   <li key={i} className={cn("truncate", g.length > PER_FLYER && "text-accent-600")}>

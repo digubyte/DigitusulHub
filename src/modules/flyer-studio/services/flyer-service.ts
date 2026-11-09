@@ -171,3 +171,22 @@ export async function listVersions(user: CurrentUser, id: string) {
   await getFlyer(user, id);
   return db.flyerVersion.findMany({ where: { projectId: id }, orderBy: { version: "desc" }, select: { version: true, note: true, createdAt: true, createdById: true } });
 }
+
+/**
+ * Exclusão em lote (lógica, como a exclusão individual). `all` = todos os flyers
+ * do próprio usuário. Itens sem permissão são ignorados e contados à parte.
+ */
+export async function bulkDeleteFlyers(user: CurrentUser, opts: { ids?: string[]; all?: boolean }) {
+  const rows = opts.all
+    ? await db.flyerProject.findMany({ where: { ownerId: user.id, deletedAt: null, isTemplate: false }, select: { id: true, ownerId: true, isTemplate: true } })
+    : await db.flyerProject.findMany({ where: { id: { in: (opts.ids ?? []).slice(0, 500) }, deletedAt: null }, select: { id: true, ownerId: true, isTemplate: true } });
+  const allowed = rows.filter((r) =>
+    canViewFlyer(user.permissions, user.id, r.ownerId, r.isTemplate) &&
+    canDeleteFlyer(user.permissions, user.id, r.ownerId) &&
+    (!r.isTemplate || user.permissions.has("flyers.templates.manage")));
+  if (allowed.length) {
+    await db.flyerProject.updateMany({ where: { id: { in: allowed.map((r) => r.id) } }, data: { deletedAt: new Date() } });
+    await logActivity(user.id, "flyer.delete", null, { count: allowed.length, all: !!opts.all });
+  }
+  return { deleted: allowed.length, skipped: rows.length - allowed.length };
+}

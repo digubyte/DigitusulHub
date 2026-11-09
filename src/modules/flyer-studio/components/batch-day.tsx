@@ -56,7 +56,9 @@ export function BatchDay({ ctx }: { ctx: StudioContext }) {
   const fold = (t: string) => t.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
   const cats = ctx.siteCategories.filter((c) => !catFilter.trim() || fold(c.label).includes(fold(catFilter.trim())));
   const fmt = getFormat(formatKey)!;
+  const [useStyle, setUseStyle] = useState(false);
   const cat = CATEGORIES.find((c) => c.key === layout.category)!;
+  const styleLabel = useStyle ? cat.label : "Estilo livre";
 
   async function run(key: string, fn: () => Promise<void>) {
     setBusy(key);
@@ -109,13 +111,13 @@ export function BatchDay({ ctx }: { ctx: StudioContext }) {
     const brand = brandFromContext(ctx, layout.mascotFileId);
     const hasMascot = layout.showMascot && ctx.brandKit.mascots.length > 0;
     const date = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit" }).format(new Date());
-    const base = `${segment || cat.label} · ${date}`;
+    const base = `${segment || (useStyle ? cat.label : "Flyers")} · ${date}`;
     const drafts = valid.map((g, i) => ({
       name: `${base} · ${i + 1}/${valid.length}${g.products.length === 1 ? " (destaque)" : ""}`,
       products: g.products,
       prompt: buildChatGptPrompt({
         category: layout.category, formatKey, width: fmt.width, height: fmt.height, headline: layout.headline, subheadline: layout.subheadline, footerText: layout.footerText,
-        segment: segment || undefined, products: g.products, colors: brand.colors, fonts: brand.fonts, emphasis: layout.emphasis,
+        segment: segment || undefined, products: g.products, colors: brand.colors, fonts: brand.fonts, emphasis: layout.emphasis, freeStyle: !useStyle,
         hasLogo: true, logoUrl: SITE_LOGO.siteUrl, seals, hasMascot, theme: g.theme,
         extraInstructions: extra, batch: valid.length > 1 ? { index: i, total: valid.length } : undefined,
       }),
@@ -194,7 +196,7 @@ export function BatchDay({ ctx }: { ctx: StudioContext }) {
 
         <div className="mt-5 space-y-4">
           <Chips label="Formato" value={formatKey} onChange={setFormatKey} options={[...FORMATS.filter((f) => MAIN_FORMATS.includes(f.key)), ...FORMATS.filter((f) => !MAIN_FORMATS.includes(f.key) && !f.customizable)].map((f) => ({ value: f.key, label: f.label.replace("Instagram ", "").replace(/^./, (c) => c.toUpperCase()), hint: f.hint }))} />
-          <Chips label="Estilo" value={layout.category} onChange={(v) => setStyle(v as CategoryKey)} options={CATEGORIES.map((c) => ({ value: c.key, label: c.label }))} />
+          <Chips label="Estilo (opcional)" value={useStyle ? layout.category : ""} onChange={(v) => { setUseStyle(!!v); if (v) setStyle(v as CategoryKey); }} options={[{ value: "", label: "Livre", hint: "O ChatGPT escolhe o clima a partir dos produtos" }, ...CATEGORIES.map((c) => ({ value: c.key, label: c.label }))]} />
           <SealsPicker all={allSeals} value={seals} onChange={setSeals} />
           <div className="grid gap-4 sm:grid-cols-2">
             <label><span className="label">Título dos flyers <span className="font-normal text-zinc-400">(opcional)</span></span><input className="input" maxLength={80} placeholder="Vazio = o ChatGPT cria uma chamada curta sobre os produtos" value={layout.headline} onChange={(e) => setLayout({ ...layout, headline: e.target.value })} /></label>
@@ -241,7 +243,7 @@ export function BatchDay({ ctx }: { ctx: StudioContext }) {
               <button className="btn-accent h-11 px-5 text-[15px]" onClick={generate} disabled={!!busy || !groups.some((g) => g.products.length)}>
                 {busy === "generate" ? <Spinner /> : <Wand2 className="h-4 w-4" />}Aprovar e gerar {groups.filter((g) => g.products.length).length} prompts
               </button>
-              <span className="text-xs text-zinc-500">{fmt.label} {fmt.width}×{fmt.height} · {cat.label} · logo e fotos vão como imagens de referência</span>
+              <span className="text-xs text-zinc-500">{fmt.label} {fmt.width}×{fmt.height} · {styleLabel} · logo e fotos vão como imagens de referência</span>
             </div>
           </Section>
         </div>
