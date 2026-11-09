@@ -277,12 +277,12 @@ export function CreateFlyers({ ctx }: { ctx: StudioContext }) {
         {items.length > 0 && (
           <div className={cn("mt-5 grid grid-cols-3 gap-2.5 sm:grid-cols-4 md:grid-cols-6", items.length > 18 && "thin-scroll max-h-[26rem] overflow-y-auto pr-1")}>
             {items.map((p) => (
-              <div key={p.id} className="group relative overflow-hidden rounded-xl border border-zinc-200 bg-white">
-                {p.imageFileId ? <img src={`/api/files/${p.imageFileId}`} alt={p.name || "Produto"} className="h-24 w-full object-contain p-2" /> : <div className="flex h-24 items-center justify-center text-[11px] text-zinc-400">sem imagem</div>}
+              <div key={p.id} className="group relative overflow-hidden rounded-xl border border-zinc-200 bg-surface">
+                {p.imageFileId ? <img src={`/api/files/${p.imageFileId}`} alt={p.name || "Produto"} className="h-24 w-full bg-white object-contain p-2" /> : <div className="flex h-24 items-center justify-center text-[11px] text-zinc-400">sem imagem</div>}
                 <p className="truncate px-2 pb-2 text-xs font-medium">{reading.has(p.id) ? "Lendo imagem…" : p.name || "Aguardando dados"}</p>
-                <button onClick={() => setItems((prev) => prev.filter((x) => x.id !== p.id))} aria-label="Remover produto" className="absolute right-1 top-1 rounded-md bg-white/90 p-1 text-zinc-400 hover:text-accent-600"><X className="h-3.5 w-3.5" /></button>
+                <button onClick={() => setItems((prev) => prev.filter((x) => x.id !== p.id))} aria-label="Remover produto" className="absolute right-1 top-1 rounded-md bg-surface/90 p-1 text-zinc-400 hover:text-accent-600"><X className="h-3.5 w-3.5" /></button>
                 {p.origin === "site" && (
-                  <button onClick={() => reroll(p)} disabled={!!busy} title="Sortear outro no lugar" aria-label="Sortear outro produto no lugar deste" className="absolute left-1 top-1 rounded-md bg-white/90 p-1 text-zinc-400 hover:text-brand-600">
+                  <button onClick={() => reroll(p)} disabled={!!busy} title="Sortear outro no lugar" aria-label="Sortear outro produto no lugar deste" className="absolute left-1 top-1 rounded-md bg-surface/90 p-1 text-zinc-400 hover:text-brand-600">
                     {busy === `reroll-${p.id}` ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Dices className="h-3.5 w-3.5" />}
                   </button>
                 )}
@@ -304,7 +304,7 @@ export function CreateFlyers({ ctx }: { ctx: StudioContext }) {
           <ul className="divide-y divide-zinc-100 rounded-xl border border-zinc-200">
             {items.map((p, i) => (
               <li key={p.id} className="grid gap-3 p-3 sm:grid-cols-[56px_1fr_120px_150px_auto] sm:items-center">
-                <div className="hidden h-14 w-14 items-center justify-center rounded-lg bg-zinc-50 sm:flex">{p.imageFileId ? <img src={`/api/files/${p.imageFileId}`} alt="" className="max-h-full max-w-full object-contain" /> : <span className="text-[10px] text-zinc-400">{i + 1}</span>}</div>
+                <div className="hidden h-14 w-14 items-center justify-center overflow-hidden rounded-lg bg-white sm:flex">{p.imageFileId ? <img src={`/api/files/${p.imageFileId}`} alt="" className="max-h-full max-w-full object-contain" /> : <span className="text-[10px] text-zinc-400">{i + 1}</span>}</div>
                 <input className="input" placeholder="Nome do produto" value={p.name} onChange={(e) => patch(p.id, { name: e.target.value })} aria-label="Nome" />
                 <input className="input font-mono" placeholder="Código" value={p.code} onChange={(e) => patch(p.id, { code: e.target.value })} aria-label="Código" />
                 <input className="input" placeholder="Valor no cartão" inputMode="decimal" aria-label="Valor no cartão"
@@ -401,7 +401,7 @@ function Section({ n, title, subtitle, aside, children }: { n: number; title: st
     <section className="card p-5 sm:p-6">
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div className="flex gap-3">
-          <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-zinc-900 text-xs font-semibold text-white">{n}</span>
+          <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-brand-600 text-xs font-semibold text-white">{n}</span>
           <div>
             <h2 className="text-lg font-semibold tracking-tight">{title}</h2>
             {subtitle && <p className="text-sm text-zinc-500">{subtitle}</p>}
@@ -416,7 +416,7 @@ function Section({ n, title, subtitle, aside, children }: { n: number; title: st
 
 function Tile({ icon: Icon, title, children }: { icon: typeof Dices; title: string; children: React.ReactNode }) {
   return (
-    <div className="flex flex-col gap-2 rounded-xl border border-zinc-200 bg-white p-4">
+    <div className="flex flex-col gap-2 rounded-xl border border-zinc-200 bg-surface p-4">
       <p className="flex items-center gap-2 text-sm font-medium"><Icon className="h-4 w-4 text-brand-600" />{title}</p>
       {children}
     </div>
@@ -430,7 +430,7 @@ function Chips({ label, value, onChange, options }: { label: string; value: stri
       <div className="flex flex-wrap gap-1.5" role="radiogroup" aria-label={label}>
         {options.map((o) => (
           <button key={o.value} role="radio" aria-checked={value === o.value} title={o.hint} onClick={() => onChange(o.value)}
-            className={cn("rounded-lg border px-3 py-1.5 text-[13px] font-medium transition-colors", value === o.value ? "border-zinc-900 bg-zinc-900 text-white" : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:text-ink")}>
+            className={cn("rounded-lg border px-3 py-1.5 text-[13px] font-medium transition-colors", value === o.value ? "border-brand-600 bg-brand-600 text-white" : "border-zinc-200 bg-surface text-zinc-600 hover:border-zinc-300 hover:text-ink")}>
             {o.label}
           </button>
         ))}

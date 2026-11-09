@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { History, KeyRound, LogOut, Settings2, Sparkles } from "lucide-react";
 import { HubLogo } from "./logo";
+import { ThemeToggle } from "./theme-toggle";
 import { cn } from "@/core/util";
 
 export interface ShellUser { name: string; email: string; roleName: string }
@@ -42,8 +43,9 @@ export function AppShell({ user, canCreate, canAdmin, children }: { user: ShellU
 
   return (
     <div className="min-h-screen">
-      <div aria-hidden className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-72 bg-[radial-gradient(60%_100%_at_50%_0%,rgba(35,65,193,.10),transparent)]" />
-      <header className="sticky top-0 z-30 border-b border-zinc-200/70 bg-white/80 backdrop-blur">
+      <div aria-hidden className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-[28rem] bg-[radial-gradient(55%_100%_at_30%_0%,rgba(35,65,193,.16),transparent),radial-gradient(35%_70%_at_85%_0%,rgba(230,31,39,.07),transparent)]" />
+      <header className="sticky top-0 z-30 border-b border-zinc-200/70 bg-surface/80 backdrop-blur">
+        <div aria-hidden className="h-[3px] bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500" />
         <div className="mx-auto flex h-14 max-w-5xl items-center gap-2 px-4">
           <Link href="/criar" aria-label="Início" className="mr-3 shrink-0"><HubLogo className="h-5 sm:h-[22px]" /></Link>
           <nav aria-label="Navegação principal" className="flex flex-1 items-center gap-1">
@@ -51,16 +53,17 @@ export function AppShell({ user, canCreate, canAdmin, children }: { user: ShellU
               const active = l.match.some((m) => pathname === m || pathname.startsWith(m + "/"));
               return (
                 <Link key={l.href} href={l.href} aria-current={active ? "page" : undefined}
-                  className={cn("flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[13.5px] font-medium transition-colors", active ? "bg-zinc-900 text-white" : "text-zinc-500 hover:bg-zinc-100 hover:text-ink")}>
+                  className={cn("flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[13.5px] font-medium transition-colors", active ? "bg-brand-600 text-white shadow-card" : "text-zinc-500 hover:bg-brand-50 hover:text-brand-700")}>
                   <l.icon className="h-4 w-4" /><span className="hidden sm:inline">{l.label}</span>
                 </Link>
               );
             })}
           </nav>
+          <ThemeToggle />
           <div className="relative" ref={menuRef}>
-            <button onClick={() => setMenu(!menu)} className="flex h-8 w-8 items-center justify-center rounded-full bg-zinc-900 text-[11px] font-semibold text-white" aria-label="Menu da conta" aria-expanded={menu}>{initials}</button>
+            <button onClick={() => setMenu(!menu)} className="flex h-8 w-8 items-center justify-center rounded-full bg-brand-600 text-[11px] font-semibold text-white" aria-label="Menu da conta" aria-expanded={menu}>{initials}</button>
             {menu && (
-              <div className="absolute right-0 mt-2 w-56 rounded-xl border border-zinc-200 bg-white p-1 shadow-pop">
+              <div className="absolute right-0 mt-2 w-56 rounded-xl border border-zinc-200 bg-surface p-1 shadow-pop">
                 <div className="px-3 py-2">
                   <p className="truncate text-sm font-medium">{user.name}</p>
                   <p className="truncate text-xs text-zinc-500">{user.email}</p>

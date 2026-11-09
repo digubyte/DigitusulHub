@@ -5,5 +5,10 @@
  * Sempre exibido sobre fundo claro para preservar as cores originais.
  */
 export function HubLogo({ className = "h-7" }: { className?: string }) {
-  return <img src="/brand/digitusul-hub-logo.svg" alt="Digitusul Hub" className={`${className} w-auto select-none`} draggable={false} />;
+  // No modo escuro o logo fica sobre uma etiqueta clara, preservando as cores originais.
+  return (
+    <span className="inline-flex items-center dark:rounded-md dark:bg-white dark:px-2 dark:py-1">
+      <img src="/brand/digitusul-hub-logo.svg" alt="Digitusul Hub" className={`${className} w-auto select-none`} draggable={false} />
+    </span>
+  );
 }

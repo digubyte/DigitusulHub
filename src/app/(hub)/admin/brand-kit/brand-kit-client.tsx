@@ -162,7 +162,7 @@ export function BrandKitAdmin({ initial }: { initial: BrandKitView }) {
                 <div key={a.assetId} className="card group relative p-2">
                   <div className="flex aspect-square items-center justify-center rounded-lg bg-zinc-50"><img src={a.url} alt={a.name} className="max-h-full max-w-full object-contain" /></div>
                   <p className="mt-1 truncate text-xs">{a.name}</p>
-                  <button className="btn-icon absolute right-1 top-1 bg-white/90 opacity-0 shadow group-hover:opacity-100 focus:opacity-100" aria-label={`Remover ${a.name}`} onClick={() => setRemoveAsset(a)}><Trash2 className="h-3.5 w-3.5 text-accent-600" /></button>
+                  <button className="btn-icon absolute right-1 top-1 bg-surface/90 opacity-0 shadow group-hover:opacity-100 focus:opacity-100" aria-label={`Remover ${a.name}`} onClick={() => setRemoveAsset(a)}><Trash2 className="h-3.5 w-3.5 text-accent-600" /></button>
                 </div>
               ))}
               <Dropzone compact accept={BRAND_ACCEPT} busy={uploading === kind} label={kind === "mascot" ? "Enviar arquivo do Digu" : "Enviar elemento"} onFiles={(f) => addAsset(f, kind)} />

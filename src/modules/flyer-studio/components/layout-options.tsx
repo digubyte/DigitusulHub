@@ -17,12 +17,12 @@ export function defaultLayout(category: CategoryKey = "promocional"): LayoutOpti
 
 /** Miniaturas que comunicam a proposta visual de cada categoria. */
 const CATEGORY_SWATCH: Record<CategoryKey, string> = {
-  novidade: "bg-white ring-1 ring-zinc-200 [background-image:radial-gradient(circle_at_85%_10%,rgba(35,65,193,.18)_0_38%,transparent_39%)]",
+  novidade: "bg-surface ring-1 ring-zinc-200 [background-image:radial-gradient(circle_at_85%_10%,rgba(35,65,193,.18)_0_38%,transparent_39%)]",
   promocional: "bg-brand-600 [background-image:linear-gradient(170deg,transparent_55%,rgba(255,255,255,.12)_55%)]",
   reposicao: "bg-zinc-100 [background-image:linear-gradient(#2341C1_0_30%,transparent_30%)]",
-  queima: "bg-white [background-image:linear-gradient(#E61F27_0_34%,transparent_34%)]",
+  queima: "bg-surface [background-image:linear-gradient(#E61F27_0_34%,transparent_34%)]",
   blackfriday: "bg-[#0A0D14] [background-image:radial-gradient(circle_at_0_0,rgba(230,31,39,.45)_0_35%,transparent_36%)]",
-  institucional: "bg-white [background-image:linear-gradient(#2341C1_0_26%,transparent_26%_86%,#2341C1_86%)]",
+  institucional: "bg-surface [background-image:linear-gradient(#2341C1_0_26%,transparent_26%_86%,#2341C1_86%)]",
 };
 
 export function CategoryPicker({ value, onChange }: { value: CategoryKey; onChange: (c: CategoryKey) => void }) {
@@ -84,7 +84,7 @@ export function AiComposer({ ctx, layout, productNames, onApply }: { ctx: Studio
     } catch (e) { toast.error((e as Error).message); } finally { setBusy(false); }
   }
   return (
-    <div className="rounded-xl border border-brand-200 bg-gradient-to-br from-brand-50 to-white p-4">
+    <div className="rounded-xl border border-brand-200 bg-gradient-to-br from-brand-50 to-surface p-4">
       <div className="mb-2 flex items-center gap-2"><Sparkles className="h-4 w-4 text-brand-600" /><p className="font-semibold">Criar com IA</p>
         <span className={cn("badge ml-auto", ctx.aiEnabled ? "bg-emerald-50 text-emerald-700" : "bg-zinc-100 text-zinc-500")}>{ctx.aiEnabled ? "IA ativa" : "Modo regras (IA não configurada)"}</span>
       </div>
@@ -151,7 +151,7 @@ export function LayoutOptionsForm({ ctx, layout, onChange }: { ctx: StudioContex
         {layout.showMascot && mascots.length > 1 && (
           <div className="mt-2 flex flex-wrap gap-2">
             {mascots.map((m) => (
-              <button key={m.fileId} onClick={() => set({ mascotFileId: m.fileId })} className={cn("h-16 w-16 rounded-lg border bg-white p-1", layout.mascotFileId === m.fileId ? "border-brand-600 ring-2 ring-brand-600/20" : "border-zinc-200")} title={m.name}>
+              <button key={m.fileId} onClick={() => set({ mascotFileId: m.fileId })} className={cn("h-16 w-16 rounded-lg border bg-surface p-1", layout.mascotFileId === m.fileId ? "border-brand-600 ring-2 ring-brand-600/20" : "border-zinc-200")} title={m.name}>
                 <img src={m.url} alt={m.name} className="h-full w-full object-contain" />
               </button>
             ))}

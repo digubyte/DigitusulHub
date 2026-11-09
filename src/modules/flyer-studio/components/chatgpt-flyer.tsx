@@ -98,7 +98,7 @@ export function ChatGptFlyerCard({ flyer, ctx, index, onChange }: { flyer: ChatG
       <div className="grid flex-1 gap-4 p-4 sm:grid-cols-[150px_1fr]">
         <div className="mx-auto flex aspect-[4/5] w-full max-w-[200px] items-center justify-center overflow-hidden rounded-lg bg-zinc-100/80 sm:max-w-none sm:self-start">
           {preview ? <img src={`/api/files/${preview}`} alt={`Arte de ${flyer.name}`} className="h-full w-full object-contain" />
-            : flyer.products.find((p) => p.imageFileId) ? <img src={`/api/files/${flyer.products.find((p) => p.imageFileId)!.imageFileId}`} alt="" className="h-full w-full object-contain p-4 opacity-40 grayscale" />
+            : flyer.products.find((p) => p.imageFileId) ? <img src={`/api/files/${flyer.products.find((p) => p.imageFileId)!.imageFileId}`} alt="" className="h-full w-full bg-white object-contain p-4 opacity-60" />
             : <ImageUp className="h-6 w-6 text-zinc-300" />}
         </div>
 
@@ -170,7 +170,7 @@ export function ChatGptFlyerCard({ flyer, ctx, index, onChange }: { flyer: ChatG
 function Step({ n, label, done, children }: { n: number; label: string; done: boolean; children: React.ReactNode }) {
   return (
     <li className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-      <span className={cn("flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-medium", done ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-500")}>{done ? <Check className="h-3 w-3" /> : n}</span>
+      <span className={cn("flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[10px] font-medium", done ? "bg-zinc-900 text-surface" : "bg-zinc-100 text-zinc-500")}>{done ? <Check className="h-3 w-3" /> : n}</span>
       <span className="min-w-[10rem] flex-1 text-zinc-600">{label}</span>
       {children}
     </li>

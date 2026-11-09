@@ -30,7 +30,7 @@ export function Modal({ open, onClose, title, children, footer, size = "md" }: {
   const w = { sm: "max-w-sm", md: "max-w-lg", lg: "max-w-2xl", xl: "max-w-4xl" }[size];
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center bg-zinc-900/30 p-0 backdrop-blur-[2px] sm:items-center sm:p-4" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
-      <div ref={ref} role="dialog" aria-modal="true" aria-label={title} className={cn("flex max-h-[92vh] w-full flex-col rounded-t-2xl bg-white shadow-pop sm:rounded-2xl", w)}>
+      <div ref={ref} role="dialog" aria-modal="true" aria-label={title} className={cn("flex max-h-[92vh] w-full flex-col rounded-t-2xl bg-surface shadow-pop sm:rounded-2xl", w)}>
         <div className="flex items-center justify-between px-6 pb-2 pt-5">
           <h2 className="text-base font-semibold tracking-tight text-ink">{title}</h2>
           <button className="btn-icon btn-ghost" onClick={onClose} aria-label="Fechar"><X className="h-4 w-4" /></button>
@@ -60,7 +60,7 @@ export function ConfirmDialog({ open, title, message, confirmLabel = "Confirmar"
 export function EmptyState({ icon, title, text, action }: { icon?: React.ReactNode; title: string; text?: string; action?: React.ReactNode }) {
   return (
     <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-zinc-200 px-6 py-16 text-center">
-      {icon && <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-white text-zinc-400 ring-1 ring-zinc-200 [&>svg]:h-5 [&>svg]:w-5">{icon}</div>}
+      {icon && <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-surface text-zinc-400 ring-1 ring-zinc-200 [&>svg]:h-5 [&>svg]:w-5">{icon}</div>}
       <p className="font-medium text-ink">{title}</p>
       {text && <p className="mt-1 max-w-md text-sm text-ink-muted">{text}</p>}
       {action && <div className="mt-4">{action}</div>}

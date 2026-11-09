@@ -73,7 +73,7 @@ export function CatalogImportModal({ open, onClose, ctx, existing, room, onImpor
       <div className="mb-4 flex gap-1 rounded-lg bg-zinc-100 p-1">
         {tabs.map((t) => (
           <button key={t.key} disabled={t.disabled} title={t.disabled ? "IA generativa não configurada" : undefined} onClick={() => { setTab(t.key); setResults([]); setNote(null); }}
-            className={cn("flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-semibold disabled:opacity-40", tab === t.key ? "bg-white text-brand-700 shadow-sm" : "text-ink-muted")}>
+            className={cn("flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-semibold disabled:opacity-40", tab === t.key ? "bg-surface text-brand-700 shadow-sm" : "text-ink-muted")}>
             <t.icon className="h-4 w-4" />{t.label}
           </button>
         ))}
@@ -105,7 +105,7 @@ export function CatalogImportModal({ open, onClose, ctx, existing, room, onImpor
               <li key={p.code}>
                 <label className={cn("flex cursor-pointer gap-3 rounded-xl border p-2.5", on ? "border-brand-500 bg-brand-50/50" : "border-zinc-200", dup && "opacity-50")}>
                   <input type="checkbox" className="mt-1" disabled={dup} checked={on} onChange={(e) => { const s = new Set(selected); if (e.target.checked) { if (s.size >= room) return toast.error("Limite de produtos atingido."); s.add(p.code); } else s.delete(p.code); setSelected(s); }} />
-                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-white">{p.imageUrl ? <img src={p.imageUrl} alt="" className="max-h-full max-w-full object-contain" referrerPolicy="no-referrer" /> : <span className="text-[10px] text-ink-muted">sem imagem</span>}</div>
+                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-lg bg-surface">{p.imageUrl ? <img src={p.imageUrl} alt="" className="max-h-full max-w-full object-contain" referrerPolicy="no-referrer" /> : <span className="text-[10px] text-ink-muted">sem imagem</span>}</div>
                   <div className="min-w-0 text-sm">
                     <p className="line-clamp-2 font-semibold leading-tight">{p.name}</p>
                     <p className="text-xs text-ink-muted">Cód. {p.code} · estoque {p.stock}{dup ? " · já adicionado" : ""}</p>

@@ -2,14 +2,70 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Modo claro: neutros levemente azulados (marca Digitusul) */
 :root {
   color-scheme: light;
+  --page: 243 246 252;
+  --surface: 255 255 255;
+  --zinc-50: 246 248 253;
+  --zinc-100: 237 241 250;
+  --zinc-200: 222 228 242;
+  --zinc-300: 199 208 229;
+  --zinc-400: 146 157 186;
+  --zinc-500: 100 112 140;
+  --zinc-600: 72 84 116;
+  --zinc-700: 42 58 112;
+  --zinc-800: 26 40 96;
+  --zinc-900: 11 26 74;
+  --zinc-950: 6 14 44;
+  --brand-50: 238 241 252;
+  --brand-100: 220 226 249;
+  --brand-200: 185 197 243;
+  --brand-300: 142 160 234;
+  --brand-700: 28 52 160;
+  --brand-800: 24 44 128;
+  --accent-50: 253 236 236;
+  --accent-700: 161 16 23;
+  --ink: 15 23 50;
+  --ink-soft: 51 62 95;
+  --ink-muted: 100 112 140;
+  --shadow: 11 26 74;
+}
+
+/* Modo escuro: azul-marinho da marca */
+.dark {
+  color-scheme: dark;
+  --page: 7 11 22;
+  --surface: 14 20 37;
+  --zinc-50: 19 27 47;
+  --zinc-100: 26 35 59;
+  --zinc-200: 37 48 77;
+  --zinc-300: 54 67 101;
+  --zinc-400: 104 116 148;
+  --zinc-500: 141 152 180;
+  --zinc-600: 172 181 204;
+  --zinc-700: 203 210 226;
+  --zinc-800: 224 229 240;
+  --zinc-900: 236 240 248;
+  --zinc-950: 248 250 253;
+  --brand-50: 26 38 88;
+  --brand-100: 32 48 112;
+  --brand-200: 46 66 150;
+  --brand-300: 84 108 205;
+  --brand-700: 158 176 242;
+  --brand-800: 186 199 247;
+  --accent-50: 66 20 28;
+  --accent-700: 255 150 154;
+  --ink: 236 240 248;
+  --ink-soft: 203 210 226;
+  --ink-muted: 141 152 180;
+  --shadow: 0 0 0;
 }
 
 html,
 body {
-  background: #fafafa;
-  color: #18181b;
+  background: rgb(var(--page));
+  color: rgb(var(--ink));
 }
 
 body {
@@ -19,25 +75,34 @@ body {
   letter-spacing: -0.006em;
 }
 
-::selection { background: #dce2f9; }
+::selection { background: rgb(var(--brand-100)); }
+
+/* Cores fixas que precisam de contraste no modo escuro */
+.dark .text-brand-600, .dark .text-brand-500 { color: rgb(132 154 242); }
+.dark .text-accent-600, .dark .text-accent-500 { color: rgb(255 112 118); }
+.dark .bg-amber-50, .dark .bg-amber-50\/70 { background-color: rgb(120 80 10 / .22); }
+.dark .text-amber-700, .dark .text-amber-800, .dark .text-amber-900, .dark .text-amber-600 { color: rgb(252 211 77); }
+.dark .bg-emerald-50 { background-color: rgb(16 120 80 / .2); }
+.dark .text-emerald-700, .dark .text-emerald-600 { color: rgb(110 231 183); }
+.dark .hover\:bg-accent-50:hover { background-color: rgb(var(--accent-50)); }
 
 @layer components {
   .btn {
     @apply inline-flex h-9 items-center justify-center gap-2 whitespace-nowrap rounded-lg px-3.5 text-sm font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900/20 focus-visible:ring-offset-1 disabled:pointer-events-none disabled:opacity-40;
   }
-  .btn-primary { @apply btn bg-zinc-900 text-white hover:bg-zinc-700; }
+  .btn-primary { @apply btn bg-zinc-900 text-surface hover:bg-zinc-700; }
   .btn-accent { @apply btn bg-brand-600 text-white hover:bg-brand-700; }
-  .btn-secondary { @apply btn border border-zinc-200 bg-white text-ink hover:border-zinc-300 hover:bg-zinc-50; }
+  .btn-secondary { @apply btn border border-zinc-200 bg-surface text-ink hover:border-zinc-300 hover:bg-zinc-50; }
   .btn-ghost { @apply btn text-zinc-600 hover:bg-zinc-100 hover:text-ink; }
-  .btn-danger { @apply btn border border-zinc-200 bg-white text-accent-600 hover:border-accent-500/40 hover:bg-accent-50; }
+  .btn-danger { @apply btn border border-zinc-200 bg-surface text-accent-600 hover:border-accent-500/40 hover:bg-accent-50; }
   .btn-sm { @apply h-8 px-2.5 text-xs; }
   .btn-icon { @apply btn h-9 w-9 p-0; }
 
   .input {
-    @apply block w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-ink transition-colors placeholder:text-zinc-400 hover:border-zinc-300 focus:border-zinc-400 focus:outline-none focus:ring-4 focus:ring-zinc-900/5 disabled:bg-zinc-50;
+    @apply block w-full rounded-lg border border-zinc-200 bg-surface px-3 py-2 text-sm text-ink transition-colors placeholder:text-zinc-400 hover:border-zinc-300 focus:border-zinc-400 focus:outline-none focus:ring-4 focus:ring-zinc-900/5 disabled:bg-zinc-50;
   }
   .label { @apply mb-1.5 block text-[13px] font-medium text-zinc-700; }
-  .card { @apply rounded-2xl border border-zinc-200/80 bg-white; }
+  .card { @apply rounded-2xl border border-zinc-200/80 bg-surface; }
   .badge { @apply inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-medium; }
   .muted { @apply text-ink-muted; }
   .eyebrow { @apply text-xs font-medium text-zinc-500; }
@@ -45,5 +110,5 @@ body {
 
 /* Barras de rolagem discretas */
 .thin-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
-.thin-scroll::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 8px; }
+.thin-scroll::-webkit-scrollbar-thumb { background: rgb(var(--zinc-300)); border-radius: 8px; }
 .thin-scroll::-webkit-scrollbar-track { background: transparent; }

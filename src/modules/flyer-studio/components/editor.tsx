@@ -213,10 +213,10 @@ export function Editor({ ctx, initial }: { ctx: StudioContext; initial: EditorPr
   return (
     <div className="flex h-[100dvh] flex-col bg-zinc-100">
       {/* Barra superior */}
-      <header className="flex h-14 shrink-0 items-center gap-2 border-b border-zinc-200 bg-white px-3">
+      <header className="flex h-14 shrink-0 items-center gap-2 border-b border-zinc-200 bg-surface px-3">
         <Link href="/estudio" className="btn-icon btn-ghost" aria-label="Voltar ao Estúdio" onClick={(e) => { if (dirty && !confirm("Há alterações não salvas. Sair mesmo assim?")) e.preventDefault(); }}><ArrowLeft className="h-5 w-5" /></Link>
         <div className="min-w-0">
-          <input className="w-full max-w-[260px] truncate rounded px-1 text-sm font-semibold text-ink hover:bg-zinc-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-500/30" value={meta.name} readOnly={readOnly} onChange={(e) => { setMeta({ ...meta, name: e.target.value }); setDirty(true); }} aria-label="Nome do projeto" />
+          <input className="w-full max-w-[260px] truncate rounded px-1 text-sm font-semibold text-ink hover:bg-zinc-50 focus:bg-surface focus:outline-none focus:ring-2 focus:ring-brand-500/30" value={meta.name} readOnly={readOnly} onChange={(e) => { setMeta({ ...meta, name: e.target.value }); setDirty(true); }} aria-label="Nome do projeto" />
           <p className="truncate px-1 text-[11px] text-ink-muted">{categoryLabel(layout.category)} · {getFormat(initial.formatKey)?.label} · {initial.width}×{initial.height}px · v{version}{readOnly && ` · somente leitura (${initial.ownerName})`}</p>
         </div>
         <div className="ml-auto flex items-center gap-1">
@@ -239,7 +239,7 @@ export function Editor({ ctx, initial }: { ctx: StudioContext; initial: EditorPr
 
       <div className="flex min-h-0 flex-1 flex-col md:flex-row">
         {/* Painel esquerdo */}
-        <aside className="order-2 flex max-h-[42vh] w-full shrink-0 flex-col border-t border-zinc-200 bg-white md:order-1 md:max-h-none md:w-[340px] md:border-r md:border-t-0">
+        <aside className="order-2 flex max-h-[42vh] w-full shrink-0 flex-col border-t border-zinc-200 bg-surface md:order-1 md:max-h-none md:w-[340px] md:border-r md:border-t-0">
           <nav className="grid grid-cols-4 border-b border-zinc-100" aria-label="Painéis">
             {([["elementos", "Elementos", Shapes], ["produtos", "Produtos", Package], ["layout", "Modelo", LayoutTemplate], ["camadas", "Camadas", Layers]] as const).map(([k, l, I]) => (
               <button key={k} onClick={() => setTab(k)} className={cn("flex flex-col items-center gap-0.5 py-2 text-[11px] font-semibold", tab === k ? "border-b-2 border-brand-600 text-brand-700" : "text-ink-muted hover:text-ink")}><I className="h-4 w-4" />{l}</button>
@@ -257,7 +257,7 @@ export function Editor({ ctx, initial }: { ctx: StudioContext; initial: EditorPr
                 {ctx.brandKit.logo && (
                   <div>
                     <p className="label">Logotipo oficial</p>
-                    <button className="flex h-16 w-full items-center justify-center rounded-lg border border-zinc-200 bg-white p-2 hover:border-brand-300" disabled={readOnly} onClick={() => addBrandAsset({ ...ctx.brandKit.logo!, name: "Logotipo Digitusul" }, "logo")}>
+                    <button className="flex h-16 w-full items-center justify-center rounded-lg border border-zinc-200 bg-surface p-2 hover:border-brand-300" disabled={readOnly} onClick={() => addBrandAsset({ ...ctx.brandKit.logo!, name: "Logotipo Digitusul" }, "logo")}>
                       <img src={ctx.brandKit.logo.url} alt="Logotipo" className="max-h-full object-contain" />
                     </button>
                   </div>
@@ -324,7 +324,7 @@ export function Editor({ ctx, initial }: { ctx: StudioContext; initial: EditorPr
         </div>
 
         {/* Propriedades */}
-        <aside className="order-3 hidden w-[300px] shrink-0 border-l border-zinc-200 bg-white lg:block">
+        <aside className="order-3 hidden w-[300px] shrink-0 border-l border-zinc-200 bg-surface lg:block">
           <div className="thin-scroll h-full overflow-y-auto p-3">
             {selected ? (
               <Properties el={selected} readOnly={readOnly} products={products} ctx={ctx} doc={doc}
@@ -503,7 +503,7 @@ function AssetGrid({ title, items, onPick, disabled }: { title: string; items: {
       <p className="label">{title}</p>
       <div className="grid grid-cols-3 gap-2">
         {items.map((a) => (
-          <button key={a.fileId} disabled={disabled} title={a.name} onClick={() => onPick(a)} className="flex aspect-square items-center justify-center rounded-lg border border-zinc-200 bg-white p-1.5 hover:border-brand-300">
+          <button key={a.fileId} disabled={disabled} title={a.name} onClick={() => onPick(a)} className="flex aspect-square items-center justify-center rounded-lg border border-zinc-200 bg-surface p-1.5 hover:border-brand-300">
             <img src={a.url} alt={a.name} className="max-h-full max-w-full object-contain" />
           </button>
         ))}

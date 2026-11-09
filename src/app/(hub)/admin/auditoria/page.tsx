@@ -18,9 +18,9 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
   return (
     <div>
       <div className="mb-3 flex flex-wrap gap-2">
-        <Link href="/admin/auditoria" className={`badge px-3 py-1 ${!acao ? "bg-brand-600 text-white" : "bg-white text-ink-soft ring-1 ring-zinc-200"}`}>Todas</Link>
+        <Link href="/admin/auditoria" className={`badge px-3 py-1 ${!acao ? "bg-brand-600 text-white" : "bg-surface text-ink-soft ring-1 ring-zinc-200"}`}>Todas</Link>
         {Object.entries(ACTION_LABELS).map(([k, v]) => (
-          <Link key={k} href={`/admin/auditoria?acao=${k}`} className={`badge px-3 py-1 ${acao === k ? "bg-brand-600 text-white" : "bg-white text-ink-soft ring-1 ring-zinc-200"}`}>{v}</Link>
+          <Link key={k} href={`/admin/auditoria?acao=${k}`} className={`badge px-3 py-1 ${acao === k ? "bg-brand-600 text-white" : "bg-surface text-ink-soft ring-1 ring-zinc-200"}`}>{v}</Link>
         ))}
       </div>
       <div className="card overflow-x-auto">

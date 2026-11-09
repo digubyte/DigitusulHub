@@ -102,7 +102,7 @@ export function ProductsEditor({ products, onChange, ctx, compact }: { products:
                   {p.imageFileId ? (
                     <div className="group relative aspect-square overflow-hidden rounded-lg bg-[conic-gradient(#f1f5f9_25%,#fff_0_50%,#f1f5f9_0_75%,#fff_0)] bg-[length:12px_12px]">
                       <img src={`/api/files/${p.imageFileId}`} alt={p.name || "Produto"} className="h-full w-full object-contain" />
-                      {busyId === p.id && <div className="absolute inset-0 flex items-center justify-center bg-white/70"><Spinner className="text-brand-600" /></div>}
+                      {busyId === p.id && <div className="absolute inset-0 flex items-center justify-center bg-surface/70"><Spinner className="text-brand-600" /></div>}
                     </div>
                   ) : (
                     <Dropzone compact multiple={false} busy={busyId === p.id} label="Imagem" onFiles={(f) => setImage(p, f)} />
