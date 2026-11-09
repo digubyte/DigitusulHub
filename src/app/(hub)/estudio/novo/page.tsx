@@ -3,16 +3,16 @@ import { HttpError } from "@/core/http";
 import { getStudioContext } from "@/modules/flyer-studio/services/studio-context";
 import { getFlyer } from "@/modules/flyer-studio/services/flyer-service";
 import { WizardClient } from "@/modules/flyer-studio/components/client-loaders";
-import { ChatGptWizard } from "@/modules/flyer-studio/components/chatgpt-wizard";
+import { redirect } from "next/navigation";
 
 export const metadata = { title: "Novo flyer" };
 
-/** Padrão: flyers (ou lote) gerados no ChatGPT. `?modo=manual` abre a montagem no editor. */
+/** A criação acontece em /criar. Aqui fica só a montagem manual no editor (`?modo=manual`) e templates antigos. */
 export default async function NewFlyerPage({ searchParams }: { searchParams: Promise<{ template?: string; modo?: string }> }) {
   const user = await requirePageUser("flyers.create");
   const { template, modo } = await searchParams;
+  if (!template && modo !== "manual") redirect("/criar");
   const ctx = await getStudioContext(user);
-  if (!template && modo !== "manual") return <ChatGptWizard ctx={ctx} />;
   let tpl = null;
   if (template) {
     try {

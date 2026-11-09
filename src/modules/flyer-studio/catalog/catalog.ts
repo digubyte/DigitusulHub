@@ -104,10 +104,11 @@ export async function searchByTerms(terms: string[], perTerm = 40): Promise<Cata
 /** Sorteio de produtos com estoque, opcionalmente dentro de uma categoria do site. */
 export async function randomProducts(count: number, opts: { categorySlug?: string; exclude?: string[] } = {}): Promise<CatalogProduct[]> {
   const exclude = new Set(opts.exclude ?? []);
-  const keep = (list: CatalogProduct[]) => list.filter((p) => inStock(p) && !exclude.has(p.code));
+  // Para flyer, só entram produtos que têm foto no site.
+  const keep = (list: CatalogProduct[]) => list.filter((p) => inStock(p) && !!p.imageUrl && !exclude.has(p.code));
 
   if (opts.categorySlug) {
-    const codes = shuffle(await categoryCodes(opts.categorySlug, Math.min(count * 3 + 10, 200))).filter((c) => !exclude.has(c));
+    const codes = shuffle(await categoryCodes(opts.categorySlug, Math.min(count * 4 + 20, 250))).filter((c) => !exclude.has(c));
     const picked: CatalogProduct[] = [];
     for (let i = 0; i < codes.length && picked.length < count && i < 250; i += 50) {
       picked.push(...keep((await productsByCodes(codes.slice(i, i + 50))).products));
@@ -118,7 +119,7 @@ export async function randomProducts(count: number, opts: { categorySlug?: strin
   const first = await algolia<{ hits: Hit[]; nbPages: number }>(`${INDEX}/query`, { query: "", hitsPerPage: 50, page: 0, attributesToRetrieve: ATTRS });
   const maxPage = Math.max(0, Math.min(first.nbPages - 1, 200));
   let pool = keep(first.hits.map(toProduct).filter((p): p is CatalogProduct => !!p));
-  for (let attempt = 0; attempt < 6 && pool.length < count * 4; attempt++) {
+  for (let attempt = 0; attempt < 10 && pool.length < count * 3; attempt++) {
     const page = Math.floor(Math.random() * (maxPage + 1));
     const r = await algolia<{ hits: Hit[] }>(`${INDEX}/query`, { query: "", hitsPerPage: 50, page, attributesToRetrieve: ATTRS });
     pool = pool.concat(keep(r.hits.map(toProduct).filter((p): p is CatalogProduct => !!p)));

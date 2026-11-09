@@ -97,23 +97,20 @@ O projeto anterior foi reescrito e integrado ao Estúdio:
 - **Lista** "Código - Nome - Valor" e **CSV** no modelo `Sku,Nome,Ativo,Ordem`.
 - Removido: gateway de IA do Lovable, dezenas de componentes não usados, código duplicado entre as funções de catálogo.
 
-## Criar flyers com o ChatGPT (um flyer ou lote)
+## Como funciona (tela única em /criar)
 
-Fluxo padrão em **Estúdio › Novo flyer ou lote**:
+Inspirado no Digitusul Prompt Generator (Lovable): uma tela só, em passos.
 
-1. **Configuração** — lote (2 a 8 flyers, padrão 6) ou flyer único, segmento (Gamer, Limpeza, Escritório…), tipo e formato.
-2. **Produtos** — catálogo do site, digitados ou por print. No lote, são divididos em ordem entre os flyers.
-3. **Estilo** — título, subtítulo, rodapé, destaque, mascote e instruções extras.
-4. **Aprovação** — resumo de cada flyer (produtos e preços) e o prompt completo, editável. Nada é salvo antes de aprovar.
+1. **Adicionar produtos** — sortear do site (categoria + quantidade; só produtos com foto e estoque > 2),
+   buscar por código, enviar fotos/prints ou colar com Ctrl+V. Busca com IA aparece se a IA estiver configurada.
+2. **Conferir** — nome, código e valor no cartão; o valor final é calculado pelo app (cartão + 8,12%, final ,50/,75/,90/,95/,99).
+3. **Gerar** — quantos flyers (1 a 8; os produtos são divididos em ordem), formato, estilo e título. “Aprovar e gerar” salva no histórico.
+4. **Resultados** — por flyer: baixar imagens (ZIP), copiar o prompt e abrir o ChatGPT (site ou app), enviar a arte de volta
+   e conferir produto por produto. Também: lista de produtos (copiar/TXT) e planilha CSV (Sku,Nome,Ativo,Ordem).
 
-Depois de aprovar, cada flyer tem: **Baixar ZIP** (fotos com os nomes citados no prompt + logo + mascote),
-**Copiar e abrir** (copia o prompt e abre o chatgpt.com; também dá para colar no app do ChatGPT) e **Enviar a arte gerada**.
-Ao enviar a arte, o usuário marca produto por produto que nome, código e preço conferem — só então ela é salva.
-O download sai no tamanho exato do formato (recorte centralizado) ou no original.
-
-Proteções: o prompt é montado pelo aplicativo com os dados do cadastro; o servidor recusa prompts (mesmo editados)
-que não contenham o nome, o código e o preço exatos de cada produto. A montagem manual no editor continua em
-**Montar manualmente** (`/estudio/novo?modo=manual`) para quando o preço precisa sair garantido ao centavo.
+O servidor recusa prompts que não contenham o nome, o código e o preço exatos de cada produto.
+Menu: **Criar flyers · Histórico · Admin** (usuários, Brand Kit, preços e integrações, auditoria).
+O editor manual antigo continua acessível em `/estudio/novo?modo=manual`.
 
 ## Integrações opcionais (`.env`)
 - `ANTHROPIC_API_KEY` (+ `AI_MODEL`, padrão `claude-opus-5-5`): Criar com IA, leitura de imagens, busca inteligente no catálogo. Usa fallback de servidor da Anthropic em caso de recusa.

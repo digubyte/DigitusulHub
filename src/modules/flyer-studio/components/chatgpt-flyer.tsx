@@ -97,7 +97,9 @@ export function ChatGptFlyerCard({ flyer, ctx, index, onChange }: { flyer: ChatG
 
       <div className="grid flex-1 gap-4 p-4 sm:grid-cols-[150px_1fr]">
         <div className="mx-auto flex aspect-[4/5] w-full max-w-[200px] items-center justify-center overflow-hidden rounded-lg bg-zinc-100/80 sm:max-w-none sm:self-start">
-          {preview ? <img src={`/api/files/${preview}`} alt={`Arte de ${flyer.name}`} className="h-full w-full object-contain" /> : <ImageUp className="h-6 w-6 text-zinc-300" />}
+          {preview ? <img src={`/api/files/${preview}`} alt={`Arte de ${flyer.name}`} className="h-full w-full object-contain" />
+            : flyer.products.find((p) => p.imageFileId) ? <img src={`/api/files/${flyer.products.find((p) => p.imageFileId)!.imageFileId}`} alt="" className="h-full w-full object-contain p-4 opacity-40 grayscale" />
+            : <ImageUp className="h-6 w-6 text-zinc-300" />}
         </div>
 
         <div className="min-w-0 space-y-3">

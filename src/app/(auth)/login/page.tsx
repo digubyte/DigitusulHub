@@ -9,10 +9,10 @@ export const dynamic = "force-dynamic";
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ voltar?: string; expirada?: string; erro?: string }> }) {
   const sp = await searchParams;
-  if (await getCurrentUser()) redirect("/dashboard");
+  if (await getCurrentUser()) redirect("/criar");
   // Plataforma recém-publicada, sem administrador: vai direto para o primeiro acesso.
   if (await needsFirstAccess()) redirect("/primeiro-acesso");
-  const next = sp.voltar && sp.voltar.startsWith("/") && !sp.voltar.startsWith("//") ? sp.voltar : "/dashboard";
+  const next = sp.voltar && sp.voltar.startsWith("/") && !sp.voltar.startsWith("//") ? sp.voltar : "/criar";
   const notice = sp.expirada ? "Sua sessão expirou. Entre novamente." : sp.erro === "acesso" ? "Seu usuário não tem acesso à plataforma." : null;
   return (
     <>

@@ -27,7 +27,7 @@ export function ChatGptProjectView({ ctx, flyer, batchId }: { ctx: StudioContext
   );
 }
 
-export function ChatGptBatchView({ ctx, flyers: initial, campaign }: { ctx: StudioContext; flyers: ChatGptFlyer[]; campaign: string | null }) {
+export function ChatGptBatchView({ ctx, flyers: initial, campaign, embedded }: { ctx: StudioContext; flyers: ChatGptFlyer[]; campaign: string | null; embedded?: boolean }) {
   const toast = useToast();
   const [flyers, setFlyers] = useState(initial);
   const [busy, setBusy] = useState<string | null>(null);
@@ -63,7 +63,13 @@ export function ChatGptBatchView({ ctx, flyers: initial, campaign }: { ctx: Stud
 
   return (
     <div>
-      <div className="mb-8 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+      <div className={embedded ? "mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between" : "mb-8 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between"}>
+        {embedded ? (
+          <div className="flex items-center gap-3">
+            <div className="h-1.5 w-32 overflow-hidden rounded-full bg-zinc-200"><div className="h-full rounded-full bg-zinc-900 transition-all" style={{ width: `${(ready.length / flyers.length) * 100}%` }} /></div>
+            <span className="text-xs text-zinc-500">{ready.length} de {flyers.length} prontos</span>
+          </div>
+        ) : (
         <div className="flex items-start gap-3">
           <Link href="/estudio" className="btn-icon btn-ghost -ml-2 mt-1" aria-label="Voltar ao Estúdio"><ArrowLeft className="h-5 w-5" /></Link>
           <div>
@@ -75,19 +81,20 @@ export function ChatGptBatchView({ ctx, flyers: initial, campaign }: { ctx: Stud
             </div>
           </div>
         </div>
+        )}
         <div className="flex flex-wrap gap-2">
-          <button className="btn-secondary" onClick={allAttachments} disabled={!!busy}>{busy === "zip" ? <Spinner /> : <FileArchive className="h-4 w-4" />}Imagens do lote</button>
-          <button className="btn-secondary" onClick={copyAll}><ClipboardCopy className="h-4 w-4" />Copiar todos os prompts</button>
+          <button className="btn-secondary" onClick={allAttachments} disabled={!!busy}>{busy === "zip" ? <Spinner /> : <FileArchive className="h-4 w-4" />}{flyers.length > 1 ? "Imagens do lote" : "Imagens"}</button>
+          {flyers.length > 1 && <button className="btn-secondary" onClick={copyAll}><ClipboardCopy className="h-4 w-4" />Copiar todos os prompts</button>}
           <a className="btn-secondary" href={CHATGPT_URL} target="_blank" rel="noopener noreferrer"><ExternalLink className="h-4 w-4" />ChatGPT</a>
           <button className="btn-primary" onClick={allResults} disabled={!ready.length || !!busy}>{busy === "results" ? <Spinner /> : <Download className="h-4 w-4" />}Baixar prontos ({ready.length})</button>
         </div>
       </div>
 
-      <p className="mb-6 max-w-3xl text-[13px] text-zinc-500">
+      {!embedded && <p className="mb-6 max-w-3xl text-[13px] text-zinc-500">
         Faça um flyer por vez, no mesmo chat do ChatGPT. Em cada cartão: baixe as imagens, clique em <strong className="font-medium text-ink">Copiar e abrir</strong>, anexe as fotos, cole o prompt e envie. Quando a arte ficar pronta, baixe e arraste de volta no cartão.
-      </p>
+      </p>}
 
-      <div className="grid gap-4 xl:grid-cols-2">
+      <div className={embedded ? "grid gap-4 lg:grid-cols-2" : "grid gap-4 xl:grid-cols-2"}>
         {flyers.map((f, i) => (
           <ChatGptFlyerCard key={f.id} flyer={f} ctx={ctx} index={i} onChange={(nf) => setFlyers((all) => all.map((x) => (x.id === nf.id ? nf : x)))} />
         ))}
