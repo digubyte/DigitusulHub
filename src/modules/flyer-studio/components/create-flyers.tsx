@@ -47,6 +47,7 @@ export function CreateFlyers({ ctx }: { ctx: StudioContext }) {
   const allSeals = useMemo(() => sealsFromKit(ctx.brandKit.approvedPhrases), [ctx.brandKit.approvedPhrases]);
   const [seals, setSeals] = useState<string[]>(allSeals);
   const [result, setResult] = useState<{ flyers: ChatGptFlyer[]; list: Product[] } | null>(null);
+  const [batchId, setBatchId] = useState<string | null>(null);
   const resultRef = useRef<HTMLDivElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -210,10 +211,11 @@ export function CreateFlyers({ ctx }: { ctx: StudioContext }) {
         extraInstructions: extra, batch: groups.length > 1 ? { index: i, total: groups.length } : undefined,
       }),
     }));
-    const r = await api<{ ids: string[] }>("/api/flyers/chatgpt", {
+    const r = await api<{ ids: string[]; batchId: string | null }>("/api/flyers/chatgpt", {
       method: "POST",
       json: { campaign: segment.trim() || null, formatKey, width: fmt.width, height: fmt.height, layoutConfig: layout, flyers: drafts },
     });
+    setBatchId(r.batchId);
     setResult({
       list: items,
       flyers: drafts.map((d, i) => ({ id: r.ids[i], name: d.name, products: d.products, prompt: d.prompt, resultFileId: null, width: fmt.width, height: fmt.height, formatKey, canEdit: true, layout })),
@@ -381,7 +383,7 @@ export function CreateFlyers({ ctx }: { ctx: StudioContext }) {
         <div ref={resultRef} className="scroll-mt-20">
           <Section n={4} title="Resultados" subtitle="Para cada flyer: baixe as imagens, copie o prompt, cole no ChatGPT (site ou app) e envie a arte de volta."
             aside={<button className="btn-ghost btn-sm" onClick={clearAll}><RotateCcw className="h-3.5 w-3.5" />Começar de novo</button>}>
-            <ChatGptBatchView ctx={ctx} flyers={result.flyers} campaign={null} embedded />
+            <ChatGptBatchView ctx={ctx} flyers={result.flyers} campaign={null} batchId={batchId} embedded />
             <div className="mt-6 rounded-xl border border-zinc-200 p-4">
               <p className="mb-2 flex items-center gap-2 text-sm font-medium"><FileText className="h-4 w-4 text-zinc-400" />Lista de produtos</p>
               <pre className="thin-scroll max-h-56 overflow-auto whitespace-pre-wrap rounded-lg bg-zinc-50 p-3 font-mono text-xs">{list}</pre>

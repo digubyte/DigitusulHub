@@ -11,10 +11,16 @@ import type { LayoutOptions, Product } from "../domain/types";
 import { buildAttachmentsZip, downloadAttachmentsLoose, CHATGPT_URL, copyText, downloadBlob, fileSlug, fitToFormat, originalFile } from "./chatgpt-assets";
 import type { StudioContext } from "./studio-types";
 import { SITE_LOGO } from "../domain/brand";
+import type { ReviewStatus } from "../domain/schemas";
+import { REVIEW_BADGE, REVIEW_LABEL } from "./approval-slides";
 
 export interface ChatGptFlyer {
   id: string; name: string; products: Product[]; prompt: string; resultFileId: string | null;
   width: number; height: number; formatKey: string; canEdit: boolean; layout: LayoutOptions;
+  /** Conversa do ChatGPT onde a arte foi gerada. */
+  chatUrl?: string | null;
+  reviewStatus?: ReviewStatus;
+  reviewNote?: string | null;
 }
 
 export function attachmentSetFor(f: ChatGptFlyer, ctx: StudioContext) {
@@ -31,6 +37,7 @@ export function ChatGptFlyerCard({ flyer, ctx, index, onChange }: { flyer: ChatG
   const [copied, setCopied] = useState(false);
   const [editing, setEditing] = useState(false);
   const [promptDraft, setPromptDraft] = useState(flyer.prompt);
+  const [chatUrl, setChatUrl] = useState(flyer.chatUrl ?? "");
   const hasAttachments = true; // sempre há o logo
   const done = !!flyer.resultFileId;
 
@@ -66,8 +73,9 @@ export function ChatGptFlyerCard({ flyer, ctx, index, onChange }: { flyer: ChatG
   });
 
   const saveResult = () => run("save", async () => {
-    await api(`/api/flyers/${flyer.id}/chatgpt`, { method: "POST", json: { fileId: pending!.id, checked: true } });
-    onChange({ ...flyer, resultFileId: pending!.id });
+    const url = chatUrl.trim() || null;
+    await api(`/api/flyers/${flyer.id}/chatgpt`, { method: "POST", json: { fileId: pending!.id, checked: true, chatUrl: url } });
+    onChange({ ...flyer, resultFileId: pending!.id, chatUrl: url, reviewStatus: "pending", reviewNote: null });
     setPending(null);
     toast.success("Arte salva no histórico.");
   });
@@ -100,7 +108,11 @@ export function ChatGptFlyerCard({ flyer, ctx, index, onChange }: { flyer: ChatG
         {index != null && <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-zinc-100 text-[11px] font-medium">{index + 1}</span>}
         <p className="min-w-0 flex-1 truncate text-sm font-medium">{flyer.name}</p>
         <span className={cn("badge", done ? "bg-emerald-50 text-emerald-700" : pending ? "bg-amber-50 text-amber-700" : "bg-zinc-100 text-zinc-500")}>{done ? "Pronto" : pending ? "Conferir" : "Aguardando arte"}</span>
+        {flyer.reviewStatus && flyer.reviewStatus !== "pending" && <span className={cn("badge", REVIEW_BADGE[flyer.reviewStatus])} data-review={flyer.reviewStatus}>{REVIEW_LABEL[flyer.reviewStatus]}</span>}
       </header>
+      {flyer.reviewNote && flyer.reviewStatus !== "approved" && (
+        <p className="border-b border-zinc-100 bg-sky-50/60 px-4 py-2 text-[13px] text-sky-900"><strong className="font-medium">Pedido na aprovação:</strong> {flyer.reviewNote}</p>
+      )}
 
       <div className="grid flex-1 gap-4 p-4 sm:grid-cols-[150px_1fr]">
         <div className="mx-auto flex aspect-[4/5] w-full max-w-[200px] items-center justify-center overflow-hidden rounded-lg bg-zinc-100/80 sm:max-w-none sm:self-start">
@@ -123,6 +135,7 @@ export function ChatGptFlyerCard({ flyer, ctx, index, onChange }: { flyer: ChatG
           {pending ? (
             <div className="space-y-2 rounded-lg bg-amber-50/70 p-3 text-[13px]">
               <p className="text-amber-900">Compare a arte com a lista: marque cada produto cujo <strong>nome, código e preço</strong> estão exatamente iguais. Se algum estiver errado, peça a correção no ChatGPT.</p>
+              <input className="input text-xs" type="url" placeholder="Link da conversa no ChatGPT (opcional)" aria-label="Link da conversa no ChatGPT" value={chatUrl} onChange={(e) => setChatUrl(e.target.value)} />
               <div className="flex flex-wrap gap-2">
                 <button className="btn-primary btn-sm" disabled={!allChecked || busy === "save"} onClick={saveResult}>{busy === "save" ? <Spinner /> : <Check className="h-3.5 w-3.5" />}Tudo confere, salvar</button>
                 <button className="btn-ghost btn-sm" onClick={() => setPending(null)}>Cancelar</button>
@@ -133,6 +146,7 @@ export function ChatGptFlyerCard({ flyer, ctx, index, onChange }: { flyer: ChatG
               <button className="btn-primary btn-sm" onClick={() => download(true)} disabled={!!busy}>{busy === "exact" ? <Spinner /> : <Download className="h-3.5 w-3.5" />}Baixar {flyer.width}×{flyer.height}</button>
               <button className="btn-secondary btn-sm" onClick={() => download(false)} disabled={!!busy}>Original</button>
               {flyer.canEdit && <button className="btn-ghost btn-sm" onClick={resetResult} disabled={!!busy}><RotateCcw className="h-3.5 w-3.5" />Gerar de novo</button>}
+              {flyer.chatUrl && <a className="btn-ghost btn-sm" href={flyer.chatUrl} target="_blank" rel="noopener noreferrer"><ExternalLink className="h-3.5 w-3.5" />Conversa</a>}
             </div>
           ) : flyer.canEdit ? (
             <ol className="space-y-2 text-[13px]">

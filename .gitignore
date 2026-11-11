@@ -6,3 +6,4 @@ storage/*
 prisma/*.db
 prisma/*.db-journal
 *.tsbuildinfo
+.flyers-work/

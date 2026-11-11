@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ClipboardCopy, Download, ExternalLink, FileArchive } from "lucide-react";
+import { ArrowLeft, ClipboardCopy, Download, ExternalLink, FileArchive, Presentation } from "lucide-react";
 import { zipSync } from "fflate";
 import { Spinner } from "@/components/ui/primitives";
 import { useToast } from "@/components/ui/toast";
@@ -27,7 +27,7 @@ export function ChatGptProjectView({ ctx, flyer, batchId }: { ctx: StudioContext
   );
 }
 
-export function ChatGptBatchView({ ctx, flyers: initial, campaign, embedded }: { ctx: StudioContext; flyers: ChatGptFlyer[]; campaign: string | null; embedded?: boolean }) {
+export function ChatGptBatchView({ ctx, flyers: initial, campaign, embedded, batchId }: { ctx: StudioContext; flyers: ChatGptFlyer[]; campaign: string | null; embedded?: boolean; batchId?: string | null }) {
   const toast = useToast();
   const [flyers, setFlyers] = useState(initial);
   const [busy, setBusy] = useState<string | null>(null);
@@ -86,6 +86,7 @@ export function ChatGptBatchView({ ctx, flyers: initial, campaign, embedded }: {
           <button className="btn-secondary" onClick={allAttachments} disabled={!!busy}>{busy === "zip" ? <Spinner /> : <FileArchive className="h-4 w-4" />}{flyers.length > 1 ? "Imagens do lote" : "Imagens"}</button>
           {flyers.length > 1 && <button className="btn-secondary" onClick={copyAll}><ClipboardCopy className="h-4 w-4" />Copiar todos os prompts</button>}
           <a className="btn-secondary" href={CHATGPT_URL} target="_blank" rel="noopener noreferrer"><ExternalLink className="h-4 w-4" />ChatGPT</a>
+          {batchId && <Link className="btn-accent" href={`/estudio/lote/${batchId}/aprovar`}><Presentation className="h-4 w-4" />Aprovar flyers ({ready.filter((f) => (f.reviewStatus ?? "pending") === "pending").length})</Link>}
           <button className="btn-primary" onClick={allResults} disabled={!ready.length || !!busy}>{busy === "results" ? <Spinner /> : <Download className="h-4 w-4" />}Baixar prontos ({ready.length})</button>
         </div>
       </div>

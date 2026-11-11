@@ -111,4 +111,13 @@ export const ChatGptResultSchema = z.object({
   fileId: z.string().min(1).max(64).nullable(),
   /** Confirmação de que nome, código e preço de cada produto foram conferidos na arte. */
   checked: z.boolean(),
+  /** Link da conversa no ChatGPT (opcional), para pedir alterações no mesmo chat. */
+  chatUrl: z.string().trim().url().max(500).refine((u) => /^https:\/\/(chatgpt\.com|chat\.openai\.com)\//.test(u), "Use o link de uma conversa do ChatGPT.").nullable().optional(),
 });
+
+export const REVIEW_STATUSES = ["pending", "approved", "redo", "changes"] as const;
+export type ReviewStatus = (typeof REVIEW_STATUSES)[number];
+export const ReviewSchema = z.object({
+  status: z.enum(REVIEW_STATUSES),
+  note: z.string().trim().max(2000).nullable().optional(),
+}).refine((d) => d.status !== "changes" || !!d.note, { message: "Escreva quais alterações você quer.", path: ["note"] });

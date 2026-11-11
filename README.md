@@ -129,6 +129,16 @@ O servidor recusa prompts que não contenham o nome, o código e o preço exatos
 Menu do topo: **Início · Gerador de flyers · Admin**; dentro do gerador, abas **Criar | Histórico**.
 O editor manual antigo continua acessível em `/estudio/novo?modo=manual`.
 
+## Aprovação em slides e automação do ChatGPT
+
+- **Aprovar flyers** (`/estudio/lote/<batchId>/aprovar`): um flyer por slide (setas ou ← →), com **Aprovar**,
+  **Refazer** e **Escrever alterações**. O status aparece nos cartões do lote; arte nova volta para "Aguardando aprovação".
+  Campos no banco: `reviewStatus`, `reviewNote`, `reviewedAt` e `chatUrl` (conversa do ChatGPT, para pedir alterações no mesmo chat).
+- **Automação pelo Claude Code + Claude in Chrome:** com este projeto aberto no Claude Code, rode `/gerar-flyers [categoria]`.
+  O Claude cria o lote, leva prompt + imagens de cada flyer ao ChatGPT no seu Chrome, confere preços/códigos/logo,
+  devolve a arte ao Hub e abre a aprovação. Depois da revisão, `/gerar-flyers refazer` processa os pedidos.
+  Roteiro completo em `.claude/commands/gerar-flyers.md`.
+
 ## Integrações opcionais (`.env`)
 - `ANTHROPIC_API_KEY` (+ `AI_MODEL`, padrão `claude-opus-5-5`): Criar com IA, leitura de imagens, busca inteligente no catálogo. Usa fallback de servidor da Anthropic em caso de recusa.
 - `REMOVE_BG_API_KEY`: remoção de fundo (a original é preservada).

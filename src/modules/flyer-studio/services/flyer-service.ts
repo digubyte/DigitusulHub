@@ -7,7 +7,7 @@ import { canDeleteFlyer, canEditFlyer, canViewFlyer } from "@/core/permissions";
 import { parseJson, toJson } from "@/core/util";
 import { logActivity } from "@/core/audit";
 import { storeImage } from "@/core/storage/storage";
-import type { ProjectWrite } from "../domain/schemas";
+import type { ProjectWrite, ReviewStatus } from "../domain/schemas";
 import type { FlyerDocument, LayoutOptions, Product } from "../domain/types";
 
 /**
@@ -61,6 +61,7 @@ export async function getFlyer(user: CurrentUser, id: string) {
     canvasState: parseJson<FlyerDocument>(row.canvasState, {} as FlyerDocument),
     isTemplate: row.isTemplate, version: row.version, ownerId: row.ownerId, ownerName: row.owner.name,
     mode: row.mode as "editor" | "chatgpt", prompt: row.prompt, resultFileId: row.resultFileId, batchId: row.batchId,
+    chatUrl: row.chatUrl, reviewStatus: row.reviewStatus as ReviewStatus, reviewNote: row.reviewNote,
     createdAt: row.createdAt.toISOString(), updatedAt: row.updatedAt.toISOString(), thumbnailId: row.thumbnailId,
     canEdit: canEditFlyer(user.permissions, user.id, row.ownerId) && (!row.isTemplate || user.permissions.has("flyers.templates.manage")),
   };

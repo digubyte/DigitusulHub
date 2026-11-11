@@ -46,6 +46,7 @@ export function BatchDay({ ctx }: { ctx: StudioContext }) {
   const [spare, setSpare] = useState<Spare[]>([]);
   const [busy, setBusy] = useState<string | null>(null);
   const [result, setResult] = useState<ChatGptFlyer[] | null>(null);
+  const [batchId, setBatchId] = useState<string | null>(null);
   const planRef = useRef<HTMLDivElement>(null);
   const resultRef = useRef<HTMLDivElement>(null);
 
@@ -122,10 +123,11 @@ export function BatchDay({ ctx }: { ctx: StudioContext }) {
         extraInstructions: extra, batch: valid.length > 1 ? { index: i, total: valid.length } : undefined,
       }),
     }));
-    const r = await api<{ ids: string[] }>("/api/flyers/chatgpt", {
+    const r = await api<{ ids: string[]; batchId: string | null }>("/api/flyers/chatgpt", {
       method: "POST",
       json: { campaign: segment || null, formatKey, width: fmt.width, height: fmt.height, layoutConfig: layout, flyers: drafts },
     });
+    setBatchId(r.batchId);
     setResult(drafts.map((d, i) => ({ id: r.ids[i], name: d.name, products: d.products, prompt: d.prompt, resultFileId: null, width: fmt.width, height: fmt.height, formatKey, canEdit: true, layout })));
     toast.success(`${drafts.length} prompts prontos e salvos no histórico.`);
     setTimeout(() => resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
@@ -253,7 +255,7 @@ export function BatchDay({ ctx }: { ctx: StudioContext }) {
         <div ref={resultRef} className="scroll-mt-20">
           <Section n={3} title="Prompts prontos" subtitle="Em cada flyer: baixe as imagens (logo + produtos), clique em Copiar e abrir, arraste as imagens no ChatGPT, cole o prompt e envie."
             aside={<button className="btn-ghost btn-sm" onClick={restart}><RotateCcw className="h-3.5 w-3.5" />Novo lote</button>}>
-            <ChatGptBatchView ctx={ctx} flyers={result} campaign={null} embedded />
+            <ChatGptBatchView ctx={ctx} flyers={result} campaign={null} batchId={batchId} embedded />
           </Section>
         </div>
       )}

@@ -5,8 +5,8 @@ import { setChatGptResult, updateChatGptPrompt } from "@/modules/flyer-studio/se
 
 /** Salva a arte gerada (ou remove para gerar de novo). */
 export const POST = apiRoute<{ id: string }>({ permission: "flyers.access" }, async ({ req, user, params }) => {
-  const { fileId, checked } = await parseBody(req, ChatGptResultSchema);
-  await setChatGptResult(user, params.id, fileId, checked);
+  const { fileId, checked, chatUrl } = await parseBody(req, ChatGptResultSchema);
+  await setChatGptResult(user, params.id, fileId, checked, chatUrl);
   return jsonOk({ ok: true });
 });
 

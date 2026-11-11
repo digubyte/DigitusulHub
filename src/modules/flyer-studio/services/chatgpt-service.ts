@@ -8,7 +8,7 @@ import { toJson } from "@/core/util";
 import { logActivity } from "@/core/audit";
 import { formatPrice } from "../domain/product-format";
 import { promptBlockers } from "../domain/chatgpt-prompt";
-import type { ChatGptBatch } from "../domain/schemas";
+import type { ChatGptBatch, ReviewStatus } from "../domain/schemas";
 import type { FlyerDocument, Product } from "../domain/types";
 
 /**
@@ -63,14 +63,19 @@ async function editable(user: CurrentUser, id: string) {
 }
 
 /** Salva (ou remove) a arte gerada no ChatGPT, depois da conferência dos dados. */
-export async function setChatGptResult(user: CurrentUser, id: string, fileId: string | null, checked: boolean) {
+export async function setChatGptResult(user: CurrentUser, id: string, fileId: string | null, checked: boolean, chatUrl?: string | null) {
   const row = await editable(user, id);
   if (fileId) {
     if (!checked) throw new HttpError(422, "Confira nome, código e preço de cada produto na arte antes de salvar.");
     const f = await db.storedFile.findUnique({ where: { id: fileId } });
     if (!f || f.ownerId !== user.id) throw new HttpError(422, "Arquivo da arte não encontrado. Envie novamente.");
   }
-  await db.flyerProject.update({ where: { id }, data: { resultFileId: fileId, thumbnailId: fileId, version: row.version + 1 } });
+  // arte nova volta para a fila de aprovação; ao remover a arte, o pedido (refazer/alterações) é mantido
+  const review = fileId ? { reviewStatus: "pending", reviewNote: null, reviewedAt: null } : {};
+  await db.flyerProject.update({
+    where: { id },
+    data: { resultFileId: fileId, thumbnailId: fileId, version: row.version + 1, ...review, ...(chatUrl !== undefined ? { chatUrl } : {}) },
+  });
   await logActivity(user.id, "flyer.result", { type: "flyer", id }, { fileId, checked });
 }
 
@@ -81,4 +86,13 @@ export async function updateChatGptPrompt(user: CurrentUser, id: string, prompt:
   assertPromptHasProducts(prompt, products, row.name);
   await db.flyerProject.update({ where: { id }, data: { prompt } });
   await logActivity(user.id, "flyer.update", { type: "flyer", id }, { prompt: true });
+}
+
+/** Aprovação do flyer: aprovar, pedir para refazer ou pedir alterações (com texto). */
+export async function setReview(user: CurrentUser, id: string, status: ReviewStatus, note?: string | null) {
+  const row = await editable(user, id);
+  if (status !== "pending" && !row.resultFileId) throw new HttpError(422, "Este flyer ainda não tem arte para aprovar.");
+  const reviewNote = status === "changes" || status === "redo" ? (note?.trim() || null) : null;
+  await db.flyerProject.update({ where: { id }, data: { reviewStatus: status, reviewNote, reviewedAt: status === "pending" ? null : new Date() } });
+  await logActivity(user.id, "flyer.review", { type: "flyer", id }, { status, note: reviewNote });
 }

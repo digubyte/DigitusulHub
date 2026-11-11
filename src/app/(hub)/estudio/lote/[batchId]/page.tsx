@@ -18,7 +18,8 @@ export default async function BatchPage({ params }: { params: Promise<{ batchId:
     <ChatGptBatchView
       ctx={ctx}
       campaign={flyers[0].campaign}
-      flyers={flyers.map((f) => ({ id: f.id, name: f.name, products: f.products, prompt: f.prompt ?? "", resultFileId: f.resultFileId, width: f.width, height: f.height, formatKey: f.formatKey, canEdit: f.canEdit, layout: f.layoutConfig }))}
+      batchId={batchId}
+      flyers={flyers.map((f) => ({ id: f.id, name: f.name, products: f.products, prompt: f.prompt ?? "", resultFileId: f.resultFileId, width: f.width, height: f.height, formatKey: f.formatKey, canEdit: f.canEdit, layout: f.layoutConfig, chatUrl: f.chatUrl, reviewStatus: f.reviewStatus, reviewNote: f.reviewNote }))}
     />
   );
 }

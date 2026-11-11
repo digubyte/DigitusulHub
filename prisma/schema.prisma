@@ -184,6 +184,10 @@ model FlyerProject {
   prompt       String?   // prompt aprovado enviado ao ChatGPT
   resultFileId String?   // arte final enviada de volta (modo chatgpt)
   batchId      String?   // flyers criados juntos no mesmo lote
+  chatUrl      String?   // conversa do ChatGPT onde a arte foi gerada (para pedir alterações no mesmo chat)
+  reviewStatus String    @default("pending") // pending | approved | redo | changes
+  reviewNote   String?   // alterações pedidas na aprovação
+  reviewedAt   DateTime?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   deletedAt    DateTime?
