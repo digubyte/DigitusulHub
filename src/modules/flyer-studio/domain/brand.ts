@@ -15,6 +15,34 @@ export const SITE_LOGO = {
   siteUrl: "https://www.digitusul.com.br/media/digitusul-logo-25-d7aed9306c.webp",
 };
 
+/**
+ * Logo oficial em alta resolução (2000 px), monocromático, nas duas versões usadas nas artes.
+ * É o que vai anexado ao ChatGPT: o logo do site (255 px, colorido) fazia o ChatGPT redesenhar a marca.
+ */
+export const OFFICIAL_LOGOS = {
+  dark: { base: "logo-digitusul-branco", path: "/brand/logo-digitusul-branco.png", use: "versão branca, para fundos escuros ou coloridos" },
+  light: { base: "logo-digitusul-azul", path: "/brand/logo-digitusul-azul.png", use: "versão azul-marinho, para fundos claros" },
+} as const;
+
+/** Flyers aprovados pela Digitusul, usados como padrão visual (layout, tipografia e acabamento). */
+export const STYLE_REFERENCES = {
+  destaque: ["/brand/referencias/destaque-1.jpg", "/brand/referencias/destaque-2.jpg", "/brand/referencias/destaque-3.jpg", "/brand/referencias/destaque-4.jpg", "/brand/referencias/destaque-5.jpg", "/brand/referencias/destaque-6.jpg"],
+  grade: ["/brand/referencias/grade-1.jpg", "/brand/referencias/grade-2.jpg", "/brand/referencias/grade-3.jpg", "/brand/referencias/grade-4.jpg"],
+} as const;
+
+/**
+ * Duas referências de estilo para o flyer. A escolha depende só dos produtos,
+ * então o prompt e os anexos sempre apontam para os mesmos arquivos.
+ */
+export function styleReferencesFor(products: { code: string }[]): { base: string; path: string }[] {
+  const list = products.length <= 1 ? STYLE_REFERENCES.destaque : STYLE_REFERENCES.grade;
+  const key = products.map((p) => p.code).join("|");
+  let h = 0;
+  for (const ch of key) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  const a = h % list.length, b = (a + 1 + (h >> 8) % (list.length - 1)) % list.length;
+  return [a, b].map((i, k) => ({ base: `referencia-estilo-${k + 1}`, path: list[i] }));
+}
+
 /** Selos de condições reais do site (rodapé do flyer). Editáveis no Brand Kit como frases da categoria "selo". */
 export const DEFAULT_SEALS = ["10% OFF no PIX", "10x sem juros", "Entrega para todo o Brasil"];
 export const SEAL_CATEGORY = "selo";

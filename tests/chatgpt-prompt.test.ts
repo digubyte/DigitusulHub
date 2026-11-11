@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { aspectDescription, buildChatGptPrompt, heroProduct, productAttachmentBase, promptBlockers, splitIntoFlyers, type PromptInput } from "@/modules/flyer-studio/domain/chatgpt-prompt";
 import type { Product } from "@/modules/flyer-studio/domain/types";
+import { styleReferencesFor } from "@/modules/flyer-studio/domain/brand";
 
 const product = (over: Partial<Product> = {}): Product => ({ id: Math.random().toString(36), code: "12345", name: "Mouse Gamer RGB 7200 DPI", priceCents: 12990, imageFileId: "f1", ...over });
 
@@ -78,18 +79,33 @@ describe("splitIntoFlyers", () => {
 });
 
 describe("imagens de referência", () => {
-  it("lista logo e fotos com os links públicos", () => {
-    const p = buildChatGptPrompt(base({ logoUrl: "https://www.digitusul.com.br/media/logo.webp", products: [product({ imageUrl: "https://cdn.exemplo.com/mouse.webp" })] }));
+  it("lista os 2 logos oficiais, as referências de estilo e as fotos", () => {
+    const p = buildChatGptPrompt(base({ products: [product({ imageUrl: "https://cdn.exemplo.com/mouse.webp" })] }));
     expect(p).toContain("IMAGENS DE REFERÊNCIA");
-    expect(p).toContain('1. "logo-digitusul" — logo oficial da Digitusul (https://www.digitusul.com.br/media/logo.webp)');
-    expect(p).toMatch(/2\. "produto-1-12345" — foto de Mouse Gamer RGB 7200 DPI \(https:\/\/cdn\.exemplo\.com\/mouse\.webp\)/);
-    expect(p).toContain("Destaque único");
+    expect(p).toContain('1. "logo-digitusul-branco" — logo oficial da Digitusul, versão branca');
+    expect(p).toContain('2. "logo-digitusul-azul" — logo oficial da Digitusul, versão azul-marinho');
+    expect(p).toContain('3. "referencia-estilo-1" — referência de estilo');
+    expect(p).toContain('4. "referencia-estilo-2" — referência de estilo');
+    expect(p).toMatch(/5\. "produto-1-12345" — foto de Mouse Gamer RGB 7200 DPI \(https:\/\/cdn\.exemplo\.com\/mouse\.webp\)/);
+    expect(p).toContain("sem redesenhar");
+    expect(p).toContain("Bloco de título à esquerda");
   });
-  it("flyer com vários produtos pede grade e mostra o tema", () => {
+  it("flyer com vários produtos pede grade de cartões e mostra o tema", () => {
     const p = buildChatGptPrompt(base({ theme: "Mouse" }));
-    expect(p).toContain("Organize os 2 produtos");
-    expect(p).toContain("liberdade criativa");
+    expect(p).toContain("grade de cartões brancos");
+    expect(p).not.toContain("liberdade criativa");
+    expect(p).toContain("NÃO copie os produtos");
     expect(p).toContain("Tema do flyer: Mouse.");
+  });
+  it("referências de estilo: destaque usa as de destaque, grade as de grade, sempre 2 diferentes e estáveis", () => {
+    const one = styleReferencesFor([{ code: "40727" }]);
+    const six = styleReferencesFor(["1", "2", "3", "4", "5", "6"].map((code) => ({ code })));
+    expect(one).toHaveLength(2);
+    expect(one.every((r) => r.path.includes("/destaque-"))).toBe(true);
+    expect(six.every((r) => r.path.includes("/grade-"))).toBe(true);
+    expect(one[0].path).not.toBe(one[1].path);
+    expect(styleReferencesFor([{ code: "40727" }])).toEqual(one);
+    for (let i = 0; i < 50; i++) { const r = styleReferencesFor([{ code: `X${i}` }, { code: "Y" }]); expect(r[0].path).not.toBe(r[1].path); }
   });
 });
 
@@ -126,7 +142,6 @@ describe("estilo livre", () => {
   it("sem estilo, o prompt não impõe categoria nem selo de campanha", () => {
     const p = buildChatGptPrompt(base({ freeStyle: true }));
     expect(p.split("\n")[0]).toBe("Crie a arte de um flyer para a loja Digitusul.");
-    expect(p).toContain("escolha você o que combina melhor");
-    expect(p).not.toContain("Clima do flyer — oferta");
+    expect(p).not.toContain("Clima do flyer");
   });
 });

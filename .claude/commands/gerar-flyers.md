@@ -34,17 +34,22 @@ Processe o cartão quando ele estiver em **Aguardando arte**, **Refazer** ou **A
 Pule os que estão **Pronto** sem pedido e os **Aprovados**.
 
 ### 2a. Prompt e imagens
-1. No cartão, clique em **Ver prompt** e leia o texto completo (`get_page_text`).
+1. Leia o prompt completo do cartão N (o `<details>` fechado não aparece no `innerText`):
+   `javascript_tool` no Hub → `document.querySelectorAll('article pre')[N-1].textContent`.
 2. O prompt lista as imagens de referência com nome e link
    (ex.: `"produto-1-46622" — foto de ... (https://cdn...)` e `"logo-digitusul" — logo oficial (https://...)`).
    Baixe cada link com `curl -L` para `.flyers-work/<data>/flyer-N/`, usando **o mesmo nome** citado no prompt
-   e a extensão do arquivo. Confira que todos baixaram (tamanho > 0).
+   e a extensão do arquivo. Links que começam com `/brand/...` (logos oficiais e referências de estilo) ficam no
+   Hub: use `HUB_URL/brand/...`. Confira que todos baixaram (tamanho > 0) — são 2 logos + 2 referências + as fotos.
 
 ### 2b. Gerar no ChatGPT
 - **Aguardando arte / Refazer**: abra `https://chatgpt.com/` em uma aba (conversa nova).
   1. Encontre o `input[type=file]` com `find`/`read_page` e use `file_upload` com **todos** os arquivos do flyer
      (logo + fotos). Não clique no botão de anexar (abre uma janela que você não controla).
-  2. Cole o prompt inteiro na caixa de mensagem. Em **Refazer**, acrescente no fim:
+  2. Cole o prompt inteiro na caixa de mensagem. A caixa é um `contenteditable` (o `form_input` não funciona e
+     digitar com `type` envia no primeiro Enter). Use `javascript_tool` simulando colar:
+     `const el=document.querySelector('.ProseMirror[contenteditable="true"]'); el.focus(); const dt=new DataTransfer(); dt.setData('text/plain', PROMPT); el.dispatchEvent(new ClipboardEvent('paste',{clipboardData:dt,bubbles:true,cancelable:true}));`
+     e envie com a tecla Enter. Em **Refazer**, acrescente no fim:
      `Gere uma versão nova, com composição e cenário diferentes da anterior, mantendo todos os textos, preços e o logo exatamente iguais.`
   3. Envie e aguarde a imagem (use `computer` → `wait` em ciclos de até 10 s; pode levar 1–3 min).
 - **Alterações pedidas**: abra o link **Conversa** do cartão (conversa onde a arte foi feita). Se não houver link,
@@ -54,14 +59,18 @@ Pule os que estão **Pronto** sem pedido e os **Aprovados**.
 ### 2c. Conferir antes de aceitar
 Dê `zoom` na imagem gerada e confira, produto por produto, contra a lista do cartão:
 - **preço** exatamente igual (R$, milhar com ponto, centavos com vírgula), **código** e **nome**;
-- **logo** da Digitusul presente e sem deformação; nenhum produto a mais ou faltando.
+- **logo** igual ao arquivo oficial anexado (símbolo do "D" com faixa curva + DIGITUSUL® + Tecnologia e Suprimentos,
+  numa cor só, sem degradê/3D); nenhum produto a mais ou faltando.
+- **acabamento** no nível das referências de estilo (sem "cara de IA": excesso de brilho, neon, texto torto).
+- a **foto** corresponde ao produto (o cadastro do site às vezes tem a foto de outro item — avise no resumo).
 Se algo estiver errado, peça a correção **na mesma conversa**, citando o valor certo
 (ex.: `O preço do Mouse X está errado. Escreva exatamente R$ 79,90.`). No máximo 2 tentativas;
 se continuar errado, deixe o cartão como está e avise no resumo final.
 
 ### 2d. Baixar e devolver ao Hub
-1. Clique no botão de download da imagem no ChatGPT. Com Bash, pegue o arquivo mais novo de `~/Downloads`
-   (`ls -t ~/Downloads | head`) e mova para `.flyers-work/<data>/flyer-N/arte.png`.
+1. Baixe a última imagem da conversa com `javascript_tool` (desenha a imagem num canvas e dispara o download):
+   pegue `[...document.querySelectorAll('main img')].filter(i=>i.naturalWidth>500).pop()`, `canvas.toBlob(...,'image/png')`
+   e um `<a download="flyerN-....png">`. Com Bash, copie de `~/Downloads` para `.flyers-work/<data>/flyer-N/arte.png`.
 2. Copie a URL da conversa (`https://chatgpt.com/c/...`).
 3. Volte ao cartão no Hub: se já tinha arte, clique **Gerar de novo** primeiro. Use `file_upload` no
    `input[type=file]` do campo "Arraste a imagem ou clique" com `arte.png`.

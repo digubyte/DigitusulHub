@@ -10,7 +10,7 @@ import { formatPrice } from "../domain/product-format";
 import type { LayoutOptions, Product } from "../domain/types";
 import { buildAttachmentsZip, downloadAttachmentsLoose, CHATGPT_URL, copyText, downloadBlob, fileSlug, fitToFormat, originalFile } from "./chatgpt-assets";
 import type { StudioContext } from "./studio-types";
-import { SITE_LOGO } from "../domain/brand";
+import { OFFICIAL_LOGOS, styleReferencesFor } from "../domain/brand";
 import type { ReviewStatus } from "../domain/schemas";
 import { REVIEW_BADGE, REVIEW_LABEL } from "./approval-slides";
 
@@ -25,7 +25,9 @@ export interface ChatGptFlyer {
 
 export function attachmentSetFor(f: ChatGptFlyer, ctx: StudioContext) {
   const mascot = f.layout.showMascot ? (ctx.brandKit.mascots.find((m) => m.fileId === f.layout.mascotFileId) ?? ctx.brandKit.mascots[0]) : null;
-  return { products: f.products, logoFileId: ctx.brandKit.logo?.fileId ?? SITE_LOGO.publicPath, mascotFileId: mascot?.fileId ?? null };
+  // Logo oficial em alta (branco + azul) e as 2 referências de estilo citadas no prompt.
+  const extras = [OFFICIAL_LOGOS.dark, OFFICIAL_LOGOS.light, ...styleReferencesFor(f.products)].map((x) => ({ base: x.base, path: x.path }));
+  return { products: f.products, logoFileId: null, mascotFileId: mascot?.fileId ?? null, extras };
 }
 
 /** Um flyer do fluxo ChatGPT: anexos → prompt → ChatGPT → arte → conferência → download. */

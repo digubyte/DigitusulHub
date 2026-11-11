@@ -6,7 +6,7 @@
  * caractere por caractere. Depois que a arte volta, o usuário confere cada
  * preço antes de salvar (checklist na tela do projeto).
  */
-import { CATEGORIES } from "./brand";
+import { CATEGORIES, OFFICIAL_LOGOS, styleReferencesFor } from "./brand";
 import { getFormat } from "./formats";
 import { formatPrice } from "./product-format";
 import type { BrandContext, CategoryKey, Product } from "./types";
@@ -121,27 +121,40 @@ export function buildChatGptPrompt(input: PromptInput): string {
   lines.push(`- ${fmt?.label ?? "Personalizado"}: ${input.width} × ${input.height} px, proporção ${a.ratio} (${a.orientation}). Gere a imagem na proporção ${a.closest}, a mais próxima disponível.`);
   lines.push("- Mantenha textos, preços e logo afastados das bordas (margem de segurança de 6%), pois a arte pode ser recortada para o tamanho exato.");
   lines.push("");
-  lines.push("DIREÇÃO DE ARTE (você tem liberdade criativa)");
-  lines.push("- Pense como um diretor de arte: crie um design rico e marcante a partir dos próprios produtos — cenário, fundo, iluminação, texturas e elementos gráficos inspirados no universo deles (ex.: limpeza → frescor, água e brilho; gamer → luzes neon e setup; escritório → mesa organizada e produtividade).");
-  lines.push("- Evite fundo liso ou chapado: use profundidade, luz, sombras, camadas, formas e movimento, sem deixar a arte poluída.");
-  lines.push(input.freeStyle ? "- Clima do flyer: escolha você o que combina melhor com estes produtos (sem selos de campanha como \"Black Friday\" ou \"Queima de estoque\")." : `- Clima do flyer — ${CATEGORY_STYLE[input.category]}.`);
-  lines.push(`- Paleta a partir das cores da marca: principal ${input.colors.primary}, destaque ${input.colors.accent}, escuro ${input.colors.dark}, claro ${input.colors.light}. Pode usar variações, degradês e tons que combinem com os produtos.`);
-  lines.push(`- Tipografia moderna, com hierarquia forte e criativa (referência: ${input.fonts.heading} nos títulos e ${input.fonts.price} nos preços), sempre legível.`);
-  lines.push(input.emphasis === "price" ? "- Os preços são o principal destaque, logo depois vêm as fotos." : "- As fotos dos produtos são o principal destaque, logo depois vêm os preços.");
+  const single = input.products.length <= 1;
+  const refs = styleReferencesFor(input.products);
+  lines.push("PADRÃO VISUAL (o mais importante depois dos dados)");
+  lines.push(`- Siga o padrão das referências de estilo anexadas ("${refs[0].base}" e "${refs[1].base}"): são flyers aprovados da Digitusul. Reproduza o mesmo nível de acabamento, a organização do layout, a tipografia, a iluminação e o respiro.`);
+  lines.push("- Das referências, copie só o estilo: NÃO copie os produtos, os textos, os preços nem as marcas que aparecem nelas.");
+  lines.push("- Resultado de peça publicitária profissional de varejo, como feita por um designer no Photoshop — não pode parecer \"arte de IA\".");
+  lines.push("- Fundo: estúdio limpo com luz suave e profundidade; superfície ou pódio discreto sob o produto; formas geométricas sutis na cor dominante. Sem excesso de brilhos, partículas, neon, fumaça ou efeitos.");
+  lines.push("- Foto: o produto real anexado, nítido e em tamanho generoso, com sombra e reflexo naturais.");
+  lines.push(`- Cores: escolha uma cor dominante coerente com o produto (ou o azul da marca ${input.colors.primary}) + branco/cinza claro + um tom escuro (${input.colors.dark}). Destaques em ${input.colors.accent} só onde ajudar.`);
+  lines.push("- Tipografia: títulos em sans-serif condensada e pesada (estilo Bebas Neue/Oswald), textos de apoio em sans-serif fina; hierarquia clara, alinhamentos consistentes.");
+  lines.push("- Preço em pílula/etiqueta sólida de cantos arredondados: \"R$\" pequeno, valor grande e centavos menores e elevados (ex.: R$ 115,⁹⁰), sem mudar o valor.");
+  lines.push("- Ícones sempre de traço fino e monocromáticos.");
+  if (!input.freeStyle) lines.push(`- Clima do flyer — ${CATEGORY_STYLE[input.category]}.`);
+  lines.push("");
+  lines.push("LAYOUT");
   const hero = heroProduct(input.products);
-  if (input.products.length <= 1) {
-    lines.push("- Destaque único: o produto é o herói da arte, com foto grande e um cenário pensado para ele; nome legível e preço em tamanho grande.");
-  } else if (hero) {
-    lines.push(`- Hierarquia: "${hero.name.trim()}" é o produto principal — maior, em posição de destaque, com cartão próprio; os outros ${input.products.length - 1} aparecem como complementares, menores e organizados abaixo ou ao lado.`);
+  if (single) {
+    lines.push("- Topo à esquerda: logo da Digitusul.");
+    lines.push("- Bloco de título à esquerda: linha curta com a categoria/marca do produto em letras pequenas; nome do produto em 2 linhas grandes (a 2ª linha na cor dominante); variante ou modelo em caixa alta com letras espaçadas.");
+    lines.push("- Até 3 benefícios curtos com ícones de traço fino, só o que for evidente pelo nome do produto (na dúvida, omita; sem números técnicos inventados).");
+    lines.push("- Produto grande à direita/centro, sobre pódio ou superfície, ocupando boa parte da arte.");
+    lines.push("- Rodapé à esquerda: código pequeno, nome completo do produto e o preço em pílula grande. À direita, os selos com ícones finos separados por divisores.");
   } else {
-    lines.push(`- Organize os ${input.products.length} produtos com clareza (grade, vitrine ou mosaico criativo), cada um com foto, nome, código e preço próximos e com o mesmo peso visual.`);
+    lines.push("- Topo: logo da Digitusul; título grande em 1–2 linhas com uma palavra/expressão em faixa colorida (pílula); subtítulo curto em uma linha.");
+    if (hero) lines.push(`- "${hero.name.trim()}" é o produto principal: cartão maior em destaque logo abaixo do título; os outros ${input.products.length - 1} em cartões menores abaixo.`);
+    else lines.push(`- Os ${input.products.length} produtos em grade de cartões brancos de cantos arredondados e sombra suave (2 colunas), todos com o mesmo peso visual.`);
+    lines.push("- Cada cartão: foto do produto, \"Cód.\" em texto pequeno, nome em negrito (até 3 linhas) e o preço em pílula colorida no canto inferior.");
+    lines.push("- Rodapé: faixa na cor escura com os selos (ícone fino + texto) e o logo da Digitusul.");
   }
-  lines.push("- Preços em etiquetas fortes; pode deixar os centavos menores e elevados (ex.: R$ 115,⁹⁰), sem mudar o valor.");
+  lines.push(input.emphasis === "price" ? "- Os preços são o principal destaque, logo depois vêm as fotos." : "- As fotos dos produtos são o principal destaque, logo depois vêm os preços.");
   if (input.theme && input.theme !== "Variados" && input.products.length > 1) lines.push(`- Tema do flyer: ${input.theme}.`);
   if (input.batch && input.batch.total > 1) {
-    lines.push(`- Este é o flyer ${input.batch.index + 1} de ${input.batch.total} de uma série: mantenha a identidade da série, mas crie uma composição própria para estes produtos.`);
+    lines.push(`- Este é o flyer ${input.batch.index + 1} de ${input.batch.total} de uma série: mesmo padrão visual, composição adaptada a estes produtos.`);
   }
-  lines.push("- Limite da criatividade: a liberdade vale para o design. Os produtos (fotos), os dados comerciais e o logo não mudam.");
   lines.push("");
   const texts = [
     input.headline?.trim() && `- Título: "${input.headline.trim()}"`,
@@ -175,7 +188,11 @@ export function buildChatGptPrompt(input: PromptInput): string {
   lines.push("");
   lines.push("IMAGENS DE REFERÊNCIA (anexadas junto com este prompt)");
   let n = 1;
-  if (input.hasLogo) lines.push(`${n++}. "${LOGO_ATTACHMENT_BASE}" — logo oficial da Digitusul${input.logoUrl ? ` (${input.logoUrl})` : ""}`);
+  if (input.hasLogo) {
+    lines.push(`${n++}. "${OFFICIAL_LOGOS.dark.base}" — logo oficial da Digitusul, ${OFFICIAL_LOGOS.dark.use} (${OFFICIAL_LOGOS.dark.path})`);
+    lines.push(`${n++}. "${OFFICIAL_LOGOS.light.base}" — logo oficial da Digitusul, ${OFFICIAL_LOGOS.light.use} (${OFFICIAL_LOGOS.light.path})`);
+  }
+  refs.forEach((r) => lines.push(`${n++}. "${r.base}" — referência de estilo, só o padrão visual (${r.path})`));
   if (input.hasMascot) lines.push(`${n++}. "${MASCOT_ATTACHMENT_BASE}" — mascote Digu`);
   input.products.forEach((p, i) => {
     if (p.imageFileId) lines.push(`${n++}. "${productAttachmentBase(p, i)}" — foto de ${p.name.trim()}${p.imageUrl ? ` (${p.imageUrl})` : ""}`);
@@ -183,7 +200,11 @@ export function buildChatGptPrompt(input: PromptInput): string {
   if (n === 1) lines.push("- Nenhuma imagem anexada.");
   if (withImages.length) lines.push("- Use as fotos reais dos produtos: não redesenhe nem troque modelo, cor ou marca. Pode recortar o fundo, girar levemente, dar escala, reflexo, sombra e integrar o produto ao cenário.");
   else lines.push("- Não há fotos dos produtos: não desenhe produtos inventados; use composição tipográfica e elementos gráficos.");
-  if (input.hasLogo) lines.push("- Aplique o logo exatamente como na imagem anexada (sem alterar cores, proporção ou letras), em área limpa e bem visível, mas em tamanho moderado — no topo ou no rodapé, sem ocupar mais que cerca de um terço da largura. Os produtos são o foco.");
+  if (input.hasLogo) {
+    lines.push(`- LOGO: coloque o arquivo de logo anexado como imagem, sem redesenhar. Use "${OFFICIAL_LOGOS.dark.base}" sobre fundo escuro/colorido e "${OFFICIAL_LOGOS.light.base}" sobre fundo claro.`);
+    lines.push("- O logo é o símbolo do \"D\" com a faixa curva por dentro + a palavra \"DIGITUSUL®\" + \"Tecnologia e Suprimentos\" embaixo, numa cor só. Não recrie, não troque a fonte, não aplique degradê, 3D, contorno ou outras cores.");
+    lines.push("- Tamanho moderado (até cerca de um terço da largura), em área limpa e bem visível.");
+  }
   else lines.push("- Escreva o nome \"Digitusul\" de forma discreta; não invente um logotipo.");
   if (input.hasMascot) lines.push("- Inclua o mascote anexado sem redesenhá-lo.");
 

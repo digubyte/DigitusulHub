@@ -29,7 +29,14 @@ async function toAttachable(blob: Blob): Promise<Blob> {
 }
 
 /** logoFileId pode ser um id do armazenamento ou um caminho público (ex.: /brand/digitusul-logo.webp). */
-export interface AttachmentSet { products: Product[]; logoFileId?: string | null; mascotFileId?: string | null }
+export interface AttachmentSet {
+  products: Product[];
+  logoFileId?: string | null;
+  mascotFileId?: string | null;
+  /** Arquivos extras com o nome (sem extensão) citado no prompt: logos oficiais e referências de estilo. */
+  extras?: { base: string; path: string }[];
+}
+const EXT: Record<string, string> = { "image/png": "png", "image/jpeg": "jpg", "image/webp": "webp" };
 
 /** Monta o ZIP com as fotos (nomes iguais aos citados no prompt), logo e mascote. */
 /** Lista os arquivos de referência de um ou mais flyers (nome final → conteúdo). */
@@ -46,6 +53,7 @@ async function collectAttachments(sets: { folder?: string; set: AttachmentSet }[
     }
     if (set.logoFileId) { const b = await get(set.logoFileId); files[prefix + logoAttachmentName(b.type)] = new Uint8Array(await b.arrayBuffer()); }
     if (set.mascotFileId) { const b = await get(set.mascotFileId); files[prefix + mascotAttachmentName(b.type)] = new Uint8Array(await b.arrayBuffer()); }
+    for (const x of set.extras ?? []) { const b = await get(x.path); files[`${prefix}${x.base}.${EXT[b.type] ?? "png"}`] = new Uint8Array(await b.arrayBuffer()); }
   }
   return files;
 }
