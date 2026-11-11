@@ -39,7 +39,7 @@ export function styleReferencesFor(products: { code: string }[]): { base: string
   const key = products.map((p) => p.code).join("|");
   let h = 0;
   for (const ch of key) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
-  const a = h % list.length, b = (a + 1 + (h >> 8) % (list.length - 1)) % list.length;
+  const a = h % list.length, b = (a + 1 + ((h >>> 8) % (list.length - 1))) % list.length;
   return [a, b].map((i, k) => ({ base: `referencia-estilo-${k + 1}`, path: list[i] }));
 }
 

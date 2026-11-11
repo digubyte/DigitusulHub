@@ -105,7 +105,10 @@ describe("imagens de referência", () => {
     expect(six.every((r) => r.path.includes("/grade-"))).toBe(true);
     expect(one[0].path).not.toBe(one[1].path);
     expect(styleReferencesFor([{ code: "40727" }])).toEqual(one);
-    for (let i = 0; i < 50; i++) { const r = styleReferencesFor([{ code: `X${i}` }, { code: "Y" }]); expect(r[0].path).not.toBe(r[1].path); }
+    for (let i = 0; i < 500; i++) { const r = styleReferencesFor([{ code: `X${i}` }, { code: "Y" }]); expect(r[0].path).not.toBe(r[1].path); }
+    // lote real que expôs o bug (hash acima de 2^31)
+    const real = styleReferencesFor(["46025", "44396", "43990", "42728", "39653", "41800"].map((code) => ({ code })));
+    expect(real[0].path).not.toBe(real[1].path);
   });
 });
 
