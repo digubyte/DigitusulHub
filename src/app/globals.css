@@ -112,3 +112,39 @@ body {
 .thin-scroll::-webkit-scrollbar { width: 8px; height: 8px; }
 .thin-scroll::-webkit-scrollbar-thumb { background: rgb(var(--zinc-300)); border-radius: 8px; }
 .thin-scroll::-webkit-scrollbar-track { background: transparent; }
+
+/* ───── Botão "Chamar o Claude" (mascote digitando + brilho laranja) ───── */
+@layer components {
+  .cc-button {
+    @apply inline-flex items-center gap-2 rounded-l-xl border border-r-0 px-3.5 py-2 text-sm font-medium transition-all duration-200;
+    background: #1f1d1b; color: #f5f0ea; border-color: #3a3633;
+  }
+  .cc-button-more {
+    @apply rounded-r-xl border px-2 text-xs transition-all duration-200;
+    background: #1f1d1b; color: #a8a29e; border-color: #3a3633;
+  }
+  .cc-button:hover, .cc-button:focus-visible {
+    border-color: #D97757; color: #fff; outline: none;
+    box-shadow: 0 0 0 1px #D97757, 0 0 18px 2px rgba(217, 119, 87, .55), 0 0 42px 6px rgba(217, 119, 87, .25);
+    animation: cc-glow 1.6s ease-in-out infinite;
+  }
+  .cc-button:hover + .cc-button-more { border-color: #D97757; }
+  .cc-button:active { transform: scale(.98); }
+}
+@keyframes cc-glow {
+  0%, 100% { box-shadow: 0 0 0 1px #D97757, 0 0 14px 1px rgba(217,119,87,.45), 0 0 32px 4px rgba(217,119,87,.18); }
+  50%      { box-shadow: 0 0 0 1px #E8916F, 0 0 24px 4px rgba(217,119,87,.7),  0 0 52px 10px rgba(217,119,87,.3); }
+}
+.cc-mascot .cc-body { animation: cc-bob .9s steps(2) infinite; }
+.cc-mascot .cc-arm-l { animation: cc-type .32s steps(2) infinite; }
+.cc-mascot .cc-arm-r { animation: cc-type .32s steps(2) infinite .16s; }
+.cc-mascot .cc-key { animation: cc-key 1s steps(2) infinite; }
+.cc-mascot .cc-eye { animation: cc-blink 3.2s steps(1) infinite; transform-box: fill-box; transform-origin: center; }
+.cc-button:hover .cc-mascot .cc-arm-l, .cc-button:hover .cc-mascot .cc-arm-r { animation-duration: .18s; }
+@keyframes cc-bob { 50% { transform: translateY(-.6px); } }
+@keyframes cc-type { 50% { transform: translateY(1px); } }
+@keyframes cc-key { 50% { fill: #D97757; } }
+@keyframes cc-blink { 0%, 92% { transform: scaleY(1); } 94% { transform: scaleY(.1); } }
+@media (prefers-reduced-motion: reduce) {
+  .cc-mascot * , .cc-button:hover { animation: none !important; }
+}

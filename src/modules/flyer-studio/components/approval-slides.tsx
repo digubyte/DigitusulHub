@@ -7,6 +7,7 @@ import { api, Spinner } from "@/components/ui/primitives";
 import { useToast } from "@/components/ui/toast";
 import { cn } from "@/core/util";
 import { formatPrice } from "../domain/product-format";
+import { CallClaudeButton } from "./call-claude";
 import type { ReviewStatus } from "../domain/schemas";
 import type { Product } from "../domain/types";
 
@@ -212,7 +213,11 @@ export function ApprovalSlides({ batchId, title, flyers: initial }: { batchId: s
               ))}
             </ul>
           )}
-          <Link href={`/estudio/lote/${batchId}`} className="btn-primary mt-3">Ver o lote e baixar</Link>
+          <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
+            {asked.length > 0 && <CallClaudeButton prompt={`/gerar-flyers lote ${batchId}`} label="Refazer com o Claude" />}
+            <Link href={`/estudio/lote/${batchId}`} className="btn-primary">Ver o lote e baixar</Link>
+          </div>
+          {approved > 0 && <p className="text-[12px] text-zinc-500">As conversas dos aprovados são apagadas do ChatGPT na próxima vez que o Claude rodar.</p>}
         </div>
       )}
     </div>

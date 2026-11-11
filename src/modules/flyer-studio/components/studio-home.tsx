@@ -12,7 +12,7 @@ import { categoryLabel } from "../domain/brand";
 import { getFormat } from "../domain/formats";
 import type { StudioContext } from "./studio-types";
 
-interface Item { id: string; name: string; category: string; campaign: string | null; formatKey: string; width: number; height: number; thumbnailId: string | null; isTemplate: boolean; updatedAt: string; ownerName: string; productCount: number; canEdit: boolean; canDelete: boolean; mode: string; batchId: string | null; resultFileId: string | null }
+interface Item { id: string; name: string; category: string; campaign: string | null; formatKey: string; width: number; height: number; thumbnailId: string | null; isTemplate: boolean; updatedAt: string; ownerName: string; productCount: number; canEdit: boolean; canDelete: boolean; mode: string; batchId: string | null; resultFileId: string | null; reviewStatus?: string }
 type Scope = "mine" | "all" | "templates";
 
 export function StudioHome({ ctx, campaigns }: { ctx: StudioContext; campaigns: string[] }) {
@@ -128,9 +128,12 @@ export function StudioHome({ ctx, campaigns }: { ctx: StudioContext; campaigns: 
                 </button>
               )}
               <Link href={it.isTemplate ? `/estudio/novo?template=${it.id}` : `/estudio/${it.id}`} className="block">
-                <div className="relative flex aspect-[4/5] items-center justify-center overflow-hidden rounded-xl border border-zinc-200/80 bg-zinc-100/70 p-3 transition group-hover:border-zinc-300">
-                  {it.thumbnailId ? <img src={`/api/files/${it.thumbnailId}`} alt="" className="max-h-full max-w-full object-contain" /> : it.mode === "chatgpt" ? <span className="flex flex-col items-center gap-2 text-xs text-zinc-400"><Sparkles className="h-6 w-6" />Aguardando arte</span> : <FileImage className="h-8 w-8 text-zinc-300" />}
-                  {it.mode === "chatgpt" && <span className="badge absolute bottom-2 left-2 bg-surface/90 text-zinc-600 ring-1 ring-zinc-200">ChatGPT</span>}
+                <div className={cn("relative flex items-center justify-center overflow-hidden rounded-xl border border-zinc-200/80 bg-zinc-100/70 transition group-hover:border-zinc-300", it.mode === "chatgpt" ? "aspect-[2/3]" : "aspect-[4/5] p-3")}>
+                  {it.thumbnailId ? <img src={`/api/files/${it.thumbnailId}`} alt="" className={it.mode === "chatgpt" ? "h-full w-full object-cover" : "max-h-full max-w-full object-contain"} /> : it.mode === "chatgpt" ? <span className="flex flex-col items-center gap-2 text-xs text-zinc-400"><Sparkles className="h-6 w-6" />Aguardando arte</span> : <FileImage className="h-8 w-8 text-zinc-300" />}
+                  {it.mode === "chatgpt" && (() => {
+                    const st = !it.resultFileId ? ["Aguardando arte", "text-zinc-600"] : it.reviewStatus === "approved" ? ["Aprovado", "text-emerald-700"] : it.reviewStatus === "redo" || it.reviewStatus === "changes" ? ["Refazer", "text-amber-700"] : ["Para aprovar", "text-sky-700"];
+                    return <span className={cn("badge absolute bottom-2 left-2 bg-surface/95 ring-1 ring-zinc-200", st[1])}>{st[0]}</span>;
+                  })()}
                 </div>
                 <div className="pt-2.5">
                   <p className="truncate text-sm font-medium text-ink">{it.name}</p>

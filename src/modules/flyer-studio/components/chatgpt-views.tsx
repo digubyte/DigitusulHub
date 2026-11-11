@@ -8,6 +8,7 @@ import { useToast } from "@/components/ui/toast";
 import { getFormat } from "../domain/formats";
 import { categoryLabel } from "../domain/brand";
 import { attachmentSetFor, ChatGptFlyerCard, type ChatGptFlyer } from "./chatgpt-flyer";
+import { CallClaudeButton } from "./call-claude";
 import { buildAttachmentsZip, CHATGPT_URL, copyText, downloadBlob, fileSlug, fitToFormat } from "./chatgpt-assets";
 import type { StudioContext } from "./studio-types";
 
@@ -83,6 +84,9 @@ export function ChatGptBatchView({ ctx, flyers: initial, campaign, embedded, bat
         </div>
         )}
         <div className="flex flex-wrap items-center gap-2">
+          {batchId && (ready.length < flyers.length || flyers.some((f) => f.reviewStatus === "redo" || f.reviewStatus === "changes")) && (
+            <CallClaudeButton prompt={`/gerar-flyers lote ${batchId}`} label={ready.length < flyers.length ? "Chamar o Claude" : "Refazer com o Claude"} />
+          )}
           {batchId && <Link className="btn-accent" href={`/estudio/lote/${batchId}/aprovar`}><Presentation className="h-4 w-4" />Aprovar ({ready.filter((f) => (f.reviewStatus ?? "pending") === "pending").length})</Link>}
           <button className="btn-secondary" onClick={allResults} disabled={!ready.length || !!busy}>{busy === "results" ? <Spinner /> : <Download className="h-4 w-4" />}Baixar artes ({ready.length})</button>
           <details className="relative">
@@ -97,7 +101,7 @@ export function ChatGptBatchView({ ctx, flyers: initial, campaign, embedded, bat
       </div>
 
       {!embedded && ready.length < flyers.length && <p className="mb-6 max-w-3xl text-[13px] text-zinc-500">
-        Faltam {flyers.length - ready.length} arte(s). Peça ao Claude <code className="rounded bg-zinc-100 px-1">/gerar-flyers</code> para gerar no ChatGPT, ou use “fazer manualmente” em cada cartão.
+        Faltam {flyers.length - ready.length} arte(s). Clique em <strong className="font-medium text-ink">Chamar o Claude</strong>: o app abre com o comando pronto, é só apertar Enter. Ou use “fazer manualmente” em cada cartão.
       </p>}
 
       <div className={embedded ? "grid gap-4 lg:grid-cols-2" : "grid gap-4 xl:grid-cols-2"}>

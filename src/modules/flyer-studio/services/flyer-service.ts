@@ -35,7 +35,7 @@ export async function listFlyers(user: CurrentUser, f: ListFilters = {}) {
     where: { AND: and },
     orderBy: { updatedAt: "desc" },
     take: 200,
-    select: { id: true, name: true, category: true, campaign: true, formatKey: true, width: true, height: true, thumbnailId: true, isTemplate: true, updatedAt: true, createdAt: true, ownerId: true, version: true, mode: true, batchId: true, resultFileId: true, owner: { select: { name: true } }, products: true },
+    select: { id: true, name: true, category: true, campaign: true, formatKey: true, width: true, height: true, thumbnailId: true, isTemplate: true, updatedAt: true, createdAt: true, ownerId: true, version: true, mode: true, batchId: true, resultFileId: true, reviewStatus: true, owner: { select: { name: true } }, products: true },
   });
   return rows.map(({ products, ...r }) => ({
     ...r,
