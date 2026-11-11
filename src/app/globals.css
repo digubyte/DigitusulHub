@@ -145,6 +145,7 @@ body {
 @keyframes cc-type { 50% { transform: translateY(1px); } }
 @keyframes cc-key { 50% { fill: #D97757; } }
 @keyframes cc-blink { 0%, 92% { transform: scaleY(1); } 94% { transform: scaleY(.1); } }
+/* Com "reduzir movimento" ligado, só o brilho para de pulsar; o mascote (movimento pequeno) continua digitando. */
 @media (prefers-reduced-motion: reduce) {
-  .cc-mascot * , .cc-button:hover { animation: none !important; }
+  .cc-button:hover { animation: none !important; }
 }
