@@ -89,7 +89,10 @@ Ao aprovar um flyer, o usuário pede que a conversa do ChatGPT dele seja apagada
 1. Na aba do Hub: `javascript_tool` → `await fetch('/api/flyers/chats').then(r => r.json())` → lista `{ id, name, chatUrl }`.
 2. Para cada item: abra `chatUrl` no ChatGPT. Confirme que o título/conteúdo é de um flyer da Digitusul (prompt
    "Crie a arte de um flyer..."). Se não for, **não apague** e avise o usuário.
-3. Apague pela interface: menu de opções da conversa (⋯ no topo ou na barra lateral) → **Excluir** → confirmar **Excluir**.
-4. Depois de apagar, na aba do Hub: `await fetch('/api/flyers/<id>/chat', { method: 'DELETE' })` (tira da fila).
-5. Só apague conversas listadas por essa fila. Nunca apague outras conversas do usuário.
+3. Apague pela interface. O título da conversa costuma ser o prompt inteiro e isso quebra o diálogo de exclusão
+   (o botão fica fora da tela e o clique não vale). Então: clique no título no topo → **Renomear** → `ctrl+a`,
+   digite um nome curto (ex.: "Flyer gamer 1") e Enter. Depois, título → **Excluir** → botão **Excluir chat**.
+4. **Confirme** abrindo o `chatUrl` de novo: se a conversa sumiu, o ChatGPT volta para a tela inicial (`location.pathname === "/"`).
+5. Só então, na aba do Hub: `await fetch('/api/flyers/<id>/chat', { method: 'DELETE' })` (tira da fila).
+6. Só apague conversas listadas por essa fila. Nunca apague outras conversas do usuário.
 Informe no resumo quantas conversas foram apagadas.
