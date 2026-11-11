@@ -151,7 +151,11 @@ export function ChatGptFlyerCard({ flyer, ctx, index, onChange }: { flyer: ChatG
               {flyer.chatUrl && <a className="btn-ghost btn-sm" href={flyer.chatUrl} target="_blank" rel="noopener noreferrer"><ExternalLink className="h-3.5 w-3.5" />Conversa</a>}
             </div>
           ) : flyer.canEdit ? (
-            <ol className="space-y-2 text-[13px]">
+            <details className="group text-[13px]">
+              <summary className="flex cursor-pointer list-none items-center gap-2 text-zinc-500 hover:text-ink">
+                <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-amber-500" />Aguardando a arte do ChatGPT · <span className="underline underline-offset-2">fazer manualmente</span>
+              </summary>
+            <ol className="mt-3 space-y-2">
               <Step n={1} label="Baixar imagens para anexar" done={false}>
                 <div className="flex gap-1.5">
                   <button className="btn-secondary btn-sm" onClick={downloadLoose} disabled={!!busy} title="Baixa cada imagem separada, para arrastar direto no ChatGPT">{busy === "loose" ? <Spinner /> : <Download className="h-3.5 w-3.5" />}Imagens</button>
@@ -165,6 +169,7 @@ export function ChatGptFlyerCard({ flyer, ctx, index, onChange }: { flyer: ChatG
                 <div className="w-full"><Dropzone compact multiple={false} busy={busy === "upload"} onFiles={upload} label="Arraste a imagem ou clique" /></div>
               </Step>
             </ol>
+            </details>
           ) : <p className="text-[13px] text-zinc-500">Aguardando a arte do responsável.</p>}
 
           <div className="border-t border-zinc-100 pt-2">

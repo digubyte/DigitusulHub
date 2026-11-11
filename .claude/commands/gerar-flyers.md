@@ -1,6 +1,6 @@
 ---
 description: Gera os flyers do dia no ChatGPT (pelo Chrome) a partir do lote do Digitusul Hub e deixa prontos para aprovação
-argument-hint: "[categoria ou palavra-chave do lote] | refazer"
+argument-hint: "[palavra-chave ou categoria do lote] | refazer | limpar"
 ---
 
 # Gerar flyers do dia no ChatGPT
@@ -9,6 +9,7 @@ Você (Claude) é o operador. O usuário pediu: **$ARGUMENTS**
 
 - Vazio ou uma categoria/palavra-chave → cria um **lote novo** (3 flyers com 6 produtos + 3 destaques de 1 produto) e gera todos.
 - `refazer` → não cria lote; abre o lote mais recente e processa só os flyers marcados como **Refazer** ou **Alterações pedidas**.
+- `limpar` → só apaga as conversas do ChatGPT de flyers já aprovados (passo 4) e para.
 
 Use **Claude in Chrome** (ferramentas `mcp__claude-in-chrome__*`), no Chrome do usuário, onde ele já está logado
 no Hub e no ChatGPT. Carregue as ferramentas de uma vez com ToolSearch
@@ -82,3 +83,13 @@ se continuar errado, deixe o cartão como está e avise no resumo final.
 2. Responda ao usuário em poucas linhas: quantos flyers ficaram prontos, quais tiveram problema e por quê,
    e que a aprovação está aberta (Aprovar / Refazer / Escrever alterações).
 3. Depois que ele revisar, `/gerar-flyers refazer` processa os pedidos.
+
+## 4. Apagar conversas de flyers aprovados (sempre, no início de cada rodada e no modo `limpar`)
+Ao aprovar um flyer, o usuário pede que a conversa do ChatGPT dele seja apagada. O Hub guarda a fila:
+1. Na aba do Hub: `javascript_tool` → `await fetch('/api/flyers/chats').then(r => r.json())` → lista `{ id, name, chatUrl }`.
+2. Para cada item: abra `chatUrl` no ChatGPT. Confirme que o título/conteúdo é de um flyer da Digitusul (prompt
+   "Crie a arte de um flyer..."). Se não for, **não apague** e avise o usuário.
+3. Apague pela interface: menu de opções da conversa (⋯ no topo ou na barra lateral) → **Excluir** → confirmar **Excluir**.
+4. Depois de apagar, na aba do Hub: `await fetch('/api/flyers/<id>/chat', { method: 'DELETE' })` (tira da fila).
+5. Só apague conversas listadas por essa fila. Nunca apague outras conversas do usuário.
+Informe no resumo quantas conversas foram apagadas.

@@ -96,3 +96,23 @@ export async function setReview(user: CurrentUser, id: string, status: ReviewSta
   await db.flyerProject.update({ where: { id }, data: { reviewStatus: status, reviewNote, reviewedAt: status === "pending" ? null : new Date() } });
   await logActivity(user.id, "flyer.review", { type: "flyer", id }, { status, note: reviewNote });
 }
+
+/** Conversas do ChatGPT de flyers já aprovados, esperando para serem apagadas pelo operador (Claude no Chrome). */
+export async function listChatsToDelete(user: CurrentUser) {
+  const rows = await db.flyerProject.findMany({
+    where: { deletedAt: null, mode: "chatgpt", reviewStatus: "approved", chatUrl: { not: null } },
+    select: { id: true, name: true, chatUrl: true, ownerId: true, isTemplate: true, reviewedAt: true },
+    orderBy: { reviewedAt: "asc" },
+  });
+  return rows
+    .filter((r) => canEditFlyer(user.permissions, user.id, r.ownerId))
+    .map((r) => ({ id: r.id, name: r.name, chatUrl: r.chatUrl!, approvedAt: r.reviewedAt?.toISOString() ?? null }));
+}
+
+/** Marca a conversa do ChatGPT como apagada (remove o link guardado). */
+export async function markChatDeleted(user: CurrentUser, id: string) {
+  const row = await editable(user, id);
+  if (!row.chatUrl) return;
+  await db.flyerProject.update({ where: { id }, data: { chatUrl: null } });
+  await logActivity(user.id, "flyer.chat.delete", { type: "flyer", id }, { chatUrl: row.chatUrl });
+}

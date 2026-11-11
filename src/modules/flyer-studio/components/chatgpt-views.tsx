@@ -82,17 +82,22 @@ export function ChatGptBatchView({ ctx, flyers: initial, campaign, embedded, bat
           </div>
         </div>
         )}
-        <div className="flex flex-wrap gap-2">
-          <button className="btn-secondary" onClick={allAttachments} disabled={!!busy}>{busy === "zip" ? <Spinner /> : <FileArchive className="h-4 w-4" />}{flyers.length > 1 ? "Imagens do lote" : "Imagens"}</button>
-          {flyers.length > 1 && <button className="btn-secondary" onClick={copyAll}><ClipboardCopy className="h-4 w-4" />Copiar todos os prompts</button>}
-          <a className="btn-secondary" href={CHATGPT_URL} target="_blank" rel="noopener noreferrer"><ExternalLink className="h-4 w-4" />ChatGPT</a>
-          {batchId && <Link className="btn-accent" href={`/estudio/lote/${batchId}/aprovar`}><Presentation className="h-4 w-4" />Aprovar flyers ({ready.filter((f) => (f.reviewStatus ?? "pending") === "pending").length})</Link>}
-          <button className="btn-primary" onClick={allResults} disabled={!ready.length || !!busy}>{busy === "results" ? <Spinner /> : <Download className="h-4 w-4" />}Baixar prontos ({ready.length})</button>
+        <div className="flex flex-wrap items-center gap-2">
+          {batchId && <Link className="btn-accent" href={`/estudio/lote/${batchId}/aprovar`}><Presentation className="h-4 w-4" />Aprovar ({ready.filter((f) => (f.reviewStatus ?? "pending") === "pending").length})</Link>}
+          <button className="btn-secondary" onClick={allResults} disabled={!ready.length || !!busy}>{busy === "results" ? <Spinner /> : <Download className="h-4 w-4" />}Baixar artes ({ready.length})</button>
+          <details className="relative">
+            <summary className="btn-ghost list-none cursor-pointer text-[13px]">Manual ▾</summary>
+            <div className="absolute right-0 z-20 mt-1 flex w-56 flex-col gap-1 rounded-xl border border-zinc-200 bg-surface p-1.5 shadow-pop">
+              <button className="btn-ghost justify-start" onClick={allAttachments} disabled={!!busy}>{busy === "zip" ? <Spinner /> : <FileArchive className="h-4 w-4" />}{flyers.length > 1 ? "Imagens do lote (ZIP)" : "Imagens (ZIP)"}</button>
+              {flyers.length > 1 && <button className="btn-ghost justify-start" onClick={copyAll}><ClipboardCopy className="h-4 w-4" />Copiar todos os prompts</button>}
+              <a className="btn-ghost justify-start" href={CHATGPT_URL} target="_blank" rel="noopener noreferrer"><ExternalLink className="h-4 w-4" />Abrir o ChatGPT</a>
+            </div>
+          </details>
         </div>
       </div>
 
-      {!embedded && <p className="mb-6 max-w-3xl text-[13px] text-zinc-500">
-        Faça um flyer por vez, no mesmo chat do ChatGPT. Em cada cartão: baixe as imagens, clique em <strong className="font-medium text-ink">Copiar e abrir</strong>, anexe as fotos, cole o prompt e envie. Quando a arte ficar pronta, baixe e arraste de volta no cartão.
+      {!embedded && ready.length < flyers.length && <p className="mb-6 max-w-3xl text-[13px] text-zinc-500">
+        Faltam {flyers.length - ready.length} arte(s). Peça ao Claude <code className="rounded bg-zinc-100 px-1">/gerar-flyers</code> para gerar no ChatGPT, ou use “fazer manualmente” em cada cartão.
       </p>}
 
       <div className={embedded ? "grid gap-4 lg:grid-cols-2" : "grid gap-4 xl:grid-cols-2"}>

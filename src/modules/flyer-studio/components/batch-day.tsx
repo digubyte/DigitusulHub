@@ -30,7 +30,7 @@ const MAIN_FORMATS = ["ig-stories", "ig-feed", "ig-square"];
  */
 export function BatchDay({ ctx }: { ctx: StudioContext }) {
   const toast = useToast();
-  const [source, setSource] = useState<"categoria" | "palavra">("categoria");
+  const [source, setSource] = useState<"categoria" | "palavra">("palavra");
   const [category, setCategory] = useState("");
   const [catFilter, setCatFilter] = useState("");
   const [term, setTerm] = useState("");
@@ -144,13 +144,13 @@ export function BatchDay({ ctx }: { ctx: StudioContext }) {
 
   return (
     <div className="space-y-6">
-      <div className="-mb-2"><FlyersHeader active="lote" subtitle={`Os flyers do dia de uma vez · ${describeRule(ctx.pricingRule).toLowerCase()} · nunca usa o valor PIX`} /></div>
+      <div className="-mb-2"><FlyersHeader active="lote" subtitle="Os 6 flyers do dia em poucos cliques." /></div>
 
-      <Section n={1} title="O que vai no lote" subtitle="Escolha a categoria do site (ou uma palavra) e quantos flyers de cada tipo.">
+      <Section n={1} title="O que você quer divulgar hoje?" subtitle="Digite um tema e o Hub separa os produtos com foto e estoque.">
         <div className="grid gap-5 lg:grid-cols-[1.3fr_1fr]">
           <div className="space-y-3">
             <div className="flex gap-0.5 self-start rounded-lg bg-zinc-100 p-0.5">
-              {([["categoria", "Categoria do site", Tag], ["palavra", "Palavra-chave", Search]] as const).map(([k, l, I]) => (
+              {([["palavra", "Tema", Search], ["categoria", "Categoria do site", Tag]] as const).map(([k, l, I]) => (
                 <button key={k} onClick={() => setSource(k)} className={cn("flex flex-1 items-center justify-center gap-1.5 rounded-md px-3 py-1.5 text-[13px] font-medium", source === k ? "bg-surface text-ink shadow-card" : "text-zinc-500 hover:text-ink")}><I className="h-3.5 w-3.5" />{l}</button>
               ))}
             </div>
@@ -182,8 +182,12 @@ export function BatchDay({ ctx }: { ctx: StudioContext }) {
               </div>
             ) : (
               <div className="space-y-1.5">
-                <input className="input" placeholder="Ex.: gamer, limpeza, caderno, toner" value={term} onChange={(e) => setTerm(e.target.value)} onKeyDown={(e) => e.key === "Enter" && !busy && build()} />
-                <p className="text-xs text-zinc-500">Busca pelo nome dos produtos no site, na ordem de relevância da busca.</p>
+                <input className="input h-11 text-[15px]" autoFocus placeholder="Ex.: gamer, café, limpeza, sublimação" value={term} onChange={(e) => setTerm(e.target.value)} onKeyDown={(e) => e.key === "Enter" && !busy && build()} />
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {["gamer", "fone", "caixa de som", "café", "limpeza", "papel A4", "sublimação", "escritório"].map((t) => (
+                    <button key={t} type="button" onClick={() => setTerm(t)} className={cn("rounded-full border px-2.5 py-0.5 text-[12px] transition-colors", term === t ? "border-brand-300 bg-brand-50 text-brand-700" : "border-zinc-200 text-zinc-500 hover:border-zinc-300 hover:text-ink")}>{t}</button>
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -196,7 +200,13 @@ export function BatchDay({ ctx }: { ctx: StudioContext }) {
           </div>
         </div>
 
-        <div className="mt-5 space-y-4">
+        <details className="group mt-5 rounded-xl border border-zinc-200">
+          <summary className="flex cursor-pointer list-none items-center gap-2 px-4 py-3 text-sm">
+            <span className="font-medium">Mais opções</span>
+            <span className="truncate text-zinc-500">· {fmt.label.replace("Instagram ", "")} · {styleLabel} · {seals.length} selos{layout.headline ? ` · título "${layout.headline}"` : ""}</span>
+            <span className="ml-auto text-xs text-zinc-400 group-open:hidden">mostrar</span><span className="ml-auto hidden text-xs text-zinc-400 group-open:inline">esconder</span>
+          </summary>
+        <div className="space-y-4 border-t border-zinc-100 p-4">
           <Chips label="Formato" value={formatKey} onChange={setFormatKey} options={[...FORMATS.filter((f) => MAIN_FORMATS.includes(f.key)), ...FORMATS.filter((f) => !MAIN_FORMATS.includes(f.key) && !f.customizable)].map((f) => ({ value: f.key, label: f.label.replace("Instagram ", "").replace(/^./, (c) => c.toUpperCase()), hint: f.hint }))} />
           <Chips label="Estilo (opcional)" value={useStyle ? layout.category : ""} onChange={(v) => { setUseStyle(!!v); if (v) setStyle(v as CategoryKey); }} options={[{ value: "", label: "Livre", hint: "O ChatGPT escolhe o clima a partir dos produtos" }, ...CATEGORIES.map((c) => ({ value: c.key, label: c.label }))]} />
           <SealsPicker all={allSeals} value={seals} onChange={setSeals} />
@@ -204,7 +214,9 @@ export function BatchDay({ ctx }: { ctx: StudioContext }) {
             <label><span className="label">Título dos flyers <span className="font-normal text-zinc-400">(opcional)</span></span><input className="input" maxLength={80} placeholder="Vazio = o ChatGPT cria uma chamada curta sobre os produtos" value={layout.headline} onChange={(e) => setLayout({ ...layout, headline: e.target.value })} /></label>
             <label><span className="label">Instruções extras (opcional)</span><input className="input" maxLength={1500} placeholder="Ex.: clima de setup gamer, luzes neon" value={extra} onChange={(e) => setExtra(e.target.value)} /></label>
           </div>
+          <p className="text-xs text-zinc-500">Preço: {describeRule(ctx.pricingRule).toLowerCase()} · nunca usa o valor PIX.</p>
         </div>
+        </details>
 
         <div className="mt-5 flex flex-wrap items-center gap-3">
           <button className="btn-accent h-11 px-5 text-[15px]" onClick={build} disabled={!!busy || sizes.length === 0}>{busy === "plan" ? <Spinner /> : <Layers className="h-4 w-4" />}{groups ? "Montar de novo" : "Montar lote"}</button>
@@ -253,7 +265,7 @@ export function BatchDay({ ctx }: { ctx: StudioContext }) {
 
       {result && (
         <div ref={resultRef} className="scroll-mt-20">
-          <Section n={3} title="Prompts prontos" subtitle="Em cada flyer: baixe as imagens (logo + produtos), clique em Copiar e abrir, arraste as imagens no ChatGPT, cole o prompt e envie."
+          <Section n={3} title="Lote salvo" subtitle="Para gerar as artes automaticamente, peça ao Claude: /gerar-flyers. Se preferir, faça manualmente em cada flyer."
             aside={<button className="btn-ghost btn-sm" onClick={restart}><RotateCcw className="h-3.5 w-3.5" />Novo lote</button>}>
             <ChatGptBatchView ctx={ctx} flyers={result} campaign={null} batchId={batchId} embedded />
           </Section>
