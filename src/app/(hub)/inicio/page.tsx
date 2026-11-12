@@ -148,7 +148,7 @@ export default async function HubHome() {
             <p className="text-xs text-zinc-500">Últimos 14 dias</p>
             <div className="mt-4 flex h-28 items-end gap-1.5" role="img" aria-label={`Aprovados por dia: ${days.map((x) => x.n).join(", ")}`}>
               {days.map((x, i) => (
-                <div key={i} className="group relative flex flex-1 flex-col items-center justify-end">
+                <div key={i} className="group relative flex h-full flex-1 flex-col items-center justify-end">
                   <div className={cn("w-full rounded-t", x.n ? "bg-brand-600" : "bg-zinc-100")} style={{ height: `${Math.max(6, (x.n / maxDay) * 100)}%` }} />
                   <span className="pointer-events-none absolute -top-6 hidden rounded bg-ink px-1.5 py-0.5 text-[10px] text-surface group-hover:block">{x.n}</span>
                 </div>

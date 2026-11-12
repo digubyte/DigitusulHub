@@ -141,7 +141,7 @@ export function MascotStage({ children }: { children: React.ReactNode }) {
   return (
     <div className="relative mt-16">
       {children}
-      <div className="pointer-events-none absolute inset-0 overflow-visible" aria-hidden>
+      <div className="pointer-events-none absolute inset-0" style={{ clipPath: "inset(-160px 0 -8px 0)" }} aria-hidden>
         {props.laptop !== null && <div className="absolute bottom-full" style={{ left: `${props.laptop}%`, transform: "translateX(-50%)" }}><Sprite rows={f ? LAPTOP_A : LAPTOP_B} /></div>}
         {actor(clawd, clawdRows, clawd.mode === "type" && f, "Mascote do Claude")}
         {actor(digu, diguRows, false, "Digu")}
