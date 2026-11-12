@@ -11,8 +11,9 @@ import { cn, relativeTime } from "@/core/util";
 import { categoryLabel } from "../domain/brand";
 import { getFormat } from "../domain/formats";
 import type { StudioContext } from "./studio-types";
+import { HistoryLots } from "./history-lots";
 
-interface Item { id: string; name: string; category: string; campaign: string | null; formatKey: string; width: number; height: number; thumbnailId: string | null; isTemplate: boolean; updatedAt: string; ownerName: string; productCount: number; canEdit: boolean; canDelete: boolean; mode: string; batchId: string | null; resultFileId: string | null; reviewStatus?: string }
+interface Item { id: string; name: string; category: string; campaign: string | null; formatKey: string; width: number; height: number; thumbnailId: string | null; isTemplate: boolean; updatedAt: string; createdAt?: string; ownerName: string; productCount: number; canEdit: boolean; canDelete: boolean; mode: string; batchId: string | null; resultFileId: string | null; reviewStatus?: string }
 type Scope = "mine" | "all" | "templates";
 
 export function StudioHome({ ctx, campaigns }: { ctx: StudioContext; campaigns: string[] }) {
@@ -29,6 +30,7 @@ export function StudioHome({ ctx, campaigns }: { ctx: StudioContext; campaigns: 
   const [selecting, setSelecting] = useState(false);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulk, setBulk] = useState<"selected" | "all" | null>(null);
+  const [view, setView] = useState<"lotes" | "flyers">("lotes");
 
   const load = useCallback(async () => {
     const sp = new URLSearchParams({ escopo: scope });
@@ -80,12 +82,17 @@ export function StudioHome({ ctx, campaigns }: { ctx: StudioContext; campaigns: 
 
   return (
     <div>
-      <FlyersHeader active="historico" canCreate={ctx.perms.create} subtitle="Todos os flyers gerados. Abra um para enviar ou baixar a arte." />
+      <FlyersHeader active="historico" canCreate={ctx.perms.create} subtitle="Seus lotes por dia e por tema. Abra um lote para aprovar ou baixar as artes." />
 
       <div className="mb-5 flex flex-col gap-3 lg:flex-row lg:items-center">
         <div className="flex gap-0.5 rounded-lg bg-zinc-100 p-0.5">
           {scopes.filter((s) => s.show).map((s) => (
             <button key={s.key} onClick={() => setScope(s.key)} className={cn("whitespace-nowrap rounded-md px-3 py-1.5 text-[13px] font-medium", scope === s.key ? "bg-surface text-ink shadow-card" : "text-zinc-500 hover:text-ink")}>{s.label}</button>
+          ))}
+        </div>
+        <div className="flex gap-0.5 rounded-lg bg-zinc-100 p-0.5">
+          {([["lotes", "Lotes"], ["flyers", "Flyers"]] as const).map(([k, l]) => (
+            <button key={k} onClick={() => setView(k)} className={cn("whitespace-nowrap rounded-md px-3 py-1.5 text-[13px] font-medium", view === k ? "bg-surface text-ink shadow-card" : "text-zinc-500 hover:text-ink")}>{l}</button>
           ))}
         </div>
         <div className="relative flex-1">
@@ -96,7 +103,7 @@ export function StudioHome({ ctx, campaigns }: { ctx: StudioContext; campaigns: 
           <button className="btn-ghost" onClick={stopSelecting}><X className="h-4 w-4" />Cancelar seleção</button>
         ) : (
           <div className="flex gap-2">
-            <button className="btn-secondary" onClick={() => setSelecting(true)}><CheckSquare className="h-4 w-4" />Selecionar</button>
+            <button className="btn-secondary" onClick={() => { setSelecting(true); setView("flyers"); }}><CheckSquare className="h-4 w-4" />Selecionar</button>
             {scope === "mine" && <button className="btn-danger" onClick={() => setBulk("all")}><Trash2 className="h-4 w-4" />Apagar todo o histórico</button>}
           </div>
         ))}
@@ -117,6 +124,8 @@ export function StudioHome({ ctx, campaigns }: { ctx: StudioContext; campaigns: 
           title={scope === "templates" ? "Nenhum template salvo" : q || category || campaign ? "Nada encontrado" : "Nenhum flyer ainda"}
           text={scope === "templates" ? "Abra um projeto e use “Salvar como template” no menu do card para compartilhar um modelo com a equipe." : "Comece criando um flyer com um ou vários produtos."}
           action={ctx.perms.create && scope !== "templates" && <Link href="/criar" className="btn-primary"><Plus className="h-4 w-4" />Criar flyers</Link>} />
+      ) : view === "lotes" && !selecting && scope !== "templates" ? (
+        <HistoryLots items={items} />
       ) : (
         <div className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3 lg:grid-cols-4">
           {items.map((it) => (
