@@ -8,6 +8,7 @@ import { useToast } from "@/components/ui/toast";
 import { cn } from "@/core/util";
 import { formatPrice } from "../domain/product-format";
 import { CallClaudeButton } from "./call-claude";
+import { cleanPendingChats, deleteApprovedChat, detectChatCleaner } from "./chat-cleaner";
 import type { ReviewStatus } from "../domain/schemas";
 import type { Product } from "../domain/types";
 
@@ -19,6 +20,7 @@ export interface ApprovalFlyer {
   reviewStatus: ReviewStatus;
   reviewNote: string | null;
   canEdit: boolean;
+  chatUrl?: string | null;
 }
 
 export const REVIEW_LABEL: Record<ReviewStatus, string> = {
@@ -51,6 +53,18 @@ export function ApprovalSlides({ batchId, title, flyers: initial }: { batchId: s
   const [busy, setBusy] = useState<ReviewStatus | null>(null);
   const [writing, setWriting] = useState(false);
   const [note, setNote] = useState("");
+  const [cleaner, setCleaner] = useState<boolean | null>(null);
+
+  // Extensão instalada? Se sim, já limpa conversas de aprovações anteriores que ficaram na fila.
+  useEffect(() => {
+    detectChatCleaner().then(async (ok) => {
+      setCleaner(ok);
+      if (!ok) return;
+      const r = await cleanPendingChats().catch(() => null);
+      if (r?.apagadas) toast.success(`${r.apagadas} conversa(s) antiga(s) apagada(s) do ChatGPT.`);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const i = queue.length ? Math.min(pos, queue.length - 1) : 0;
   const current = queue[i];
@@ -76,7 +90,13 @@ export function ApprovalSlides({ batchId, title, flyers: initial }: { batchId: s
         setLeaving(null);
         setWriting(false); setNote("");
       }, EXIT_MS);
-      toast.success(status === "approved" ? "Aprovado. A conversa no ChatGPT entra na fila para ser apagada." : status === "redo" ? "Vai ser refeito." : "Alterações registradas.");
+      if (status === "approved" && current.chatUrl && cleaner) {
+        toast.success("Aprovado. Apagando a conversa no ChatGPT…");
+        const chatUrl = current.chatUrl;
+        deleteApprovedChat(id, chatUrl).then((r) => r.ok ? toast.success("Conversa apagada do ChatGPT ✓") : toast.error(`Não consegui apagar a conversa: ${r.error}`));
+      } else {
+        toast.success(status === "approved" ? "Aprovado." : status === "redo" ? "Vai ser refeito." : "Alterações registradas.");
+      }
     } catch (e) {
       toast.error((e as Error).message);
     } finally {
@@ -115,6 +135,12 @@ export function ApprovalSlides({ batchId, title, flyers: initial }: { batchId: s
           {asked.length > 0 && <span className="badge bg-amber-50 px-2 py-1 text-amber-700">{asked.length} para refazer</span>}
         </div>
       </div>
+      {cleaner === false && (
+        <div className="mb-5 flex flex-wrap items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-[13px] text-amber-900">
+          <span className="flex-1">Para a conversa do ChatGPT ser apagada assim que você aprovar, instale a extensão do Hub neste Chrome.</span>
+          <Link href="/extensao" className="btn-secondary btn-sm">Instalar extensão</Link>
+        </div>
+      )}
 
       {current ? (
         <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_340px]">
@@ -217,7 +243,7 @@ export function ApprovalSlides({ batchId, title, flyers: initial }: { batchId: s
             {asked.length > 0 && <CallClaudeButton prompt={`/gerar-flyers lote ${batchId}`} label="Refazer com o Claude" />}
             <Link href={`/estudio/lote/${batchId}`} className="btn-primary">Ver o lote e baixar</Link>
           </div>
-          {approved > 0 && <p className="text-[12px] text-zinc-500">As conversas dos aprovados são apagadas do ChatGPT na próxima vez que o Claude rodar.</p>}
+          {approved > 0 && <p className="text-[12px] text-zinc-500">{cleaner ? "As conversas dos aprovados foram apagadas do ChatGPT pela extensão." : "Sem a extensão, as conversas dos aprovados são apagadas pela tarefa agendada do Claude."}</p>}
         </div>
       )}
     </div>

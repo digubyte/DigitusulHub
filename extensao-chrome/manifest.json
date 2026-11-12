@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "name": "Digitusul Hub · limpeza do ChatGPT",
+  "version": "1.0.0",
+  "description": "Ao aprovar um flyer no Digitusul Hub, apaga do ChatGPT a conversa usada para gerá-lo.",
+  "permissions": ["scripting", "tabs"],
+  "host_permissions": ["https://digitusul-hub.vercel.app/*", "https://chatgpt.com/*"],
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [
+    { "matches": ["https://digitusul-hub.vercel.app/*"], "js": ["hub.js"], "run_at": "document_start" }
+  ],
+  "icons": { "128": "icon128.png" }
+}

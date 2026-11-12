@@ -16,7 +16,7 @@ export default async function ApprovePage({ params }: { params: Promise<{ batchI
     <ApprovalSlides
       batchId={batchId}
       title={flyers[0].name.replace(/ · \d+\/\d+$/, "")}
-      flyers={flyers.map((f) => ({ id: f.id, name: f.name, products: f.products, resultFileId: f.resultFileId, reviewStatus: f.reviewStatus, reviewNote: f.reviewNote, canEdit: f.canEdit }))}
+      flyers={flyers.map((f) => ({ id: f.id, name: f.name, products: f.products, resultFileId: f.resultFileId, reviewStatus: f.reviewStatus, reviewNote: f.reviewNote, canEdit: f.canEdit, chatUrl: f.chatUrl }))}
     />
   );
 }

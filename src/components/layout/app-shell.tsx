@@ -51,7 +51,7 @@ export function AppShell({ user, solutions, canAdmin, children }: { user: ShellU
       <div aria-hidden className="pointer-events-none fixed inset-x-0 top-0 -z-10 h-[28rem] bg-[radial-gradient(55%_100%_at_30%_0%,rgba(35,65,193,.16),transparent),radial-gradient(35%_70%_at_85%_0%,rgba(230,31,39,.07),transparent)]" />
       <header className="sticky top-0 z-30 border-b border-zinc-200/70 bg-surface/80 backdrop-blur">
         <div aria-hidden className="h-[3px] bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500" />
-        <div className="mx-auto flex h-14 max-w-5xl items-center gap-2 px-4">
+        <div className="mx-auto flex h-14 max-w-6xl items-center gap-2 px-4 sm:px-6">
           <Link href="/inicio" aria-label="Início" className="mr-3 shrink-0"><HubLogo className="h-5 sm:h-[22px]" /></Link>
           <nav aria-label="Navegação principal" className="flex flex-1 items-center gap-1">
             {links.map((l) => {
@@ -81,7 +81,7 @@ export function AppShell({ user, solutions, canAdmin, children }: { user: ShellU
           </div>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:py-10">{children}</main>
+      <main className="mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-10">{children}</main>
     </div>
   );
 }

@@ -72,7 +72,7 @@ tests/                   testes das regras críticas
 3. Crie a rota em `src/app/(hub)/<rota>/page.tsx` usando `requirePageUser("<permissão>")`.
 4. O módulo aparece no menu, no Dashboard e em **Administração › Módulos** sem mexer no núcleo.
 
-Os módulos futuros (Gestão Comercial, CRM, Marketing, Relatórios) já estão registrados como "Em desenvolvimento" e só exibem uma página informativa — não há funcionalidades simuladas.
+
 
 ## Segurança
 - Permissões verificadas **no servidor** em toda página e rota de API; consultas de flyers sempre filtradas pelo escopo do usuário (projetos alheios respondem 404).
@@ -138,6 +138,16 @@ O editor manual antigo continua acessível em `/estudio/novo?modo=manual`.
   O Claude cria o lote, leva prompt + imagens de cada flyer ao ChatGPT no seu Chrome, confere preços/códigos/logo,
   devolve a arte ao Hub e abre a aprovação. Depois da revisão, `/gerar-flyers refazer` processa os pedidos.
   Roteiro completo em `.claude/commands/gerar-flyers.md`.
+
+## Extensão do Chrome: apagar a conversa ao aprovar
+
+`extensao-chrome/` é uma extensão (Manifest V3) que, ao aprovar um flyer na tela de aprovação, apaga do ChatGPT a
+conversa usada para gerá-lo — o servidor do Hub não tem acesso à conta do ChatGPT; a extensão, no Chrome do usuário, tem.
+- Só aceita pedidos das páginas do Hub, só para flyers listados em `GET /api/flyers/chats` (aprovados) e só apaga conversas
+  cujo conteúdo é de flyer da Digitusul. Usa o mesmo pedido do botão "Excluir" do ChatGPT (`is_visible: false`); se o
+  ChatGPT mudar, a tarefa agendada do Claude continua como reserva.
+- Instalação guiada em `/extensao` (download de `public/extensao/digitusul-hub-limpeza.zip`). Ao mudar a extensão,
+  gere o zip de novo: `python -c "import zipfile,os;z=zipfile.ZipFile('public/extensao/digitusul-hub-limpeza.zip','w',zipfile.ZIP_DEFLATED);[z.write(os.path.join('extensao-chrome',f),f) for f in os.listdir('extensao-chrome')]"`.
 
 ## Integrações opcionais (`.env`)
 - `ANTHROPIC_API_KEY` (+ `AI_MODEL`, padrão `claude-opus-5-5`): Criar com IA, leitura de imagens, busca inteligente no catálogo. Usa fallback de servidor da Anthropic em caso de recusa.
