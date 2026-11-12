@@ -6,7 +6,7 @@ import { THEME_INIT_SCRIPT } from "@/components/layout/theme-toggle";
 export const metadata: Metadata = {
   title: { default: "Digitusul Hub", template: "%s · Digitusul Hub" },
   description: "Plataforma interna de soluções Digitusul",
-  icons: { icon: "/brand/digitusul-hub-logo-original.svg" },
+  icons: { icon: "/brand/digitusul-icon.svg" },
   robots: { index: false, follow: false },
 };
 

@@ -6,6 +6,7 @@ import { getNavForUser } from "@/core/modules/service";
 import { db } from "@/core/db";
 import { cn, relativeTime } from "@/core/util";
 import { CallClaudeButton } from "@/modules/flyer-studio/components/call-claude";
+import { MascotStage } from "@/components/mascots/mascot-stage";
 
 export const metadata = { title: "Início" };
 
@@ -92,6 +93,7 @@ export default async function HubHome() {
         </section>
       )}
 
+      <MascotStage>
       <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {stats.map((s) => (
           <div key={s.label} className="card p-4">
@@ -101,6 +103,7 @@ export default async function HubHome() {
           </div>
         ))}
       </section>
+      </MascotStage>
 
       <section className="grid gap-4 lg:grid-cols-[1fr_320px]">
         <div className="card p-5">
