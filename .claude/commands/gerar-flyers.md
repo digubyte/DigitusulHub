@@ -81,13 +81,34 @@ se continuar errado, deixe o cartão como está e avise no resumo final.
 4. Cole a URL da conversa no campo **Link da conversa no ChatGPT**, marque o checkbox de cada produto
    (você já conferiu no passo 2c) e clique **Tudo confere, salvar**.
 
-## 3. Fim
-1. Abra `HUB_URL/estudio/lote/<batchId>/aprovar` (botão **Aprovar flyers**) e deixe a aba na frente.
-2. Responda ao usuário em poucas linhas: quantos flyers ficaram prontos, quais tiveram problema e por quê,
-   e que a aprovação está aberta (Aprovar / Refazer / Escrever alterações).
-3. Depois que ele revisar, `/gerar-flyers refazer` processa os pedidos.
+## 3. Acompanhar a aprovação (não encerre a sessão logo depois de gerar)
+O usuário quer que, **ao aprovar**, a conversa do ChatGPT daquele flyer suma na hora, e que Refazer/Alterações
+sejam atendidos sem ele ter de chamar o Claude de novo. Então, depois de gerar:
+1. Abra `HUB_URL/estudio/lote/<batchId>/aprovar` numa aba **separada** (a aba que o usuário vê) e avise em uma linha:
+   "Artes prontas. Pode aprovar — vou apagando as conversas e refazendo o que você pedir."
+2. Numa outra aba do Hub (a sua de trabalho), vigie em ciclos com `javascript_tool` (cada chamada espera no máx. ~40 s):
+   ```js
+   const until = Date.now() + 40000; let r = null;
+   while (Date.now() < until) {
+     const fila = (await fetch('/api/flyers/chats').then(r => r.json())).chats;
+     const lote = (await fetch('/api/flyers?lote=<batchId>').then(r => r.json())).items;
+     const pend = lote.filter(x => x.resultFileId && x.reviewStatus === 'pending').length;
+     const pedidos = lote.filter(x => x.reviewStatus === 'redo' || x.reviewStatus === 'changes').map(x => x.name);
+     if (fila.length || pedidos.length || !pend) { r = { fila, pend, pedidos }; break; }
+     await new Promise(ok => setTimeout(ok, 8000));
+   }
+   JSON.stringify(r ?? 'nada novo');
+   ```
+3. A cada resultado:
+   - `fila` com itens → apague essas conversas **na hora** (passo 4) e volte a vigiar.
+   - `pedidos` com itens → refaça esses flyers (passo 2: Refazer ou Alterações), devolva ao Hub e volte a vigiar
+     (a arte nova volta para "aguardando aprovação").
+   - `pend === 0` e sem pedidos → acabou: apague o que restar na fila e responda com o resumo final.
+4. Se passar **45 minutos sem nenhuma decisão** do usuário, pare de vigiar e avise:
+   "Parei de acompanhar; quando aprovar, clique em Chamar o Claude (ou /gerar-flyers limpar) para apagar as conversas."
+5. Resumo final em poucas linhas: quantos aprovados, quantos refeitos e quantas conversas apagadas.
 
-## 4. Apagar conversas de flyers aprovados (sempre, no início de cada rodada e no modo `limpar`)
+## 4. Apagar conversas de flyers aprovados (durante o acompanhamento, no início de cada rodada e no modo `limpar`)
 Ao aprovar um flyer, o usuário pede que a conversa do ChatGPT dele seja apagada. O Hub guarda a fila:
 1. Na aba do Hub: `javascript_tool` → `await fetch('/api/flyers/chats').then(r => r.json())` → lista `{ id, name, chatUrl }`.
 2. Para cada item: abra `chatUrl` no ChatGPT. Confirme que o título/conteúdo é de um flyer da Digitusul (prompt
